@@ -42,6 +42,9 @@ from sklearn.tree import DecisionTreeRegressor
 import pandas as pd
 import numpy as np
 
+# Optimal Transport
+import ot
+
 # Pre-Processing
 from sklearn.model_selection import train_test_split
 from sklearn.compose import ColumnTransformer
@@ -58,6 +61,9 @@ from pathlib import Path
 
 # Visulatization
 import matplotlib.pyplot as plt
+# necessary for 3d plot even if not used
+from mpl_toolkits.mplot3d import Axes3D  # noqa
+from matplotlib.collections import PolyCollection  # noqa
 
 # Writing, Reading, Exporting, and Importing
 #from sklearn.externals import joblib

@@ -64,6 +64,7 @@ import matplotlib.pyplot as plt
 # necessary for 3d plot even if not used
 from mpl_toolkits.mplot3d import Axes3D  # noqa
 from matplotlib.collections import PolyCollection  # noqa
+from tqdm import tqdm
 
 # Writing, Reading, Exporting, and Importing
 #from sklearn.externals import joblib

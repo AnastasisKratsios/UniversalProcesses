@@ -185,11 +185,11 @@ def def_simple_deep_classifer(height, depth, learning_rate, input_dim, output_di
     for d_i in range(depth):
         simple_deep_classifier.add(tf.keras.layers.Dense(height, activation='relu'))
 
-    simple_deep_classifier.add(tf.keras.layers.Dense(output_dim, activation='sigmoid'))
+    simple_deep_classifier.add(tf.keras.layers.Dense(output_dim, activation='softmax'))
 
     # Compile Simple Deep Classifier
     simple_deep_classifier.compile(optimizer='adam',
-                  loss='binary_crossentropy',
+                  loss='categorical_crossentropy',
                   metrics=['accuracy'])
     
     # Return Output
@@ -202,7 +202,7 @@ from tensorflow.keras import Sequential
 def build_simple_deep_classifier(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train,X_test):
 
     # Deep Feature Network
-    CV_simple_deep_classifier = tf.keras.wrappers.scikit_learn.KerasClassifier(build_fn=def_simple_deep_classifer, verbose=True)
+    CV_simple_deep_classifier = tf.keras.wrappers.scikit_learn.KerasRegressor(build_fn=def_simple_deep_classifer, verbose=True)
     
     # Randomized CV
     CV_simple_deep_classifier_CVer = RandomizedSearchCV(estimator=CV_simple_deep_classifier, 

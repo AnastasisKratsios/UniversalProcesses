@@ -81,6 +81,7 @@ import os
 import math
 from scipy.stats import norm
 from itertools import compress
+import copy
 
 
 # ## Regression

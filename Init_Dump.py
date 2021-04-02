@@ -5,7 +5,6 @@
 # 
 # **Note:** Some Modules may be re-loaded multiple times but this is intentional so as to make clear which script has which dependancies!
 
-# ## Architopes
 
 # In[1]:
 
@@ -261,18 +260,7 @@ import warnings
 
 Path('./outputs/models/').mkdir(parents=True, exist_ok=True)
 # Vanilla Benchmark(s)
-#Path('./outputs/models/OLS/').mkdir(parents=True, exist_ok=True)
-#Path('./outputs/models/LASSO/').mkdir(parents=True, exist_ok=True)
-#Path('./outputs/models/ENETPCA/').mkdir(parents=True, exist_ok=True)
-#Path('./outputs/models/RBF_Reg/').mkdir(parents=True, exist_ok=True)
 Path('./outputs/models/ffNNs/').mkdir(parents=True, exist_ok=True)
-# Ensemble Benchmark(s)
-Path('./outputs/models/Gradient_Boosted_Tree/').mkdir(parents=True, exist_ok=True)
-Path('./outputs/models/Bagged_ffNNs/').mkdir(parents=True, exist_ok=True)
-# Architope(s)
-Path('./outputs/models/Architopes/ffNN_tope_full/').mkdir(parents=True, exist_ok=True)
-Path('./outputs/models/Architopes/ffNN_tope_logistic/').mkdir(parents=True, exist_ok=True)
-Path('./outputs/models/Architopes/ffNN_tope_expert/').mkdir(parents=True, exist_ok=True)
 # LaTeX and misc. output(s)
 Path('./outputs/plots/').mkdir(parents=True, exist_ok=True)
 Path('./outputs/tables/').mkdir(parents=True, exist_ok=True)

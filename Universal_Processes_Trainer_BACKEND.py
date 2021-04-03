@@ -1,3 +1,138 @@
+#!/usr/bin/env python
+# coding: utf-8
+
+# # Universal $\mathcal{P}_1(\mathbb{R})$-Deep Neural Model (Type A)
+# ---
+
+# ---
+# # Training Algorithm:
+# ---
+# ## 1) Generate Data:
+# Generates the empirical measure $\sum_{n=1}^N \delta_{X_T(\omega_n)}$ of $X_T$ conditional on $X_0=x_0\in \mathbb{R}$ *($x_0$ and $T>0$ are user-provided)* by simulating from:
+# $$ 
+# X_T = x + \int_0^T \alpha(s,x)ds + \int_0^T\beta(s,x)dW_s.
+# $$
+# 
+# ## 2) Get "Sample Barycenters":
+# Let $\{\mu_n\}_{n=1}^N\subset\mathcal{P}_1(\mathbb{R}^d)$.  Then, the *sample barycenter* is defined by:
+# 1. $\mathcal{M}^{(0)}\triangleq \left\{\hat{\mu}_n\right\}_{n=1}^N$,
+# 2. For $1\leq n\leq \mbox{N sample barycenters}$: 
+#     - $
+# \mu^{\star}\in \underset{\tilde{\mu}\in \mathcal{M}^{(n)}}{\operatorname{argmin}}\, \sum_{n=1}^N \mathcal{W}_1\left(\mu^{\star},\mu_n\right),
+# $
+#     - $\mathcal{M}^{(n)}\triangleq \mathcal{M}^{(n-1)} - \{\mu^{\star}\},$
+# *i.e., the closest generated measure form the random sample to all other elements of the random sample.*
+# 
+# ---
+# **Note:** *We simplify the computational burden of getting the correct classes by putting this right into this next loop.*
+# 
+# ## 3) Train Deep Classifier:
+# $\hat{f}\in \operatorname{argmin}_{f \in \mathcal{NN}_{d:N}^{\star}} 
+# \sum_{x \in \mathbb{X}}
+# \, 
+# \mathbb{H}
+# \left(
+#     \operatorname{Softmax}_N\circ f(x)_n| I\left\{W_1(\hat{\mu}_n,\mu_x),\inf_{m\leq N} W_1(\hat{\mu}_m,\mu_x)\right\}
+# \right);
+# $
+# where $\mathbb{H}$ is the categorical cross-entropy.  
+# 
+# ---
+# ---
+# ---
+# ## Notes - Why the procedure is so computationally efficient?
+# ---
+#  - The sample barycenters do not require us to solve for any new Wasserstein-1 Barycenters; which is much more computationally costly,
+#  - Our training procedure never back-propages through $\mathcal{W}_1$ since steps 2 and 3 are full-decoupled.  Therefore, training our deep classifier is (comparatively) cheap since it takes values in the standard $N$-simplex.
+# 
+# ---
+
+# ## Meta-Parameters
+
+# ### Visualization
+
+# In[1]:
+
+
+# How many random polulations to visualize:
+Visualization_Size = 4
+
+
+# ### Quantization
+# *This hyperparameter describes the proportion of the data used as sample-barycenters.*
+
+# In[2]:
+
+
+Quantization_Proportion = 0.75
+
+
+# ### Simulation
+
+# In[22]:
+
+
+## Monte-Carlo
+N_Euler_Maruyama_Steps = 100
+N_Monte_Carlo_Samples = 10**4
+N_Monte_Carlo_Samples_Test = 10**1 # How many MC-samples to draw from test-set?
+
+# Roughness
+Rougness = 0.01
+Ratio_fBM_to_typical_vol = 0.5
+
+T_end = 1
+Direct_Sampling = False #This hyperparameter determines if we use a Euler-Maryama scheme or if we use something else.  
+
+## Grid
+N_Grid_Finess = 2*(10**2)
+Max_Grid = 1
+
+
+# **Note**: Setting *N_Quantizers_to_parameterize* prevents any barycenters and sub-sampling.
+
+# #### Mode: Code-Testin Parameter(s)
+
+# In[23]:
+
+
+trial_run = True
+
+
+# ### Meta-parameters
+
+# In[24]:
+
+
+# Test-size Ratio
+test_size_ratio = .75
+
+
+# ## SDE Simulation Hyper-Parameter(s)
+
+# ### Drift
+
+# In[25]:
+
+
+def alpha(t,x):
+    return np.sin(math.pi*x) #+ np.exp(-t)
+
+
+# ### Volatility
+
+# In[26]:
+
+
+def beta(t,x):
+    return 1#(1+t) + np.cos(x)
+
+
+# ### Get Paths
+
+# In[27]:
+
+
 # load dataset
 results_path = "./outputs/models/"
 results_tables_path = "./outputs/results/"
@@ -7,7 +142,7 @@ data_path_folder = "./inputs/data/"
 
 # ### Import
 
-# In[7]:
+# In[28]:
 
 
 # Load Packages/Modules
@@ -16,7 +151,6 @@ exec(open('Init_Dump.py').read())
 exec(open('Grid_Enhanced_Network.py').read())
 # Load Helper Function(s)
 # %run ParaGAN_Backend.ipynb
-# exec(open('ParaGAN_Backend.py').read())
 exec(open('Helper_Functions.py').read())
 # Import time separately
 import time
@@ -24,7 +158,7 @@ import time
 
 # ### Set Seed
 
-# In[8]:
+# In[29]:
 
 
 random.seed(2021)
@@ -38,7 +172,7 @@ tf.random.set_seed(2021)
 # ### Initialize Grid
 # This is $\mathbb{X}$ and it represents the grid of initial states.
 
-# In[9]:
+# In[30]:
 
 
 # Get Input Data
@@ -66,7 +200,7 @@ print("\u2022 Grid Instances: ", N_Grid_Instances, "and :",N_Grid_Instances_test
 # ### Initialize Counting Parameters
 # Initialize the "conting" type parameters which will help us to determine the length of loops and to intialize object's size later on.  
 
-# In[10]:
+# In[31]:
 
 
 # Get Internal (Counting) Parameters
@@ -84,20 +218,23 @@ print("\u2022 Each Wasserstein-1 Ball should contain: ",
 
 # ---
 
-# ### Simulate Path
-# $d X_t = \alpha(t,x)dt + \beta(t,x)dW_t ;\qquad X_0 =x$
+# ### Simulate "Rough" SDE:
+# $d X_t = \alpha(t,x)dt + (\beta(t,x)+\sigma_t^H)dW_t ;\qquad X_0 =x$
+# Where $(\sigma_t^H)_t$ is a fBM with Hurst parameter $H=0.01$.  
 
 # ### Define Sampler - Data-Generator
 
 # Generates the empirical measure $\sum_{n=1}^N \delta_{X_T(\omega_n)}$ of $X_T$ conditional on $X_0=x_0\in \mathbb{R}$ *($x_0$ and $T>0$ are user-provided)*.
 
-# In[13]:
+# In[32]:
 
 
 def Euler_Maruyama_Generator(x_0,
                              N_Euler_Maruyama_Steps = 100,
                              N_Monte_Carlo_Samples = 100,
-                             T = 1): 
+                             T = 1,
+                             Hurst = 0.01,
+                             Ratio_fBM_to_typical_vol = 0.5): 
     
     #----------------------------#    
     # DEFINE INTERNAL PARAMETERS #
@@ -121,6 +258,8 @@ def Euler_Maruyama_Generator(x_0,
         t = 1
         # Initialize Current State 
         X_current = x_0
+        # Generate roughness
+        sigma_rough = FBM(n=N_Euler_Maruyama_Steps, hurst=0.75, length=1, method='daviesharte').fbm()
         # Perform Euler-Maruyama Simulation
         while t<N_Euler_Maruyama_Steps:
             # Update Internal Parameters
@@ -128,7 +267,9 @@ def Euler_Maruyama_Generator(x_0,
             t_current = t*(T/N_Euler_Maruyama_Steps)
 
             # Update Generated Path
-            X_current = X_current + alpha(t_current,X_current)*dt + beta(t_current,X_current)*np.random.normal(0,sqrt_dt)
+            drift_t = alpha(t_current,X_current)*dt
+            vol_t = ((1-Ratio_fBM_to_typical_vol)*beta(t_current,X_current)+Ratio_fBM_to_typical_vol*(sigma_rough[t]))*np.random.normal(0,sqrt_dt)
+            X_current = X_current + drift_t + vol_t
 
             # Update Counter (EM)
             t = t+1
@@ -146,7 +287,7 @@ def Euler_Maruyama_Generator(x_0,
 
 # ### Initializations
 
-# In[14]:
+# In[33]:
 
 
 # Initialize List of Barycenters
@@ -180,6 +321,9 @@ if Direct_Sampling == True:
 else:
     print("Using Monte-Carlo Sampling directly from measure at time-T of X_T.")
 
+print("===================================")
+print("Start Simulation Step: Training Set")
+print("===================================")
 # Perform Monte-Carlo Data Generation
 for i in tqdm(range(N_Grid_Instances)):
     # Get Terminal Distribution Shape
@@ -194,18 +338,25 @@ for i in tqdm(range(N_Grid_Instances)):
         measures_locations_loop = Euler_Maruyama_Generator(x_0=x_Grid[i],
                                                            N_Euler_Maruyama_Steps = N_Euler_Maruyama_Steps,
                                                            N_Monte_Carlo_Samples = N_Monte_Carlo_Samples,
-                                                           T = T_end)
+                                                           T = T_end,
+                                                           Hurst=Rougness,
+                                                           Ratio_fBM_to_typical_vol=Ratio_fBM_to_typical_vol)
     
     # Append to List
     measures_locations_list.append(measures_locations_loop.reshape(-1,1))
     measures_weights_list.append(measure_weights)
     
 # Update User
-print("Done Simulation Step (Train Set)")
+print("==================================")
+print("Done Simulation Step: Training Set")
+print("==================================")
 
 #----------------------------------------------------------------------------------------------#
 
 # Perform Monte-Carlo Data Generation
+print("===============================")
+print("Start Simulation Step: Test Set")
+print("===============================")
 for i in tqdm(range(N_Grid_Instances_test)):
     # Get Terminal Distribution Shape
     ###
@@ -218,9 +369,11 @@ for i in tqdm(range(N_Grid_Instances_test)):
                                                     N_Monte_Carlo_Samples_Test).reshape(-1,))/N_Monte_Carlo_Samples_Test
     else:
         measures_locations_test_loop = Euler_Maruyama_Generator(x_0=x_Grid[i],
-                                                           N_Euler_Maruyama_Steps = N_Euler_Maruyama_Steps,
-                                                           N_Monte_Carlo_Samples = N_Monte_Carlo_Samples_Test,
-                                                           T = T_end)
+                                                                N_Euler_Maruyama_Steps = N_Euler_Maruyama_Steps,
+                                                                N_Monte_Carlo_Samples = N_Monte_Carlo_Samples_Test,
+                                                                T = T_end,
+                                                                Hurst=Rougness,
+                                                                Ratio_fBM_to_typical_vol=Ratio_fBM_to_typical_vol)
     
     
     # Append to List
@@ -228,10 +381,19 @@ for i in tqdm(range(N_Grid_Instances_test)):
     measures_weights_test_list.append(measure_weights_test)
     
 # Update User
-print("Done Simulation Step (Test Set)")
+print("===============================")
+print("Start Simulation Step: Test Set")
+print("===============================")
 
 
-# #### Get Cover
+# #### Start Timer (Model Type A)
+
+# In[ ]:
+
+
+# Start Timer
+Type_A_timer_Begin = time.time()
+
 
 # ## Get "Sample Barycenters":
 # Let $\{\mu_n\}_{n=1}^N\subset\mathcal{P}_1(\mathbb{R}^d)$.  Then, the *sample barycenter* is defined by:
@@ -346,23 +508,13 @@ print(Classifer_Wasserstein_Centers)
 
 # ---
 
-# ### Train Classifier
+# ### Train Deep Classifier
 
 # In this step, we train a deep (feed-forward) classifier:
 # $$
 # \hat{f}\triangleq \operatorname{Softmax}_N\circ W_J\circ \sigma \bullet \dots \sigma \bullet W_1,
 # $$
 # to identify which barycenter we are closest to.
-
-# #### Deep Classifier
-# Prepare Labels/Classes
-
-# In[ ]:
-
-
-# Time-Elapsed Training Deep Classifier
-Type_A_timer_Begin = time.time()
-
 
 # Re-Load Grid and Redefine Relevant Input/Output dimensions in dictionary.
 
@@ -444,9 +596,25 @@ print("Building Barycenters Set: END")
 print("#-----------------------------#")
 
 
+# #### Stop Timer
+
+# In[ ]:
+
+
+# Stop Timer
+Type_A_timer_end = time.time()
+# Compute Lapsed Time Needed For Training
+Time_Lapse_Model_A = Type_A_timer_end - Type_A_timer_Begin
+
+
 # ## Get Moment Predictions
+
 # #### Write Predictions
+
 # ### Training-Set Result(s): 
+
+# In[ ]:
+
 
 print("Building Training Set Performance Metrics")
 
@@ -498,7 +666,8 @@ Type_A_Prediction = pd.DataFrame({"W1":W1_Performance,
                                   "(E[X'^4]-E[X^4])^.25":Kurtosis_prediction_Performance},index=["MAE","MSE"])
 
 # Write Performance
-Type_A_Prediction.to_latex((results_tables_path+"Type_A_Prediction.tex"))
+Type_A_Prediction.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
+ "__TypeAPrediction_Train.tex"))
 
 
 #---------------------------------------------------------------------------------------------#
@@ -509,6 +678,10 @@ print(Type_A_Prediction)
 # ---
 
 # ### Test-Set Result(s): 
+
+# In[ ]:
+
+
 print("Building Test Set Performance Metrics")
 
 # Initialize Wasserstein-1 Error Distribution
@@ -559,20 +732,32 @@ Type_A_Prediction_test = pd.DataFrame({"W1":W1_Performance_test,
                                   "(E[X'^4]-E[X^4])^.25":Kurtosis_prediction_Performance_test},index=["MAE","MSE"])
 
 # Write Performance
-Type_A_Prediction_test.to_latex((results_tables_path+"Type_A_Prediction_test.tex"))
+Type_A_Prediction_test.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
+ "__TypeAPrediction_Test.tex"))
 
 
 # ## Update User
 
 # ### Training-Set Performance
+
+# In[ ]:
+
+
 Type_A_Prediction
 
 
 # ### Test-Set Performance
+
+# In[ ]:
+
+
 Type_A_Prediction_test
 
 
 # ### Print for Terminal Legibility
+
+# In[ ]:
+
 
 print("#----------------------#")
 print("Training-Set Performance")
@@ -591,7 +776,41 @@ print(" ")
 print(" ")
 
 
+# # Visualization of Performance
+# Randomly subsample from output space and visualize empirical measures!
+
+# In[29]:
+
+
+# # Adjust if is number of plots to visualizes is larger than number of output distributions (But only if there is not enough data!)
+# if N_Grid_Instances <= Visualization_Size**2:
+#         Visualization_Size = int(round(np.sqrt(min(N_Grid_Instances,Visualization_Size**2)))-1)
+
+
+# # Initialize Random Sample of input-output pairs to visualize
+# plotting_distribution_indices = random.sample(range(N_Grid_Instances), (Visualization_Size)**2)
+
+# # Generate Plot
+# f, axarr = plt.subplots(Visualization_Size,Visualization_Size,figsize=(6, 6), dpi=80, facecolor='w', edgecolor='k')
+# plt.suptitle("Sample of Predictions")
+# for i in range(Visualization_Size):
+#     for j in range(Visualization_Size):
+#         # Get Current (Randomly chosen (uniformly)) Index
+#         current_index = (i*Visualization_Size + j)
+#         current_random_index = plotting_distribution_indices[current_index]
+#         # Generate Current Plot
+#         axarr[i,j].bar(Barycenters_Array,(Predicted_Weights[current_random_index].reshape(-1,)), alpha=0.5,label="Prediction",color="chartreuse")
+#         axarr[i,j].bar(measures_locations_list[current_random_index].reshape(-1,),measures_weights_list[current_random_index], alpha=0.5,label="Target",color="purple")
+
+
 # ---
+
+# # Benchmark: SDE-Net
+
+# Credits for this implementation of SDE-Net go to the author of the GitHub repository: [https://github.com/Junghwan-brian/SDE-Net](https://github.com/Junghwan-brian/SDE-Net). 
+# *cloned on April 3$^{rd}$ 2021.*
+# 
+# This method is explored in the recent 2020 ICML paper: [Code for paper: SDE-Net: Equipping Deep Neural network with Uncertainty Estimates](http://proceedings.mlr.press/v119/kong20b.html) by: *Lingkai Kong, Jimeng Sun, and Chao Zhang*.
 
 # ---
 # # Fin

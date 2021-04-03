@@ -55,6 +55,9 @@ from sklearn import preprocessing
 from sklearn.ensemble import GradientBoostingRegressor
 from sklearn.tree import DecisionTreeRegressor
 
+# Simulation
+from fbm import FBM
+
 # Structuring
 from pathlib import Path
 

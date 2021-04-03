@@ -25,7 +25,7 @@ if trial_run == True:
 
     param_grid_Deep_Classifier = {'batch_size': [32],
                         'epochs': [400],
-                        'learning_rate': [0.001],
+                        'learning_rate': [0.0001],
                         'height': [200],
                         'depth': [3],
                         'input_dim':[15],

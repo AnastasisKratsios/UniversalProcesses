@@ -1,62 +1,3 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # Universal $\mathcal{P}_1(\mathbb{R})$-Deep Neural Model (Type A)
-# ---
-
-# ---
-# # Training Algorithm:
-# ---
-# ## 1) Generate Data:
-# Generates the empirical measure $\sum_{n=1}^N \delta_{X_T(\omega_n)}$ of $X_T$ conditional on $X_0=x_0\in \mathbb{R}$ *($x_0$ and $T>0$ are user-provided)* by simulating from:
-# $$ 
-# X_T = x + \int_0^T \alpha(s,x)ds + \int_0^T\beta(s,x)dW_s.
-# $$
-# 
-# ## 2) Get "Sample Barycenters":
-# Let $\{\mu_n\}_{n=1}^N\subset\mathcal{P}_1(\mathbb{R}^d)$.  Then, the *sample barycenter* is defined by:
-# 1. $\mathcal{M}^{(0)}\triangleq \left\{\hat{\mu}_n\right\}_{n=1}^N$,
-# 2. For $1\leq n\leq \mbox{N sample barycenters}$: 
-#     - $
-# \mu^{\star}\in \underset{\tilde{\mu}\in \mathcal{M}^{(n)}}{\operatorname{argmin}}\, \sum_{n=1}^N \mathcal{W}_1\left(\mu^{\star},\mu_n\right),
-# $
-#     - $\mathcal{M}^{(n)}\triangleq \mathcal{M}^{(n-1)} - \{\mu^{\star}\},$
-# *i.e., the closest generated measure form the random sample to all other elements of the random sample.*
-# 
-# ---
-# **Note:** *We simplify the computational burden of getting the correct classes by putting this right into this next loop.*
-# 
-# ## 3) Train Deep Classifier:
-# $\hat{f}\in \operatorname{argmin}_{f \in \mathcal{NN}_{d:N}^{\star}} 
-# \sum_{x \in \mathbb{X}}
-# \, 
-# \mathbb{H}
-# \left(
-#     \operatorname{Softmax}_N\circ f(x)_n| I\left\{W_1(\hat{\mu}_n,\mu_x),\inf_{m\leq N} W_1(\hat{\mu}_m,\mu_x)\right\}
-# \right);
-# $
-# where $\mathbb{H}$ is the categorical cross-entropy.  
-# 
-# ---
-# ---
-# ---
-# ## Notes - Why the procedure is so computationally efficient?
-# ---
-#  - The sample barycenters do not require us to solve for any new Wasserstein-1 Barycenters; which is much more computationally costly,
-#  - Our training procedure never back-propages through $\mathcal{W}_1$ since steps 2 and 3 are full-decoupled.  Therefore, training our deep classifier is (comparatively) cheap since it takes values in the standard $N$-simplex.
-# 
-# ---
-
-# ## Meta-Parameters
-
-# ### Visualization
-
-# In[1]:
-
-
-# How many random polulations to visualize:
-Visualization_Size = 4
-
 
 # ### Quantization
 # *This hyperparameter describes the proportion of the data used as sample-barycenters.*
@@ -64,28 +5,40 @@ Visualization_Size = 4
 # In[2]:
 
 
-Quantization_Proportion = 0.75
+Quantization_Proportion = 0.25
 
 
 # ### Simulation
 
-# In[22]:
+# #### Ground Truth:
+# *The build-in Options:*
+# - rSDE 
+# - pfBM
+# - 2lnflow
+
+# In[3]:
+
+
+groud_truth = "2lnflow"
+
+
+# #### Grid Hyperparameter(s)
+
+# In[4]:
 
 
 ## Monte-Carlo
-N_Euler_Maruyama_Steps = 100
+N_Euler_Maruyama_Steps = 200
 N_Monte_Carlo_Samples = 10**4
-N_Monte_Carlo_Samples_Test = 10**1 # How many MC-samples to draw from test-set?
+N_Monte_Carlo_Samples_Test = 10**4 # How many MC-samples to draw from test-set?
 
-# Roughness
-Rougness = 0.01
-Ratio_fBM_to_typical_vol = 0.5
-
+# End times for Time-Grid
 T_end = 1
-Direct_Sampling = False #This hyperparameter determines if we use a Euler-Maryama scheme or if we use something else.  
+T_end_test = 1.25
+
 
 ## Grid
-N_Grid_Finess = 2*(10**2)
+N_Grid_Finess = 100
 Max_Grid = 1
 
 
@@ -93,44 +46,80 @@ Max_Grid = 1
 
 # #### Mode: Code-Testin Parameter(s)
 
-# In[23]:
+# In[5]:
 
 
-trial_run = True
+trial_run = False
 
 
 # ### Meta-parameters
 
-# In[24]:
+# In[6]:
 
 
 # Test-size Ratio
-test_size_ratio = .75
+test_size_ratio = .25
 
 
-# ## SDE Simulation Hyper-Parameter(s)
+# ## Simulation from Measure-Valued $2$-Parameter Gaussian Flow
+# $$
+# X_{t,x} \sim \mathcal{N}\left(\alpha(t,x),\beta(t,x)\right).
+# $$
+
+# **Note:** *$\alpha$ and $\beta$ are specified below in the SDE Example*.
+
+# ## Simulation from Rough SDE
+# Simulate via Euler-M method from:
+# $$ 
+# X_T = x + \int_0^T \alpha(s,x)ds + \int_0^T((1-\eta)\beta(s,x)+\eta\sigma_s^H)dW_s.
+# $$
 
 # ### Drift
 
-# In[25]:
+# In[7]:
 
 
 def alpha(t,x):
-    return np.sin(math.pi*x) #+ np.exp(-t)
+    return 1 - .5
 
 
 # ### Volatility
 
-# In[26]:
+# In[8]:
 
 
 def beta(t,x):
-    return 1#(1+t) + np.cos(x)
+    return .5
+
+
+# ### Roughness Meta-parameters
+
+# In[9]:
+
+
+Rougness = 0.9 # Hurst Parameter
+Ratio_fBM_to_typical_vol = 0 # $\eta$ in equation above.
+
+
+# ## Perturbed Fractional Brownian Motion
+# Simulate from:
+# $$
+# X_t^x(\omega) = f_1(x)f_2(t) + B_t^H(\omega).
+# $$
+
+# In[10]:
+
+
+def field_dirction_x(x):
+    return x*np.cos(x)
+
+def finite_variation_t(t):
+    return t*(np.sin(math.pi*t) + np.exp(-t))
 
 
 # ### Get Paths
 
-# In[27]:
+# In[11]:
 
 
 # load dataset
@@ -142,13 +131,13 @@ data_path_folder = "./inputs/data/"
 
 # ### Import
 
-# In[28]:
+# In[12]:
 
 
 # Load Packages/Modules
 exec(open('Init_Dump.py').read())
 # Load Hyper-parameter Grid
-exec(open('Grid_Enhanced_Network.py').read())
+exec(open('CV_Grid.py').read())
 # Load Helper Function(s)
 # %run ParaGAN_Backend.ipynb
 exec(open('Helper_Functions.py').read())
@@ -158,7 +147,7 @@ import time
 
 # ### Set Seed
 
-# In[29]:
+# In[13]:
 
 
 random.seed(2021)
@@ -172,7 +161,7 @@ tf.random.set_seed(2021)
 # ### Initialize Grid
 # This is $\mathbb{X}$ and it represents the grid of initial states.
 
-# In[30]:
+# In[14]:
 
 
 # Get Input Data
@@ -181,16 +170,22 @@ tf.random.set_seed(2021)
 x_Grid = np.arange(start=-Max_Grid,
                    stop=Max_Grid,
                    step=(2*Max_Grid/N_Grid_Finess))
+t_Grid = np.linspace(0,T_end,(1+N_Euler_Maruyama_Steps))
 ## Get Number of Instances in Grid: Training
-N_Grid_Instances = len(x_Grid)
+N_Grid_Instances_x = len(x_Grid)
+N_Grid_Instances_t = len(t_Grid)
+N_Grid_Instances = N_Grid_Instances_x*N_Grid_Instances_t 
 
 #----------------------------------------------------------#
 ## Test
 x_Grid_test = np.sort(np.random.uniform(low=-Max_Grid,
                                         high=Max_Grid,
                                         size = round(N_Grid_Instances*test_size_ratio)))
+t_Grid_test = np.linspace(T_end+0.001,T_end_test,(1+round(N_Euler_Maruyama_Steps*test_size_ratio)))
 # Get Number of Instances in Grid: Test
-N_Grid_Instances_test = len(x_Grid_test)
+N_Grid_Instances_x_test = len(x_Grid_test)
+N_Grid_Instances_t_test = len(t_Grid_test)
+N_Grid_Instances_test = N_Grid_Instances_x_test*N_Grid_Instances_t_test
 #----------------------------------------------------------#
 
 # Updater User
@@ -200,11 +195,11 @@ print("\u2022 Grid Instances: ", N_Grid_Instances, "and :",N_Grid_Instances_test
 # ### Initialize Counting Parameters
 # Initialize the "conting" type parameters which will help us to determine the length of loops and to intialize object's size later on.  
 
-# In[31]:
+# In[15]:
 
 
 # Get Internal (Counting) Parameters
-N_Quantizers_to_parameterize = round(Quantization_Proportion*N_Grid_Finess)
+N_Quantizers_to_parameterize = round(Quantization_Proportion*N_Grid_Instances)
 N_Elements_Per_Cluster = int(round(N_Grid_Instances/N_Quantizers_to_parameterize))
 
 # Update User
@@ -218,29 +213,29 @@ print("\u2022 Each Wasserstein-1 Ball should contain: ",
 
 # ---
 
-# ### Simulate "Rough" SDE:
-# $d X_t = \alpha(t,x)dt + (\beta(t,x)+\sigma_t^H)dW_t ;\qquad X_0 =x$
-# Where $(\sigma_t^H)_t$ is a fBM with Hurst parameter $H=0.01$.  
+# ### Simulate from non-Markovian SDE with rough volatility:
+# $d X_t = \alpha(t,X_t)dt + ((1-\eta)\beta(t,X_t)+\eta\sigma_t^H)dW_t ;\qquad X_0 =x$
+# Where $(\sigma_t^H)_t$ is a fBM with Hurst parameter $H=0.01$ and $\eta \in [0,1]$ controlls the 'abount of long-term memory and roughness in $X_t$'.
 
 # ### Define Sampler - Data-Generator
 
 # Generates the empirical measure $\sum_{n=1}^N \delta_{X_T(\omega_n)}$ of $X_T$ conditional on $X_0=x_0\in \mathbb{R}$ *($x_0$ and $T>0$ are user-provided)*.
 
-# In[32]:
+# In[16]:
 
 
 def Euler_Maruyama_Generator(x_0,
-                             N_Euler_Maruyama_Steps = 100,
+                             N_Euler_Maruyama_Steps = 10,
                              N_Monte_Carlo_Samples = 100,
                              T = 1,
-                             Hurst = 0.01,
+                             Hurst = 0.1,
                              Ratio_fBM_to_typical_vol = 0.5): 
     
     #----------------------------#    
     # DEFINE INTERNAL PARAMETERS #
     #----------------------------#
     # Initialize Empirical Measure
-    X_T_Empirical = np.zeros(N_Monte_Carlo_Samples)
+    X_T_Empirical = np.zeros([N_Euler_Maruyama_Steps,N_Monte_Carlo_Samples])
 
 
     # Internal Initialization(s)
@@ -261,7 +256,7 @@ def Euler_Maruyama_Generator(x_0,
         # Generate roughness
         sigma_rough = FBM(n=N_Euler_Maruyama_Steps, hurst=0.75, length=1, method='daviesharte').fbm()
         # Perform Euler-Maruyama Simulation
-        while t<N_Euler_Maruyama_Steps:
+        while t<(N_Euler_Maruyama_Steps-1):
             # Update Internal Parameters
             ## Get Current Time
             t_current = t*(T/N_Euler_Maruyama_Steps)
@@ -274,8 +269,8 @@ def Euler_Maruyama_Generator(x_0,
             # Update Counter (EM)
             t = t+1
 
-        # Update Empirical Measure
-        X_T_Empirical[n_sample] = X_current
+            # Update Empirical Measure
+            X_T_Empirical[t,n_sample] = X_current
 
         # Update Counter (MC)
         n_sample = n_sample + 1
@@ -287,7 +282,7 @@ def Euler_Maruyama_Generator(x_0,
 
 # ### Initializations
 
-# In[33]:
+# In[17]:
 
 
 # Initialize List of Barycenters
@@ -299,6 +294,9 @@ measures_weights_list = []
 ## Testing Outputs
 measures_locations_test_list = []
 measures_weights_test_list = []
+# Grid (Training and Testing inputs (t,x))
+X_train = []
+X_test = []
 
 # Initialize (Empirical) Weight(s)
 measure_weights = np.ones(N_Monte_Carlo_Samples)/N_Monte_Carlo_Samples
@@ -311,84 +309,283 @@ Init_Quantizer_generic = np.ones(N_Monte_Carlo_Samples)/N_Monte_Carlo_Samples
 
 # #### Get Data
 
-# In[ ]:
+# ### Gaussian $2$-Parameter Flow
+
+# In[18]:
+
+
+if groud_truth == "2lnflow":
+    print("Direct Sampling from Distribution for 2-Parameter Flow.")
+    #----------------------------------------------------------------------------------------------#
+    # Update User
+    print("===================================")
+    print("Start Simulation Step: Training Set")
+    print("===================================")
+    # Perform Monte-Carlo Data Generation
+    for i in range(N_Grid_Instances_x):
+        x_loop = x_Grid[i]
+        # Generate finite-variation path (since it stays unchanged)
+        for j in range(N_Grid_Instances_t):
+            t_loop = t_Grid[j]
+            measures_locations_loop = np.random.normal(alpha(t_loop,x_loop),
+                                                          beta(t_loop,x_loop),
+                                                          N_Monte_Carlo_Samples)
+        
+            # Update Inputs
+            if (i==0 and j==0):
+                X_train = np.array([t_loop,x_loop]).reshape(1,-1)
+            else:
+                X_train = np.append(X_train,np.array([t_loop,x_loop]).reshape(1,-1),axis=0)
+        
+            # Append to List
+            measures_locations_list = measures_locations_list + [measures_locations_loop]
+            measures_weights_list.append(measure_weights)
+        
+        
+    
+    # Update User
+    print("==================================")
+    print("Done Simulation Step: Training Set")
+    print("==================================")
+
+
+print("===============================--------------------------------------===============================")
+print("===============================--------------------------------------===============================")
+print("===============================--------------------------------------===============================")
+
+if groud_truth == "2lnflow":
+    print("===============================")
+    print("Start Simulation Step: Test Set")
+    print("===============================")
+    # Perform Monte-Carlo Data Generation
+    for i in range(N_Grid_Instances_x_test):
+        x_loop = x_Grid_test[i]
+        # Generate finite-variation path (since it stays unchanged)
+        for j in range(N_Grid_Instances_t_test):
+            t_loop = t_Grid_test[j]
+            measures_locations_loop = np.random.normal(alpha(t_loop,x_loop),
+                                                          beta(t_loop,x_loop),
+                                                          N_Monte_Carlo_Samples_Test)
+        
+            # Update Inputs
+            if (i==0 and j==0):
+                X_test = np.array([t_loop,x_loop]).reshape(1,-1)
+            else:
+                X_test = np.append(X_test,np.array([t_loop,x_loop]).reshape(1,-1),axis=0)
+        
+            # Append to List
+            measures_locations_test_list = measures_locations_test_list + [measures_locations_loop]
+            measures_weights_test_list.append(measure_weights_test)
+    print("==============================")
+    print("Done Simulation Step: Test Set")
+    print("==============================")
+
+
+# ### Rough SDE Simulator:
+
+# In[19]:
+
+
+if groud_truth == "rSDE":
+    print("Using Euler-Maruyama distritization + Monte-Carlo Sampling.")
+    #----------------------------------------------------------------------------------------------#
+    # Update User
+    print("===================================")
+    print("Start Simulation Step: Training Set")
+    print("===================================")
+    # Initialize fBM Generator
+    fBM_Generator = FBM(n=N_Euler_Maruyama_Steps, hurst=0.75, length=1, method='daviesharte')
+
+    # Perform Monte-Carlo Data Generation
+    for i in range(N_Grid_Instances_x):
+        # Get x
+        field_loop_x = field_dirction_x(x_Grid[i])
+        # Get omega and t
+        # Generate finite-variation path (since it stays unchanged)
+        finite_variation_path = finite_variation_t(t_Grid).reshape(-1,1) +field_loop_x
+        # Simulate Paths
+        paths_loop = Euler_Maruyama_Generator(x_0=x_Grid[i],
+                                              N_Euler_Maruyama_Steps = len(t_Grid),
+                                              N_Monte_Carlo_Samples = N_Monte_Carlo_Samples,
+                                              T = T_end,
+                                              Hurst=Rougness,
+                                              Ratio_fBM_to_typical_vol=Ratio_fBM_to_typical_vol)
+        
+        # Map numpy to list
+        measures_locations_loop = paths_loop.tolist()
+        # Get inputs
+        X_train_loop = np.append(np.repeat(x_Grid[i],(N_Euler_Maruyama_Steps+1)).reshape(-1,1),
+                                 t_Grid.reshape(-1,1),
+                                 axis=1)
+        
+        # Append to List
+        measures_locations_list = measures_locations_list + measures_locations_loop
+        measures_weights_list.append(measure_weights)
+        
+        # Update Inputs
+        if i==0:
+            X_train = X_train_loop
+        else:
+            X_train = np.append(X_train,X_train_loop,axis=0)
+    
+    # Update User
+    print("==================================")
+    print("Done Simulation Step: Training Set")
+    print("==================================")
+
+
+print("===============================--------------------------------------===============================")
+print("===============================--------------------------------------===============================")
+print("===============================--------------------------------------===============================")
+
+if groud_truth == "rSDE":
+    print("===============================")
+    print("Start Simulation Step: Test Set")
+    print("===============================")
+    # Initialize fBM Generator
+    fBM_Generator_test = FBM(n=(len(t_Grid_test)-1), hurst=0.75, length=1, method='daviesharte')
+
+    # Perform Monte-Carlo Data Generation
+    for i in range(N_Grid_Instances_x_test):
+        # Get x
+        field_loop_x = field_dirction_x(x_Grid_test[i])
+        # Get omega and t
+        # Generate finite-variation path (since it stays unchanged)
+        finite_variation_path = finite_variation_t(t_Grid_test).reshape(-1,1) +field_loop_x
+        paths_loop = Euler_Maruyama_Generator(x_0=x_Grid_test[i],
+                                              N_Euler_Maruyama_Steps = len(t_Grid_test),
+                                              N_Monte_Carlo_Samples = N_Monte_Carlo_Samples_Test,
+                                              T = T_end_test,
+                                              Hurst=Rougness,
+                                              Ratio_fBM_to_typical_vol=Ratio_fBM_to_typical_vol)
+        
+        # Map numpy to list
+        measures_locations_loop = paths_loop.tolist()
+        # Get inputs
+        X_test_loop = np.append(np.repeat(x_Grid_test[i],len(t_Grid_test)).reshape(-1,1),
+                                 t_Grid_test.reshape(-1,1),
+                                 axis=1)
+        
+        # Append to List
+        measures_locations_test_list = measures_locations_test_list + measures_locations_loop
+        measures_weights_test_list.append(measure_weights_test)
+        
+        # Update Inputs
+        if i==0:
+            X_test = X_test_loop
+        else:
+            X_test = np.append(X_test,X_test_loop,axis=0)
+    print("==============================")
+    print("Done Simulation Step: Test Set")
+    print("==============================")
+
+
+# ### Perturbed fBM Generator:
+
+# In[20]:
 
 
 # Update User
 print("Current Monte-Carlo Step:")
-if Direct_Sampling == True:
-    print("Using Euler-Maruyama distritization + Monte-Carlo Sampling.")
-else:
-    print("Using Monte-Carlo Sampling directly from measure at time-T of X_T.")
+if groud_truth == "pfBM":
+    print("===================================")
+    print("Start Simulation Step: Training Set")
+    print("===================================")
+    # Initialize fBM Generator
+    fBM_Generator = FBM(n=N_Euler_Maruyama_Steps, hurst=0.75, length=1, method='daviesharte')
 
-print("===================================")
-print("Start Simulation Step: Training Set")
-print("===================================")
-# Perform Monte-Carlo Data Generation
-for i in tqdm(range(N_Grid_Instances)):
-    # Get Terminal Distribution Shape
-    ###
+    # Perform Monte-Carlo Data Generation
+    for i in range(N_Grid_Instances_x):
+        # Get x
+        field_loop_x = field_dirction_x(x_Grid[i])
+        # Get omega and t
+        # Generate finite-variation path (since it stays unchanged)
+        finite_variation_path = finite_variation_t(t_Grid).reshape(-1,1) +field_loop_x
+        for n_MC in range(N_Monte_Carlo_Samples):
+            fBM_variation_path_loop = fBM_Generator.fbm().reshape(-1,1)
+            generated_path_loop = finite_variation_path + fBM_variation_path_loop
+            if n_MC == 0:
+                paths_loop = generated_path_loop
+            else:
+                paths_loop = np.append(paths_loop,generated_path_loop,axis=-1)
+        
+        # Map numpy to list
+        measures_locations_loop = paths_loop.tolist()
+        # Get inputs
+        X_train_loop = np.append(np.repeat(x_Grid[i],(N_Euler_Maruyama_Steps+1)).reshape(-1,1),
+                                 t_Grid.reshape(-1,1),
+                                 axis=1)
+        
+        # Append to List
+        measures_locations_list = measures_locations_list + measures_locations_loop
+        measures_weights_list.append(measure_weights)
+        
+        # Update Inputs
+        if i==0:
+            X_train = X_train_loop
+        else:
+            X_train = np.append(X_train,X_train_loop,axis=0)
     
-    if Direct_Sampling == True:
-        # DIRECT SAMPLING
-        measures_locations_loop = (np.random.normal(alpha(1,x_Grid[i]),
-                                                    beta(1,x_Grid[i]),
-                                                    N_Monte_Carlo_Samples).reshape(-1,))/N_Monte_Carlo_Samples
-    else:
-        measures_locations_loop = Euler_Maruyama_Generator(x_0=x_Grid[i],
-                                                           N_Euler_Maruyama_Steps = N_Euler_Maruyama_Steps,
-                                                           N_Monte_Carlo_Samples = N_Monte_Carlo_Samples,
-                                                           T = T_end,
-                                                           Hurst=Rougness,
-                                                           Ratio_fBM_to_typical_vol=Ratio_fBM_to_typical_vol)
-    
-    # Append to List
-    measures_locations_list.append(measures_locations_loop.reshape(-1,1))
-    measures_weights_list.append(measure_weights)
-    
-# Update User
-print("==================================")
-print("Done Simulation Step: Training Set")
-print("==================================")
+    # Update User
+    print("==================================")
+    print("Done Simulation Step: Training Set")
+    print("==================================")
 
-#----------------------------------------------------------------------------------------------#
 
-# Perform Monte-Carlo Data Generation
-print("===============================")
-print("Start Simulation Step: Test Set")
-print("===============================")
-for i in tqdm(range(N_Grid_Instances_test)):
-    # Get Terminal Distribution Shape
-    ###
+print("===============================--------------------------------------===============================")
+print("===============================--------------------------------------===============================")
+print("===============================--------------------------------------===============================")
+
+if groud_truth == "pfBM":
+    print("===============================")
+    print("Start Simulation Step: Test Set")
+    print("===============================")
+    # Initialize fBM Generator
+    fBM_Generator_test = FBM(n=(len(t_Grid_test)-1), hurst=0.75, length=1, method='daviesharte')
+
+    # Perform Monte-Carlo Data Generation
+    for i in range(N_Grid_Instances_x_test):
+        # Get x
+        field_loop_x = field_dirction_x(x_Grid_test[i])
+        # Get omega and t
+        # Generate finite-variation path (since it stays unchanged)
+        finite_variation_path = finite_variation_t(t_Grid_test).reshape(-1,1) +field_loop_x
+        for n_MC in range(N_Monte_Carlo_Samples_Test):
+            fBM_variation_path_loop = fBM_Generator_test.fbm().reshape(-1,1)
+            generated_path_loop = finite_variation_path + fBM_variation_path_loop
+            if n_MC == 0:
+                paths_loop = generated_path_loop
+            else:
+                paths_loop = np.append(paths_loop,generated_path_loop,axis=-1)
+        
+        # Map numpy to list
+        measures_locations_loop = paths_loop.tolist()
+        # Get inputs
+        X_test_loop = np.append(np.repeat(x_Grid_test[i],len(t_Grid_test)).reshape(-1,1),
+                                 t_Grid_test.reshape(-1,1),
+                                 axis=1)
+        
+        # Append to List
+        measures_locations_test_list = measures_locations_test_list + measures_locations_loop
+        measures_weights_test_list.append(measure_weights_test)
+        
+        # Update Inputs
+        if i==0:
+            X_test = X_test_loop
+        else:
+            X_test = np.append(X_test,X_test_loop,axis=0)
+    print("==============================")
+    print("Done Simulation Step: Test Set")
+    print("==============================")
     
-     
-    if Direct_Sampling == True:
-        # DIRECT SAMPLING
-        measures_locations_test_loop = (np.random.normal(alpha(1,x_Grid[i]),
-                                                    beta(1,x_Grid[i]),
-                                                    N_Monte_Carlo_Samples_Test).reshape(-1,))/N_Monte_Carlo_Samples_Test
-    else:
-        measures_locations_test_loop = Euler_Maruyama_Generator(x_0=x_Grid[i],
-                                                                N_Euler_Maruyama_Steps = N_Euler_Maruyama_Steps,
-                                                                N_Monte_Carlo_Samples = N_Monte_Carlo_Samples_Test,
-                                                                T = T_end,
-                                                                Hurst=Rougness,
-                                                                Ratio_fBM_to_typical_vol=Ratio_fBM_to_typical_vol)
-    
-    
-    # Append to List
-    measures_locations_test_list.append(measures_locations_test_loop.reshape(-1,1))
-    measures_weights_test_list.append(measure_weights_test)
-    
-# Update User
-print("===============================")
-print("Start Simulation Step: Test Set")
-print("===============================")
+print("===============================--------------------------------------===============================")
+print("===============================--------------------------------------===============================")
+print("===============================--------------------------------------===============================")
 
 
 # #### Start Timer (Model Type A)
 
-# In[ ]:
+# In[21]:
 
 
 # Start Timer
@@ -420,7 +617,7 @@ Type_A_timer_Begin = time.time()
 # 
 # **Note**: *Computing the dissimularity matrix is the most costly part of the entire algorithm with a complexity of at-most $\mathcal{O}\left(E_{W} \# \mathbb{X})^2\right)$ where $E_W$ denotes the complexity of a single Wasserstein-1 evaluation between two elements of the dataset.*
 
-# In[ ]:
+# In[22]:
 
 
 # Initialize Disimilarity Matrix
@@ -430,7 +627,7 @@ Dissimilarity_matrix_ot = np.zeros([N_Grid_Instances,N_Grid_Instances])
 # Update User
 print("\U0001F61A"," Begin Building Distance Matrix"," \U0001F61A")
 # Build Disimilarity Matrix
-for i in tqdm(range(N_Grid_Instances)):
+for i in range(N_Grid_Instances):
     for j in range(N_Grid_Instances):
         Dissimilarity_matrix_ot[i,j] = ot.emd2_1d(measures_locations_list[j],
                                                   measures_locations_list[i])
@@ -442,7 +639,7 @@ print("\U0001F600"," Done Building Distance Matrix","\U0001F600","!")
 
 # ## Get "Sample Barycenters" and Generate Classes
 
-# In[ ]:
+# In[23]:
 
 
 # Initialize Locations Matrix (Internal to Loop)
@@ -459,14 +656,14 @@ Distances_Loop = Dissimilarity_matrix_ot_current.sum(axis=1)
 Classifer_Wasserstein_Centers = np.zeros([N_Quantizers_to_parameterize,N_Grid_Instances])
 
 
-# In[ ]:
+# In[24]:
 
 
 # Update User
 print("\U0001F61A"," Begin Identifying Sample Barycenters"," \U0001F61A")
 
 # Identify Sample Barycenters
-for i in tqdm(range(N_Quantizers_to_parameterize)):    
+for i in range(N_Quantizers_to_parameterize):    
     # GET BARYCENTER #
     #----------------#
     ## Identify row with minimum total distance
@@ -475,7 +672,7 @@ for i in tqdm(range(N_Quantizers_to_parameterize)):
     ## Update Barycenters Array ##
     #----------------------------#
     ### Get next Barycenter
-    new_barycenter_loop = measures_locations_list_current[Barycenter_index].reshape(-1,1)
+    new_barycenter_loop = np.array(measures_locations_list_current[Barycenter_index]).reshape(-1,1)
     ### Update Array of Barycenters
     if i == 0:
         # Initialize Barycenters Array
@@ -520,20 +717,20 @@ print(Classifer_Wasserstein_Centers)
 
 # #### Train Deep Classifier
 
-# In[ ]:
+# In[25]:
 
 
 # Re-Load Hyper-parameter Grid
-exec(open('Grid_Enhanced_Network.py').read())
+exec(open('CV_Grid.py').read())
 # Re-Load Classifier Function(s)
 exec(open('Helper_Functions.py').read())
 
 
-# In[ ]:
+# In[26]:
 
 
 # Redefine (Dimension-related) Elements of Grid
-# param_grid_Deep_Classifier['input_dim'] = [1]
+param_grid_Deep_Classifier['input_dim'] = [2]
 param_grid_Deep_Classifier['output_dim'] = [N_Quantizers_to_parameterize]
 
 # Train simple deep classifier
@@ -541,16 +738,16 @@ predicted_classes_train, predicted_classes_test, N_params_deep_classifier = buil
                                                                                                         n_jobs = n_jobs, 
                                                                                                         n_iter = n_iter, 
                                                                                                         param_grid_in=param_grid_Deep_Classifier, 
-                                                                                                        X_train = x_Grid, 
+                                                                                                        X_train = X_train, 
                                                                                                         y_train = Classifer_Wasserstein_Centers.T,
-                                                                                                        X_test = x_Grid_test)
+                                                                                                        X_test = X_test)
 
 
 # #### Get Predicted Quantized Distributions
 # - Each *row* of "Predicted_Weights" is the $\beta\in \Delta_N$.
 # - Each *Column* of "Barycenters_Array" denotes the $x_1,\dots,x_N$ making up the points of the corresponding empirical measures.
 
-# In[ ]:
+# In[27]:
 
 
 # Format Weights
@@ -559,7 +756,7 @@ print("#---------------------------------------#")
 print("Building Training Set (Regression): START")
 print("#---------------------------------------#")
 Predicted_Weights = np.array([])
-for i in tqdm(range(N_Quantizers_to_parameterize)):    
+for i in range(N_Quantizers_to_parameterize):    
     b = np.repeat(np.array(predicted_classes_train[:,i],dtype='float').reshape(-1,1),N_Monte_Carlo_Samples,axis=-1)
     b = b/N_Monte_Carlo_Samples
     if i ==0 :
@@ -575,7 +772,7 @@ print("#-------------------------------------#")
 print("Building Test Set (Predictions): START")
 print("#-------------------------------------#")
 Predicted_Weights_test = np.array([])
-for i in tqdm(range(N_Quantizers_to_parameterize)):
+for i in range(N_Quantizers_to_parameterize):
     b_test = np.repeat(np.array(predicted_classes_test[:,i],dtype='float').reshape(-1,1),N_Monte_Carlo_Samples,axis=-1)
     b_test = b_test/N_Monte_Carlo_Samples
     if i ==0 :
@@ -598,7 +795,7 @@ print("#-----------------------------#")
 
 # #### Stop Timer
 
-# In[ ]:
+# In[28]:
 
 
 # Stop Timer
@@ -613,7 +810,7 @@ Time_Lapse_Model_A = Type_A_timer_end - Type_A_timer_Begin
 
 # ### Training-Set Result(s): 
 
-# In[ ]:
+# In[52]:
 
 
 print("Building Training Set Performance Metrics")
@@ -627,43 +824,43 @@ Kurtosis_errors = np.array([])
 #---------------------------------------------------------------------------------------------#
 
 # Populate Error Distribution
-for x_i in tqdm(range(len(measures_locations_list)-1)):    
+for x_i in range(len(measures_locations_list)-1):    
     # Get Laws
     W1_loop = ot.emd2_1d(Barycenters_Array,
-                         measures_locations_list[x_i].reshape(-1,),
+                         np.array(measures_locations_list[x_i]).reshape(-1,),
                          Predicted_Weights[x_i,].reshape(-1,),
-                         measures_weights_list[x_i].reshape(-1,))
+                         measure_weights.reshape(-1,))
     W1_errors = np.append(W1_errors,W1_loop)
     # Get Means
     Mu_hat = np.sum((Predicted_Weights[x_i])*(Barycenters_Array))
-    Mu = np.mean(measures_locations_list[x_i])
+    Mu = np.mean(np.array(measures_locations_list[x_i]))
     Mean_errors =  np.append(Mean_errors,(Mu_hat-Mu))
     # Get Var (non-centered)
     Var_hat = np.sum((Barycenters_Array**2)*(Predicted_Weights[x_i]))
-    Var = np.mean(measures_locations_list[x_i]**2)
+    Var = np.mean(np.array(measures_locations_list[x_i])**2)
     Var_errors = np.append(Var_errors,(Var_hat-Var)**2)
     # Get skewness (non-centered)
     Skewness_hat = np.sum((Barycenters_Array**3)*(Predicted_Weights[x_i]))
-    Skewness = np.mean(measures_locations_list[x_i]**3)
+    Skewness = np.mean(np.array(measures_locations_list[x_i])**3)
     Skewness_errors = np.append(Skewness_errors,(abs(Skewness_hat-Skewness))**(1/3))
     # Get skewness (non-centered)
     Kurtosis_hat = np.sum((Barycenters_Array**4)*(Predicted_Weights[x_i]))
-    Kurtosis = np.mean(measures_locations_list[x_i]**4)
+    Kurtosis = np.mean(np.array(measures_locations_list[x_i])**4)
     Kurtosis_errors = np.append(Kurtosis_errors,(abs(Kurtosis_hat-Kurtosis))**.25)
     
 #---------------------------------------------------------------------------------------------#
 # Compute Error Statistics/Descriptors
-W1_Performance = np.array([np.mean(np.abs(W1_errors)),np.mean(W1_errors**2)])
-Mean_prediction_Performance = np.array([np.mean(np.abs(Mean_errors)),np.mean(Mean_errors**2)])
-Var_prediction_Performance = np.array([np.mean(np.abs(Var_errors)),np.mean(Var_errors**2)])
-Skewness_prediction_Performance = np.array([np.mean(np.abs(Skewness_errors)),np.mean(Skewness_errors**2)])
-Kurtosis_prediction_Performance = np.array([np.mean(np.abs(Kurtosis_errors)),np.mean(Kurtosis_errors**2)])
+W1_Performance = np.array([np.min(np.abs(W1_errors)),np.mean(np.abs(W1_errors)),np.max(np.abs(W1_errors))])
+Mean_prediction_Performance = np.array([np.min(np.abs(Mean_errors)),np.mean(np.abs(Mean_errors)),np.max(np.abs(Mean_errors))])
+Var_prediction_Performance = np.array([np.min(np.abs(Var_errors)),np.mean(np.abs(Var_errors)),np.max(np.abs(Var_errors))])
+Skewness_prediction_Performance = np.array([np.min(np.abs(Skewness_errors)),np.mean(np.abs(Skewness_errors)),np.max(np.abs(Skewness_errors))])
+Kurtosis_prediction_Performance = np.array([np.min(np.abs(Kurtosis_errors)),np.mean(np.abs(Kurtosis_errors)),np.max(np.abs(Kurtosis_errors))])
 
 Type_A_Prediction = pd.DataFrame({"W1":W1_Performance,
                                   "E[X']-E[X]":Mean_prediction_Performance,
                                   "(E[X'^2]-E[X^2])^.5":Var_prediction_Performance,
                                   "(E[X'^3]-E[X^3])^(1/3)":Skewness_prediction_Performance,
-                                  "(E[X'^4]-E[X^4])^.25":Kurtosis_prediction_Performance},index=["MAE","MSE"])
+                                  "(E[X'^4]-E[X^4])^.25":Kurtosis_prediction_Performance},index=["Min","MAE","Max"])
 
 # Write Performance
 Type_A_Prediction.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
@@ -679,7 +876,7 @@ print(Type_A_Prediction)
 
 # ### Test-Set Result(s): 
 
-# In[ ]:
+# In[53]:
 
 
 print("Building Test Set Performance Metrics")
@@ -693,43 +890,43 @@ Kurtosis_errors_test = np.array([])
 #---------------------------------------------------------------------------------------------#
 
 # Populate Error Distribution
-for x_i in tqdm(range(len(measures_locations_test_list)-1)):    
+for x_i in range(len(measures_locations_test_list)-1):    
     # Get Laws
     W1_loop_test = ot.emd2_1d(Barycenters_Array,
-                         measures_locations_test_list[x_i].reshape(-1,),
+                         np.array(measures_locations_test_list[x_i]).reshape(-1,),
                          Predicted_Weights_test[x_i,].reshape(-1,),
-                         measures_weights_test_list[x_i].reshape(-1,))
+                         measure_weights_test.reshape(-1,))
     W1_errors_test = np.append(W1_errors_test,W1_loop_test)
     # Get Means
     Mu_hat_test = np.sum((Predicted_Weights_test[x_i])*(Barycenters_Array))
-    Mu_test = np.mean(measures_locations_test_list[x_i])
+    Mu_test = np.mean(np.array(measures_locations_test_list[x_i]))
     Mean_errors_test =  np.append(Mean_errors_test,(Mu_hat_test-Mu_test))
     # Get Var (non-centered)
     Var_hat_test = np.sum((Barycenters_Array**2)*(Predicted_Weights_test[x_i]))
-    Var_test = np.mean(measures_locations_test_list[x_i]**2)
+    Var_test = np.mean(np.array(measures_locations_test_list[x_i])**2)
     Var_errors_test = np.append(Var_errors_test,(Var_hat_test-Var_test)**2)
     # Get skewness (non-centered)
     Skewness_hat_test = np.sum((Barycenters_Array**3)*(Predicted_Weights_test[x_i]))
-    Skewness_test = np.mean(measures_locations_test_list[x_i]**3)
+    Skewness_test = np.mean(np.array(measures_locations_test_list[x_i])**3)
     Skewness_errors_test = np.append(Skewness_errors_test,(abs(Skewness_hat_test-Skewness_test))**(1/3))
     # Get skewness (non-centered)
     Kurtosis_hat_test = np.sum((Barycenters_Array**4)*(Predicted_Weights_test[x_i]))
-    Kurtosis_test = np.mean(measures_locations_test_list[x_i]**4)
+    Kurtosis_test = np.mean(np.array(measures_locations_test_list[x_i])**4)
     Kurtosis_errors_test = np.append(Kurtosis_errors_test,(abs(Kurtosis_hat_test-Kurtosis_test))**.25)
     
 #---------------------------------------------------------------------------------------------#
 # Compute Error Statistics/Descriptors
-W1_Performance_test = np.array([np.mean(np.abs(W1_errors_test)),np.mean(W1_errors_test**2)])
-Mean_prediction_Performance_test = np.array([np.mean(np.abs(Mean_errors_test)),np.mean(Mean_errors_test**2)])
-Var_prediction_Performance_test = np.array([np.mean(np.abs(Var_errors_test)),np.mean(Var_errors_test**2)])
-Skewness_prediction_Performance_test = np.array([np.mean(np.abs(Skewness_errors_test)),np.mean(Skewness_errors_test**2)])
-Kurtosis_prediction_Performance_test = np.array([np.mean(np.abs(Kurtosis_errors_test)),np.mean(Kurtosis_errors_test**2)])
+W1_Performance_test = np.array([np.min(np.abs(W1_errors_test)),np.mean(np.abs(W1_errors_test)),np.mean(np.abs(W1_errors_test))])
+Mean_prediction_Performance_test = np.array([np.min(np.abs(Mean_errors_test)),np.mean(np.abs(Mean_errors_test)),np.mean(np.abs(Mean_errors_test))])
+Var_prediction_Performance_test = np.array([np.min(np.abs(Var_errors_test)),np.mean(np.abs(Var_errors_test)),np.mean(np.abs(Var_errors_test))])
+Skewness_prediction_Performance_test = np.array([np.min(np.abs(Skewness_errors_test)),np.mean(np.abs(Skewness_errors_test)),np.mean(np.abs(Skewness_errors_test))])
+Kurtosis_prediction_Performance_test = np.array([np.min(np.abs(Kurtosis_errors_test)),np.mean(np.abs(Kurtosis_errors_test)),np.mean(np.abs(Kurtosis_errors_test))])
 
 Type_A_Prediction_test = pd.DataFrame({"W1":W1_Performance_test,
                                   "E[X']-E[X]":Mean_prediction_Performance_test,
                                   "(E[X'^2]-E[X^2])^.5":Var_prediction_Performance_test,
                                   "(E[X'^3]-E[X^3])^(1/3)":Skewness_prediction_Performance_test,
-                                  "(E[X'^4]-E[X^4])^.25":Kurtosis_prediction_Performance_test},index=["MAE","MSE"])
+                                  "(E[X'^4]-E[X^4])^.25":Kurtosis_prediction_Performance_test},index=["Min","MAE","Max"])
 
 # Write Performance
 Type_A_Prediction_test.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
@@ -738,25 +935,9 @@ Type_A_Prediction_test.to_latex((results_tables_path+str("Roughness_")+str(Rougn
 
 # ## Update User
 
-# ### Training-Set Performance
-
-# In[ ]:
-
-
-Type_A_Prediction
-
-
-# ### Test-Set Performance
-
-# In[ ]:
-
-
-Type_A_Prediction_test
-
-
 # ### Print for Terminal Legibility
 
-# In[ ]:
+# In[54]:
 
 
 print("#----------------------#")
@@ -776,41 +957,56 @@ print(" ")
 print(" ")
 
 
-# # Visualization of Performance
-# Randomly subsample from output space and visualize empirical measures!
+# ### Facts of Simulation Experiment:
 
-# In[29]:
-
-
-# # Adjust if is number of plots to visualizes is larger than number of output distributions (But only if there is not enough data!)
-# if N_Grid_Instances <= Visualization_Size**2:
-#         Visualization_Size = int(round(np.sqrt(min(N_Grid_Instances,Visualization_Size**2)))-1)
+# In[55]:
 
 
-# # Initialize Random Sample of input-output pairs to visualize
-# plotting_distribution_indices = random.sample(range(N_Grid_Instances), (Visualization_Size)**2)
+# Update User
+print("====================")
+print(" Experiment's Facts ")
+print("====================")
+print("------------------------------------------------------")
+print("=====")
+print("Model")
+print("=====")
+print("\u2022 N Centers:",N_Quantizers_to_parameterize)
+print("\u2022 Each Wasserstein-1 Ball should contain: ",
+      N_Elements_Per_Cluster, 
+      "elements from the training set.")
+print("------------------------------------------------------")
+print("========")
+print("Training")
+print("========")
+print("\u2022 Data-size:",(len(x_Grid)*len(t_Grid)))
+print("\u2022 N Points per training datum:",N_Monte_Carlo_Samples)
+print("------------------------------------------------------")
+print("=======")
+print("Testing")
+print("=======")
+print("\u2022 Data-size Test:",(len(x_Grid_test)*len(t_Grid_test)))
+print("\u2022 N Points per testing datum:",N_Monte_Carlo_Samples_Test)
+print("------------------------------------------------------")
+print("------------------------------------------------------")
 
-# # Generate Plot
-# f, axarr = plt.subplots(Visualization_Size,Visualization_Size,figsize=(6, 6), dpi=80, facecolor='w', edgecolor='k')
-# plt.suptitle("Sample of Predictions")
-# for i in range(Visualization_Size):
-#     for j in range(Visualization_Size):
-#         # Get Current (Randomly chosen (uniformly)) Index
-#         current_index = (i*Visualization_Size + j)
-#         current_random_index = plotting_distribution_indices[current_index]
-#         # Generate Current Plot
-#         axarr[i,j].bar(Barycenters_Array,(Predicted_Weights[current_random_index].reshape(-1,)), alpha=0.5,label="Prediction",color="chartreuse")
-#         axarr[i,j].bar(measures_locations_list[current_random_index].reshape(-1,),measures_weights_list[current_random_index], alpha=0.5,label="Target",color="purple")
+
+# ### Training-Set Performance
+
+# In[56]:
+
+
+Type_A_Prediction
+
+
+# ### Test-Set Performance
+
+# In[57]:
+
+
+Type_A_Prediction_test
 
 
 # ---
-
-# # Benchmark: SDE-Net
-
-# Credits for this implementation of SDE-Net go to the author of the GitHub repository: [https://github.com/Junghwan-brian/SDE-Net](https://github.com/Junghwan-brian/SDE-Net). 
-# *cloned on April 3$^{rd}$ 2021.*
-# 
-# This method is explored in the recent 2020 ICML paper: [Code for paper: SDE-Net: Equipping Deep Neural network with Uncertainty Estimates](http://proceedings.mlr.press/v119/kong20b.html) by: *Lingkai Kong, Jimeng Sun, and Chao Zhang*.
 
 # ---
 # # Fin

@@ -204,22 +204,27 @@ def build_simple_deep_classifier(n_folds , n_jobs, n_iter, param_grid_in, X_trai
     # Deep Feature Network
     CV_simple_deep_classifier = tf.keras.wrappers.scikit_learn.KerasRegressor(build_fn=def_simple_deep_classifer, verbose=True)
     
+    # Scaler
+    scaler = MinMaxScaler()#StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.fit_transform(X_test)
+    
     # Randomized CV
     CV_simple_deep_classifier_CVer = RandomizedSearchCV(estimator=CV_simple_deep_classifier, 
-                                    n_jobs=n_jobs,
-                                    cv=KFold(n_folds, random_state=2020, shuffle=True),
-                                    param_distributions=param_grid_in,
-                                    n_iter=n_iter,
-                                    return_train_score=True,
-                                    random_state=2020,
-                                    verbose=10)
+                                                        n_jobs=n_jobs,
+                                                        cv=KFold(n_folds, random_state=2021, shuffle=True),
+                                                        param_distributions=param_grid_in,
+                                                        n_iter=n_iter,
+                                                        return_train_score=True,
+                                                        random_state=2020,
+                                                        verbose=10)
     
     # Fit
-    CV_simple_deep_classifier_CVer.fit(X_train,y_train)
+    CV_simple_deep_classifier_CVer.fit(X_train_scaled,y_train)
 
     # Make Prediction(s)
-    predicted_classes_train = CV_simple_deep_classifier_CVer.predict(X_train)
-    predicted_classes_test = CV_simple_deep_classifier_CVer.predict(X_test)
+    predicted_classes_train = CV_simple_deep_classifier_CVer.predict(X_train_scaled)
+    predicted_classes_test = CV_simple_deep_classifier_CVer.predict(X_test_scaled)
     
     # Counter number of parameters #
     #------------------------------#

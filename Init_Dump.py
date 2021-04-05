@@ -28,6 +28,7 @@ from keras.models import Sequential
 from keras.layers import Dense
 from keras.wrappers.scikit_learn import KerasRegressor
 from keras import backend as K
+from sklearn.compose import TransformedTargetRegressor
 
 # Evaluation
 from sklearn.metrics import mean_absolute_error, mean_squared_error

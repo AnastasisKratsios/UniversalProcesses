@@ -41,6 +41,7 @@ from sklearn.tree import DecisionTreeRegressor
 # Formatting:
 import pandas as pd
 import numpy as np
+import itertools
 
 # Optimal Transport
 import ot

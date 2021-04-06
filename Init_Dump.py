@@ -69,6 +69,8 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D  # noqa
 from matplotlib.collections import PolyCollection  # noqa
 from tqdm import tqdm
+import seaborn as sns
+sns.set()
 
 # Writing, Reading, Exporting, and Importing
 #from sklearn.externals import joblib
@@ -86,6 +88,8 @@ import math
 from scipy.stats import norm
 from itertools import compress
 import copy
+from operator import itemgetter 
+from itertools import compress
 
 
 # ## Regression

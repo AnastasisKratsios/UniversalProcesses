@@ -262,8 +262,8 @@ N_Centers_per_box = max(1,int(round(np.sqrt(N_Quantizers_to_parameterize))))
 
 
 # Generate Grid of Barycenters
-x_Grid_barycenters = np.arange(start=-Max_Grid,
-                               stop=Max_Grid,
+x_Grid_barycenters = np.arange(start=(-Max_Grid+x_0),
+                               stop=(Max_Grid+x_0),
                                step = (2*Max_Grid/N_Centers_per_box))
 if groud_truth == "2lnflow":
     t_Grid_barycenters = np.arange(start=0,
@@ -746,11 +746,11 @@ for x_i in tqdm(range(len(measures_locations_test_list))):
     
 #---------------------------------------------------------------------------------------------#
 # Compute Error Statistics/Descriptors
-W1_Performance_test = np.array([np.min(np.abs(W1_errors_test)),np.mean(np.abs(W1_errors_test)),np.mean(np.abs(W1_errors_test))])
-Mean_prediction_Performance_test = np.array([np.min(np.abs(Mean_errors_test)),np.mean(np.abs(Mean_errors_test)),np.mean(np.abs(Mean_errors_test))])
-Var_prediction_Performance_test = np.array([np.min(np.abs(Var_errors_test)),np.mean(np.abs(Var_errors_test)),np.mean(np.abs(Var_errors_test))])
-Skewness_prediction_Performance_test = np.array([np.min(np.abs(Skewness_errors_test)),np.mean(np.abs(Skewness_errors_test)),np.mean(np.abs(Skewness_errors_test))])
-Kurtosis_prediction_Performance_test = np.array([np.min(np.abs(Kurtosis_errors_test)),np.mean(np.abs(Kurtosis_errors_test)),np.mean(np.abs(Kurtosis_errors_test))])
+W1_Performance_test = np.array([np.min(np.abs(W1_errors_test)),np.mean(np.abs(W1_errors_test)),np.max(np.abs(W1_errors_test))])
+Mean_prediction_Performance_test = np.array([np.min(np.abs(Mean_errors_test)),np.mean(np.abs(Mean_errors_test)),np.max(np.abs(Mean_errors_test))])
+Var_prediction_Performance_test = np.array([np.min(np.abs(Var_errors_test)),np.mean(np.abs(Var_errors_test)),np.max(np.abs(Var_errors_test))])
+Skewness_prediction_Performance_test = np.array([np.min(np.abs(Skewness_errors_test)),np.mean(np.abs(Skewness_errors_test)),np.max(np.abs(Skewness_errors_test))])
+Kurtosis_prediction_Performance_test = np.array([np.min(np.abs(Kurtosis_errors_test)),np.mean(np.abs(Kurtosis_errors_test)),np.max(np.abs(Kurtosis_errors_test))])
 
 Type_A_Prediction_test = pd.DataFrame({"W1":W1_Performance_test,
                                   "E[X']-E[X]":Mean_prediction_Performance_test,

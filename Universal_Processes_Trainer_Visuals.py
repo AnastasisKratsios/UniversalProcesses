@@ -14,6 +14,62 @@
 # # Visualization
 # *From hereon out...do nothing and just let the backend sript run...the images and tables will load :).*
 
+# ### Example Noises
+
+# In[1]:
+
+
+print("Example Noises")
+predicted_paths = np.vstack(measures_locations_list)
+predicted_paths_test = np.vstack(measures_locations_test_list)
+
+# Initialize Plot #
+#-----------------#
+plt.figure(num=None, figsize=(12, 12), dpi=80, facecolor='w', edgecolor='k')
+
+for i in range(10):
+    plt.plot(predicted_paths[ i , : ] )
+
+# Format Plot #
+#-------------#
+plt.title("Noise Example")
+
+# Export #
+#--------#
+# SAVE Figure to .eps
+plt.savefig('./outputs/plots/Example_Noise_at_arbitrary_point.pdf', format='pdf')
+
+
+# ### Example Paths
+
+# In[ ]:
+
+
+print("Example Paths")
+
+predicted_paths = np.vstack(measures_locations_list)
+predicted_paths_test = np.vstack(measures_locations_test_list)
+
+predicted_paths = np.vstack(measures_locations_list)
+predicted_paths_test = np.vstack(measures_locations_test_list)
+
+# Initialize Plot #
+#-----------------#
+plt.figure(num=None, figsize=(12, 12), dpi=80, facecolor='w', edgecolor='k')
+
+for i in range(10):
+    plt.plot(predicted_paths[ :50 :,i ] )
+
+# Format Plot #
+#-------------#
+plt.title("Paths Example")
+
+# Export #
+#--------#
+# SAVE Figure to .eps
+plt.savefig('./outputs/plots/Example_paths.pdf', format='pdf')
+
+
 # #### Visualization of Training-Set Performance
 # *Each "jump" is just the new $x$ point, so it is not a genuine jump but rather a flattening of a $2$-surface!*
 

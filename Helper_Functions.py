@@ -248,20 +248,85 @@ print('Deep Classifier - Ready')
 
 
 
+
+
+
+
+
+
+
+
 #-------------------------------#
 #=### Results & Summarizing ###=#
 #-------------------------------#
-def reporter(y_train_hat_in,y_test_hat_in,y_train_in,y_test_in):
-    # Training Performance
-    Training_performance = np.array([mean_absolute_error(y_train_hat_in,y_train_in),
-                                mean_squared_error(y_train_hat_in,y_train_in),
-                                   mean_absolute_percentage_error(y_train_hat_in,y_train_in)])
-    # Testing Performance
-    Test_performance = np.array([mean_absolute_error(y_test_hat_in,y_test_in),
-                                mean_squared_error(y_test_hat_in,y_test_in),
-                                   mean_absolute_percentage_error(y_test_hat_in,y_test_in)])
-    # Organize into Dataframe
-    Performance_dataframe = pd.DataFrame({'train': Training_performance,'test': Test_performance})
-    Performance_dataframe.index = ["MAE","MSE","MAPE"]
-    # return output
-    return Performance_dataframe
+# We empirically estimate the standard error and confidence intervals or the relevant error distributions using the method of this paper: [Bootstrap Methods for Standard Errors, Confidence Intervals, and Other Measures of Statistical Accuracy - by: B. Efron and R. Tibshirani ](https://www.jstor.org/stable/2245500?casa_token=w_8ZaRuo1qwAAAAA%3Ax5kzbYXzxGSWj-EZaC10XyOVADJyKQGXOVA9huJejP9Tt7fgMNhmPhj-C3WdgbB9AEZdqjT5q_azPmBLH6pDq61jzVFxV4XxqBuerQRBLaaOFKcyr0s&seq=1#metadata_info_tab_contents).
+
+# In[ ]:
+
+
+def bootstrap(data, n=1000, func=np.mean):
+    """
+    Generate `n` bootstrap samples, evaluating `func`
+    at each resampling. `bootstrap` returns a function,
+    which can be called to obtain confidence intervals
+    of interest.
+    """
+    simulations = list()
+    sample_size = len(data)
+    xbar_init = np.mean(data)
+    for c in range(n):
+        itersample = np.random.choice(data, size=sample_size, replace=True)
+        simulations.append(func(itersample))
+    simulations.sort()
+    def ci(p):
+        """
+        Return 2-sided symmetric confidence interval specified
+        by p.
+        """
+        u_pval = (1+p)/2.
+        l_pval = (1-u_pval)
+        l_indx = int(np.floor(n*l_pval))
+        u_indx = int(np.floor(n*u_pval))
+        return(simulations[l_indx],xbar_init,simulations[u_indx])
+    return(ci)
+
+
+
+def get_Error_distribution_plots(test_set_data,
+                                 model_test_results,
+                                 NEU_model_test_results,
+                                 model_name):
+    # Initialization
+    import seaborn as sns
+    import warnings
+    warnings.filterwarnings("ignore")
+
+    # Initialize NEU-Model Name
+    NEU_model_name = "NEU-"+model_name
+    plt.figure(num=None, figsize=(12, 12), dpi=80, facecolor='w', edgecolor='k')
+
+    # Initialize Errors
+    Er = model_test_results - data_x_test_raw.reshape(-1,)
+    NEU_Er = NEU_model_test_results - data_x_test_raw.reshape(-1,)
+    
+    # Internal Computations 
+    xbar_init = np.mean(Er)
+    NEU_xbar_init = np.mean(NEU_Er)
+
+    # Generate Plots #
+    #----------------#
+    # generate 5000 resampled sample means  =>
+    means = [np.mean(np.random.choice(Er,size=len(Er),replace=True)) for i in range(5000)]
+    NEU_means = [np.mean(np.random.choice(NEU_Er,size=len(NEU_Er),replace=True)) for i in range(5000)]
+    sns.distplot(means, color='r', kde=True, hist_kws=dict(edgecolor="r", linewidth=.675),label=model_name)
+    sns.distplot(NEU_means, color='b', kde=True, hist_kws=dict(edgecolor="b", linewidth=.675),label=NEU_model_name)
+    plt.xlabel("Initial Sample Mean: {}".format(xbar_init))
+    plt.title("Distribution of Sample Mean")
+    plt.axvline(x=xbar_init) # vertical line at xbar_init
+    plt.legend(loc="upper left")
+    plt.title("Model Predictions")
+    # Save Plot
+    plt.savefig('./outputs/plotsANDfigures/'+model_name+'.pdf', format='pdf')
+    # Show Plot
+    if is_visuallty_verbose == True:
+        plt.show(block=False)

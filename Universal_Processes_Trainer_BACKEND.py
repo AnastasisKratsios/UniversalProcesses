@@ -673,6 +673,13 @@ for x_i in tqdm(range(len(measures_locations_list)-1)):
     Kurtosis_errors = np.append(Kurtosis_errors,(abs(Kurtosis_hat-Kurtosis))**.25)
     
 #---------------------------------------------------------------------------------------------#
+W1_95 = bootstrap(W1_errors, n=1000, func=np.mean)(.95)
+W1_99 = bootstrap(W1_errors, n=1000, func=np.mean)(.99)
+M_95 = bootstrap(predictions_mean, n=1000, func=np.mean)(.95)
+M_99 = bootstrap(predictions_mean, n=1000, func=np.mean)(.99)
+M_95_MC = bootstrap(true_mean, n=1000, func=np.mean)(.95)
+M_99_MC = bootstrap(true_mean, n=1000, func=np.mean)(.99)
+#---------------------------------------------------------------------------------------------#
 # Compute Error Statistics/Descriptors
 W1_Performance = np.array([np.min(np.abs(W1_errors)),np.mean(np.abs(W1_errors)),np.max(np.abs(W1_errors))])
 Mean_prediction_Performance = np.array([np.min(np.abs(Mean_errors)),np.mean(np.abs(Mean_errors)),np.max(np.abs(Mean_errors))])
@@ -685,11 +692,20 @@ Type_A_Prediction = pd.DataFrame({"W1":W1_Performance,
                                   "(E[X'^2]-E[X^2])^.5":Var_prediction_Performance,
                                   "(E[X'^3]-E[X^3])^(1/3)":Skewness_prediction_Performance,
                                   "(E[X'^4]-E[X^4])^.25":Kurtosis_prediction_Performance},index=["Min","MAE","Max"])
+Type_A_Predictions_and_confidence = pd.DataFrame({"W1_99_Train":W1_95,
+                                                  "W1error_99_Train":W1_99,
+                                                  "M_95_Train":M_95,
+                                                  "M_99_Train":M_99,
+                                                  "MC_95_Train":M_95_MC,
+                                                  "MC_99_Train":M_99_MC},index=["CL","Mean","CU"])
+
 
 # Write Performance
 Type_A_Prediction.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Train.tex"))
 
+Type_A_Predictions_and_confidence.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
+ "__TypeAPrediction_Train_predictions_w_confidence_intervals.tex"))
 
 #---------------------------------------------------------------------------------------------#
 # Update User
@@ -700,7 +716,7 @@ Type_A_Prediction
 
 # ### Test-Set Result(s): 
 
-# In[30]:
+# In[2]:
 
 
 print("Building Test Set Performance Metrics")
@@ -745,6 +761,13 @@ for x_i in tqdm(range(len(measures_locations_test_list))):
     Kurtosis_errors_test = np.append(Kurtosis_errors_test,(abs(Kurtosis_hat_test-Kurtosis_test))**.25)
     
 #---------------------------------------------------------------------------------------------#
+W1_95_test = bootstrap(W1_errors_test, n=1000, func=np.mean)(.95)
+W1_99_test = bootstrap(W1_errors_test, n=1000, func=np.mean)(.99)
+M_95_test = bootstrap(predictions_mean_test, n=1000, func=np.mean)(.95)
+M_99_test = bootstrap(predictions_mean_test, n=1000, func=np.mean)(.99)
+M_95_MC_test = bootstrap(true_mean_test, n=1000, func=np.mean)(.95)
+M_99_MC_test = bootstrap(true_mean_test, n=1000, func=np.mean)(.99)
+#---------------------------------------------------------------------------------------------#
 # Compute Error Statistics/Descriptors
 W1_Performance_test = np.array([np.min(np.abs(W1_errors_test)),np.mean(np.abs(W1_errors_test)),np.max(np.abs(W1_errors_test))])
 Mean_prediction_Performance_test = np.array([np.min(np.abs(Mean_errors_test)),np.mean(np.abs(Mean_errors_test)),np.max(np.abs(Mean_errors_test))])
@@ -757,10 +780,18 @@ Type_A_Prediction_test = pd.DataFrame({"W1":W1_Performance_test,
                                   "(E[X'^2]-E[X^2])^.5":Var_prediction_Performance_test,
                                   "(E[X'^3]-E[X^3])^(1/3)":Skewness_prediction_Performance_test,
                                   "(E[X'^4]-E[X^4])^.25":Kurtosis_prediction_Performance_test},index=["Min","MAE","Max"])
+Type_A_Predictions_and_confidence_test = pd.DataFrame({"W1_99_Test":W1_95_test,
+                                                       "W1error_99_Test":W1_99_test,
+                                                       "M_95_Test":M_95_test,
+                                                       "M_99_Test":M_99_test,
+                                                       "MC_95_Test":M_95_MC_test,
+                                                       "MC_99_Test":M_99_MC_test},index=["CL","Mean","CU"])
 
 # Write Performance
 Type_A_Prediction_test.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Test.tex"))
+Type_A_Predictions_and_confidence_test.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
+ "__TypeAPrediction_Test_predictions_w_confidence_intervals.tex"))
 
 
 # # Visualization
@@ -837,7 +868,7 @@ plt.plot(true_mean,label="true",color="green")
 
 # ### Print for Terminal Legibility
 
-# In[34]:
+# In[1]:
 
 
 print("#----------------------#")

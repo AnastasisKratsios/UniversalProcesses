@@ -61,7 +61,7 @@
 # - pfBM
 # - 2lnflow
 
-# In[2]:
+# In[ ]:
 
 
 # Option 1:
@@ -74,7 +74,7 @@
 
 # #### Grid Hyperparameter(s)
 
-# In[3]:
+# In[ ]:
 
 
 # ## Monte-Carlo
@@ -97,7 +97,7 @@
 
 # This option sets $\delta$ in $B_{\mathbb{R}\times [0,\infty)}(\hat{x}_n,\delta)$; where $\hat{x}_n\in \nu_{\cdot}^{-1}[\hat{\mu}]$.  N_measures_per_center sets the number of samples to draw in this ball...by construction the training set is $\delta$-bounded and $\nu_{(x,t)}$, for any such $x$ is $\omega_{\nu_{\cdot}}(\delta)$-bounded in $\mathcal{P}_1(\mathbb{R})$.
 
-# In[4]:
+# In[ ]:
 
 
 # # Hyper-parameters of Cover
@@ -110,7 +110,7 @@
 # ### Random Cover
 # This is not an active option!
 
-# In[5]:
+# In[ ]:
 
 
 # Set Minibatch Size
@@ -121,7 +121,7 @@
 # - True: $\Rightarrow$ cross validation through grid of very mild parameters just to test hardward or software.
 # - False: $\Rightarrow$ run CV-grid.
 
-# In[6]:
+# In[ ]:
 
 
 # trial_run = True
@@ -130,7 +130,7 @@
 # ### Meta-parameters
 # Ratio $\frac{\text{Testing Datasize}}{\text{Training Datasize}}$.
 
-# In[7]:
+# In[ ]:
 
 
 # test_size_ratio = .25
@@ -144,7 +144,7 @@
 
 # ### Drift
 
-# In[8]:
+# In[ ]:
 
 
 # def alpha(t,x):
@@ -153,7 +153,7 @@
 
 # ### Volatility
 
-# In[9]:
+# In[ ]:
 
 
 # def beta(t,x):
@@ -164,7 +164,7 @@
 #  - Roughness is $H$,
 #  - Ratio_fBM_to_typical_vol is $\eta$.
 
-# In[10]:
+# In[ ]:
 
 
 # Rougness = 0.9 # Hurst Parameter
@@ -178,7 +178,7 @@
 
 # **Note:** *$\alpha$ and $\beta$ are specified below in the SDE Example*.
 
-# In[48]:
+# In[ ]:
 
 
 # def field_dirction_x(x):
@@ -188,7 +188,7 @@
 #     return t*(np.sin(math.pi*t) + np.exp(-t))
 
 
-# In[49]:
+# In[ ]:
 
 
 # Run Backend
@@ -199,7 +199,7 @@
 
 # ### Get Paths
 
-# In[12]:
+# In[ ]:
 
 
 # load dataset
@@ -211,7 +211,7 @@ data_path_folder = "./inputs/data/"
 
 # ### Import
 
-# In[13]:
+# In[ ]:
 
 
 # Load Packages/Modules
@@ -226,7 +226,7 @@ import time
 
 # ### Set Seed
 
-# In[14]:
+# In[ ]:
 
 
 random.seed(2021)
@@ -239,7 +239,7 @@ tf.random.set_seed(2021)
 
 # ## Initialization of Auxiliary Internal-Variable(s)
 
-# In[15]:
+# In[ ]:
 
 
 # Initialize (Empirical) Weight(s)
@@ -258,7 +258,7 @@ N_Centers_per_box = max(1,int(round(np.sqrt(N_Quantizers_to_parameterize))))
 # 
 # *We separate the case of a $2$-parameter measure-valued flow from the SDE example as follows:*
 
-# In[16]:
+# In[ ]:
 
 
 # Generate Grid of Barycenters
@@ -273,7 +273,7 @@ if groud_truth == "2lnflow":
 
 # **Note:** If we do not consider the 2-paramter (probability) measure-valued flow model; then we start all time points at the same place; so as to ensure that the "test set" consists exactly of future times corresponding to trained initial states!
 
-# In[17]:
+# In[ ]:
 
 
 if not(groud_truth == "2lnflow"):
@@ -284,7 +284,7 @@ if not(groud_truth == "2lnflow"):
 
 # #### Build Full-Grid
 
-# In[18]:
+# In[ ]:
 
 
 for x_i in range(len(x_Grid_barycenters)):
@@ -302,7 +302,7 @@ N_Quantizers_to_parameterize = Grid_Barycenters.shape[0]
 # ### Generate Data
 # This is $\mathbb{X}$ and it represents the grid of initial states.
 
-# In[19]:
+# In[ ]:
 
 
 # LOAD Simulator (Backend)
@@ -312,7 +312,7 @@ exec(open('Simulator.py').read())
 
 # #### Start Timer (Model Type A)
 
-# In[20]:
+# In[ ]:
 
 
 # Start Timer
@@ -327,7 +327,7 @@ Type_A_timer_Begin = time.time()
 # 
 # ### Get Training Data
 
-# In[21]:
+# In[ ]:
 
 
 if groud_truth == "2lnflow":
@@ -373,7 +373,7 @@ if groud_truth == "2lnflow":
 
 # ### Get Testing Data
 
-# In[22]:
+# In[ ]:
 
 
 if groud_truth == "2lnflow":
@@ -407,7 +407,7 @@ if groud_truth == "2lnflow":
 
 # ### Get Training and Testing Data
 
-# In[23]:
+# In[ ]:
 
 
 # LOAD Simulator (Backend)
@@ -415,7 +415,7 @@ if groud_truth == "2lnflow":
 exec(open('Simulator.py').read())
 
 
-# In[24]:
+# In[ ]:
 
 
 # NEW?
@@ -528,7 +528,7 @@ if groud_truth == "rSDE":
 
 # #### Train Deep Classifier
 
-# In[25]:
+# In[ ]:
 
 
 # Re-Load Hyper-parameter Grid
@@ -537,7 +537,7 @@ exec(open('CV_Grid.py').read())
 exec(open('Helper_Functions.py').read())
 
 
-# In[26]:
+# In[ ]:
 
 
 print("==========================================")
@@ -566,7 +566,7 @@ print("=================================================")
 # - Each *row* of "Predicted_Weights" is the $\beta\in \Delta_N$.
 # - Each *Column* of "Barycenters_Array" denotes the $x_1,\dots,x_N$ making up the points of the corresponding empirical measures.
 
-# In[27]:
+# In[ ]:
 
 
 # Format Weights
@@ -614,7 +614,7 @@ print("#-----------------------------#")
 
 # #### Stop Timer
 
-# In[28]:
+# In[ ]:
 
 
 # Stop Timer
@@ -623,13 +623,28 @@ Type_A_timer_end = time.time()
 Time_Lapse_Model_A = Type_A_timer_end - Type_A_timer_Begin
 
 
+# ### Get Model Complexities
+
+# In[ ]:
+
+
+Model_Complexity = pd.DataFrame({"N_Params":N_params_deep_classifier,
+                                 "Training Time":Time_Lapse_Model_A,
+                                 "N_Centers":N_Quantizers_to_parameterize,
+                                 "N_Q":N_Monte_Carlo_Samples},index=["Model_Complexity_metrics"])
+
+
+Model_Complexity.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
+ "__ModelComplexities.tex"))
+
+
 # ## Get Moment Predictions
 
 # #### Write Predictions
 
 # ### Training-Set Result(s): 
 
-# In[29]:
+# In[ ]:
 
 
 print("Building Training Set Performance Metrics")
@@ -704,19 +719,19 @@ Type_A_Predictions_and_confidence = pd.DataFrame({"W1_99_Train":W1_95,
 Type_A_Prediction.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Train.tex"))
 
-Type_A_Predictions_and_confidence.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
+(Type_A_Predictions_and_confidence.T).to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Train_predictions_w_confidence_intervals.tex"))
 
-#---------------------------------------------------------------------------------------------#
-# Update User
-Type_A_Prediction
+# #---------------------------------------------------------------------------------------------#
+# # Update User
+# Type_A_Prediction
 
 
 # ---
 
 # ### Test-Set Result(s): 
 
-# In[2]:
+# In[ ]:
 
 
 print("Building Test Set Performance Metrics")
@@ -780,6 +795,7 @@ Type_A_Prediction_test = pd.DataFrame({"W1":W1_Performance_test,
                                   "(E[X'^2]-E[X^2])^.5":Var_prediction_Performance_test,
                                   "(E[X'^3]-E[X^3])^(1/3)":Skewness_prediction_Performance_test,
                                   "(E[X'^4]-E[X^4])^.25":Kurtosis_prediction_Performance_test},index=["Min","MAE","Max"])
+
 Type_A_Predictions_and_confidence_test = pd.DataFrame({"W1_99_Test":W1_95_test,
                                                        "W1error_99_Test":W1_99_test,
                                                        "M_95_Test":M_95_test,
@@ -790,7 +806,7 @@ Type_A_Predictions_and_confidence_test = pd.DataFrame({"W1_99_Test":W1_95_test,
 # Write Performance
 Type_A_Prediction_test.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Test.tex"))
-Type_A_Predictions_and_confidence_test.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
+(Type_A_Predictions_and_confidence_test.T).to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Test_predictions_w_confidence_intervals.tex"))
 
 
@@ -798,14 +814,14 @@ Type_A_Predictions_and_confidence_test.to_latex((results_tables_path+str("Roughn
 
 # #### Visualization of Training-Set Performance
 
-# In[39]:
+# In[ ]:
 
 
 plt.plot(predictions_mean,label="prediction",color="purple")
 plt.plot(true_mean,label="true",color="green")
 
 
-# In[32]:
+# In[ ]:
 
 
 # # plt.plot(predictions_mean_test,color="purple")
@@ -835,7 +851,7 @@ plt.plot(true_mean,label="true",color="green")
 
 # #### Visualization of Test-Set Performance
 
-# In[33]:
+# In[ ]:
 
 
 # # plt.plot(predictions_mean_test,color="purple")
@@ -868,7 +884,7 @@ plt.plot(true_mean,label="true",color="green")
 
 # ### Print for Terminal Legibility
 
-# In[1]:
+# In[ ]:
 
 
 print("#----------------------#")
@@ -890,7 +906,7 @@ print(" ")
 
 # ### Training-Set Performance
 
-# In[35]:
+# In[ ]:
 
 
 # Type_A_Prediction
@@ -898,10 +914,18 @@ print(" ")
 
 # ### Test-Set Performance
 
-# In[36]:
+# In[ ]:
 
 
 # Type_A_Prediction_test
+
+
+# # Model Complexity
+
+# In[ ]:
+
+
+# Model_Complexity
 
 
 # ---

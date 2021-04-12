@@ -330,6 +330,13 @@ Type_A_timer_Begin = time.time()
 # In[ ]:
 
 
+# Start Monte-Carlo Timer
+test_DATA_MC = time.time()
+
+
+# In[ ]:
+
+
 if groud_truth == "2lnflow":
     print("Building Training Set - 2-logNormal Ground-Truth")
     # Generate Training Data
@@ -393,6 +400,13 @@ if groud_truth == "2lnflow":
 
     # Generate Testing Dataset (Outputs)
     measures_locations_test_list, measures_weights_test_list = twoparameter_flow_sampler(X_test,N_Monte_Carlo_Samples_Test)
+
+
+# In[ ]:
+
+
+# Stop Monte-Carlo Timer
+test_DATA_MC = time.time() - test_DATA_MC
 
 
 # ### Rough SDE:
@@ -549,7 +563,7 @@ param_grid_Deep_Classifier['input_dim'] = [2]
 param_grid_Deep_Classifier['output_dim'] = [N_Quantizers_to_parameterize]
 
 # Train simple deep classifier
-predicted_classes_train, predicted_classes_test, N_params_deep_classifier = build_simple_deep_classifier(n_folds = CV_folds, 
+predicted_classes_train, predicted_classes_test, N_params_deep_classifier, timer_output = build_simple_deep_classifier(n_folds = CV_folds, 
                                                                                                         n_jobs = n_jobs, 
                                                                                                         n_iter = n_iter, 
                                                                                                         param_grid_in=param_grid_Deep_Classifier, 
@@ -631,7 +645,9 @@ Time_Lapse_Model_A = Type_A_timer_end - Type_A_timer_Begin
 Model_Complexity = pd.DataFrame({"N_Params":N_params_deep_classifier,
                                  "Training Time":Time_Lapse_Model_A,
                                  "N_Centers":N_Quantizers_to_parameterize,
-                                 "N_Q":N_Monte_Carlo_Samples},index=["Model_Complexity_metrics"])
+                                 "N_Q":N_Monte_Carlo_Samples,
+                                 "Time Test": timer_output,
+                                 "Time EM-MC": test_DATA_MC},index=["Model_Complexity_metrics"])
 
 
 Model_Complexity.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+

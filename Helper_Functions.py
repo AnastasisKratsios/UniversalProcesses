@@ -223,8 +223,13 @@ def build_simple_deep_classifier(n_folds , n_jobs, n_iter, param_grid_in, X_trai
     CV_simple_deep_classifier_CVer.fit(X_train_scaled,y_train)
 
     # Make Prediction(s)
+    prediction_timer_train = time.time()
     predicted_classes_train = CV_simple_deep_classifier_CVer.predict(X_train_scaled)
+    prediction_timer_train = time.time() - prediction_timer_train
+    
+    prediction_timer_test = time.time()
     predicted_classes_test = CV_simple_deep_classifier_CVer.predict(X_test_scaled)
+    prediction_timer_test = time.time() - prediction_timer_test
     
     # Counter number of parameters #
     #------------------------------#
@@ -232,10 +237,14 @@ def build_simple_deep_classifier(n_folds , n_jobs, n_iter, param_grid_in, X_trai
     best_model = CV_simple_deep_classifier_CVer.best_estimator_
     # Count Number of Parameters
     N_params_best_classifier = np.sum([np.prod(v.get_shape().as_list()) for v in best_model.model.trainable_variables])
+    
+    # Timers #
+    #--------#
+    timer_output = prediction_timer_test#np.array([prediction_timer_train,prediction_timer_test])
 
     
     # Return Values
-    return predicted_classes_train, predicted_classes_test, N_params_best_classifier
+    return predicted_classes_train, predicted_classes_test, N_params_best_classifier, timer_output
 
 # Update User
 #-------------#

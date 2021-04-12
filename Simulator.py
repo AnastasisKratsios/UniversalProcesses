@@ -39,7 +39,7 @@ def Euler_Maruyama_Generator(x_0,
         # Initialize Current State 
         X_current = x_0
         # Generate roughness
-        sigma_rough = FBM(n=N_Euler_Maruyama_Steps, hurst=0.75, length=1, method='daviesharte').fbm()
+        sigma_rough = FBM(n=N_Euler_Maruyama_Steps, hurst=Hurst, length=1, method='daviesharte').fbm()
         # Perform Euler-Maruyama Simulation
         for t in range(N_Euler_Maruyama_Steps):
             # Update Internal Parameters

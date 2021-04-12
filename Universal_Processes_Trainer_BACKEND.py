@@ -650,7 +650,7 @@ Model_Complexity = pd.DataFrame({"N_Centers":N_Quantizers_to_parameterize,
                                  "Time Test": timer_output,
                                  "Time EM-MC": test_DATA_MC},index=["Model_Complexity_metrics"])
 
-pd.set_option('display.float_format', '{:.2E}'.format)
+pd.set_option('display.float_format', '{:.4E}'.format)
 Model_Complexity.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__ModelComplexities.tex"))
 
@@ -733,10 +733,10 @@ Type_A_Predictions_and_confidence = pd.DataFrame({"W1_99_Train":W1_95,
 
 
 # Write Performance
-pd.set_option('display.float_format', '{:.2E}'.format)
+pd.set_option('display.float_format', '{:.4E}'.format)
 Type_A_Prediction.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Train.tex"))
-pd.set_option('display.float_format', '{:.2E}'.format)
+pd.set_option('display.float_format', '{:.4E}'.format)
 (Type_A_Predictions_and_confidence.T).to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Train_predictions_w_confidence_intervals.tex"))
 
@@ -822,10 +822,10 @@ Type_A_Predictions_and_confidence_test = pd.DataFrame({"W1_99_Test":W1_95_test,
                                                        "MC_99_Test":M_99_MC_test},index=["CL","Mean","CU"])
 
 # Write Performance
-pd.set_option('display.float_format', '{:.2E}'.format)
+pd.set_option('display.float_format', '{:.4E}'.format)
 Type_A_Prediction_test.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Test.tex"))
-pd.set_option('display.float_format', '{:.2E}'.format)
+pd.set_option('display.float_format', '{:.4E}'.format)
 (Type_A_Predictions_and_confidence_test.T).to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Test_predictions_w_confidence_intervals.tex"))
 

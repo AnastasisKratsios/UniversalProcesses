@@ -46,9 +46,9 @@ else:
     
 
     param_grid_Deep_Classifier = {'batch_size': [32],
-                        'epochs': [100,200],
-                        'learning_rate': [0.00001,0.000001,0.001],
-                        'height': [50,100,200],
+                        'epochs': [100,200,250],
+                        'learning_rate': [0.00001,0.000001],
+                        'height': [50,100,200,250],
                         'depth': [2,3,4],
                         'input_dim':[15],
                         'output_dim':[1]}

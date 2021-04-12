@@ -402,13 +402,6 @@ if groud_truth == "2lnflow":
     measures_locations_test_list, measures_weights_test_list = twoparameter_flow_sampler(X_test,N_Monte_Carlo_Samples_Test)
 
 
-# In[ ]:
-
-
-# Stop Monte-Carlo Timer
-test_DATA_MC = time.time() - test_DATA_MC
-
-
 # ### Rough SDE:
 # Simulation of the random-field:
 # $$
@@ -528,6 +521,13 @@ if groud_truth == "rSDE":
             position_counter = position_counter + 1
 
 
+# In[ ]:
+
+
+# Stop Monte-Carlo Timer
+test_DATA_MC = time.time() - test_DATA_MC
+
+
 # ---
 
 # ### Train Deep Classifier
@@ -642,14 +642,15 @@ Time_Lapse_Model_A = Type_A_timer_end - Type_A_timer_Begin
 # In[ ]:
 
 
-Model_Complexity = pd.DataFrame({"N_Params":N_params_deep_classifier,
-                                 "Training Time":Time_Lapse_Model_A,
-                                 "N_Centers":N_Quantizers_to_parameterize,
+Model_Complexity = pd.DataFrame({"N_Centers":N_Quantizers_to_parameterize,
                                  "N_Q":N_Monte_Carlo_Samples,
+                                 "N_Params":N_params_deep_classifier,
+                                 "Training Time":Time_Lapse_Model_A,
+                                 "T_Test/T_Test-MC": (timer_output/test_DATA_MC),
                                  "Time Test": timer_output,
                                  "Time EM-MC": test_DATA_MC},index=["Model_Complexity_metrics"])
 
-
+pd.set_option('display.float_format', '{:.2E}'.format)
 Model_Complexity.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__ModelComplexities.tex"))
 
@@ -732,9 +733,10 @@ Type_A_Predictions_and_confidence = pd.DataFrame({"W1_99_Train":W1_95,
 
 
 # Write Performance
+pd.set_option('display.float_format', '{:.2E}'.format)
 Type_A_Prediction.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Train.tex"))
-
+pd.set_option('display.float_format', '{:.2E}'.format)
 (Type_A_Predictions_and_confidence.T).to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Train_predictions_w_confidence_intervals.tex"))
 
@@ -820,8 +822,10 @@ Type_A_Predictions_and_confidence_test = pd.DataFrame({"W1_99_Test":W1_95_test,
                                                        "MC_99_Test":M_99_MC_test},index=["CL","Mean","CU"])
 
 # Write Performance
+pd.set_option('display.float_format', '{:.2E}'.format)
 Type_A_Prediction_test.to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Test.tex"))
+pd.set_option('display.float_format', '{:.2E}'.format)
 (Type_A_Predictions_and_confidence_test.T).to_latex((results_tables_path+str("Roughness_")+str(Rougness)+str("__RatiofBM_")+str(Ratio_fBM_to_typical_vol)+
  "__TypeAPrediction_Test_predictions_w_confidence_intervals.tex"))
 

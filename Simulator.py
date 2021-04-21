@@ -49,13 +49,16 @@ def Euler_Maruyama_Generator(x_0,
             # Update Generated Path
             drift_t = alpha(t_current,X_current)*dt
             W_t = np.random.normal(0,sqrt_dt)
-            vol_t = (1-Ratio_fBM_to_typical_vol)*beta(t_current,X_current) #+ Ratio_fBM_to_typical_vol*sigma_rough[t]
-            vol_t = vol_t*W_t
+            vol_t = beta(t_current,X_current)
+            vol_t = ((1-Ratio_fBM_to_typical_vol)*vol_t*W_t) + (Ratio_fBM_to_typical_vol*sigma_rough[t])
             X_current = X_current + drift_t + vol_t
 
             # Update Empirical Measure
-            X_T_Empirical[t,n_sample] = (X_current+ Ratio_fBM_to_typical_vol*sigma_rough[t])
-
+            X_T_Empirical[t,n_sample] = X_current
+    
+    # Add Stationary Uniform Noise
+#     if uniform_noise>0:
+#         X_T_Empirical = X_T_Empirical #+ np.random.uniform(low=-uniform_noise,high=uniform_noise,size=X_T_Empirical.shape())
     return X_T_Empirical
 
 

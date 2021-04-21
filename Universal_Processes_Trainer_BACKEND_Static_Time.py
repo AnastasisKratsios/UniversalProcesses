@@ -515,7 +515,25 @@ if groud_truth == "rSDE":
 
             # Update Position
             position_counter = position_counter + 1
-            
+    
+    # Initialize position Counter
+    position_counter = 0
+    # Iniitalize uniform weights vector
+    measures_weights_list_loop = np.ones(N_Monte_Carlo_Samples)/N_Monte_Carlo_Samples
+
+    # For simplicity override:
+    N_Monte_Carlo_Samples_Test = N_Monte_Carlo_Samples
+    
+    # Overrine Number of Centers
+    N_x = int(np.round(len(x_Grid_barycenters)*(1-test_size_ratio)))
+    N_x_test = int(np.round(len(x_Grid_barycenters)*(test_size_ratio)))
+    N_t = len(t_Grid_barycenters)
+    N_Quantizers_to_parameterize = N_x*N_t
+    
+    # Initialize number of training and testing to grab from each initial condition
+    N_train = int(N_Euler_Maruyama_Steps)
+    N_test = N_train
+    
     for x_i in tqdm(range(N_x_test)):
         for t_j in range(N_t):
 

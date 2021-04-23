@@ -43,6 +43,9 @@ import pandas as pd
 import numpy as np
 import itertools
 
+# Learning
+from sklearn.cluster import KMeans
+
 # Optimal Transport
 import ot
 

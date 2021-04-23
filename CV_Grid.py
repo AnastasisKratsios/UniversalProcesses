@@ -30,7 +30,21 @@ if trial_run == True:
                         'depth': [1],
                         'input_dim':[15],
                         'output_dim':[1]}
-
+    
+    # Random Forest Grid
+    #--------------------#
+    Rand_Forest_Grid = {'learning_rate': [0.01],
+                        'max_depth': [10],
+                        'min_samples_leaf': [3],
+                        'n_estimators': [500]}
+    
+    # Kernel Ridge #
+    #--------------#
+    param_grid_kernel_Ridge={"alpha": np.linspace(1e0, 0.1, 10),
+                             "gamma": np.logspace(-2, 2, 50),
+                             "kernel": ["rbf", "laplacian", "polynomial", "cosine", "sigmoid"]}
+    
+   
     
 else:
     
@@ -52,6 +66,20 @@ else:
                         'depth': [2,3,4],
                         'input_dim':[15],
                         'output_dim':[1]}
+    
+    # Random Forest Grid
+    #--------------------#
+    Rand_Forest_Grid = {'learning_rate': [0.0005,0.0001,0.00005,0.00001],
+                        'max_depth': [3,4,5,6, 7, 8,9, 10],
+                        'min_samples_leaf': [5, 9, 17, 20,50],
+                       'n_estimators': [1500]}
+    
+    # Kernel Ridge #
+    #--------------#
+    param_grid_kernel_Ridge={"alpha": [1e0, 0.1, 1e-2, 1e-3],
+                             "gamma": np.logspace(-2, 2, 10**2),
+                             "kernel": ["rbf", "laplacian", "polynomial", "cosine", "sigmoid"]}
+
                         
                        
 

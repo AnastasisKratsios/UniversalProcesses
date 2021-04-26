@@ -44,6 +44,15 @@ if trial_run == True:
                              "gamma": np.logspace(-2, 2, 50),
                              "kernel": ["rbf", "laplacian", "polynomial", "cosine", "sigmoid"]}
     
+    # Gaussian Process Regression #
+    #-----------------------------#
+    param_grid_GAUSSIAN = {'kernel':[kernels.RBF(),
+                                     kernels.Matern(),
+                                     kernels.RationalQuadratic(),
+                                     kernels.WhiteKernel()],
+                           'n_restarts_optimizer':[5,10,20,25],
+                           'random_state':[2020]}
+    
    
     
 else:
@@ -79,6 +88,15 @@ else:
     param_grid_kernel_Ridge={"alpha": [1e0, 0.1, 1e-2, 1e-3],
                              "gamma": np.logspace(-2, 2, 10**2),
                              "kernel": ["rbf", "laplacian", "polynomial", "cosine", "sigmoid"]}
+    
+    # Gaussian Process Regression #
+    #-----------------------------#
+    param_grid_GAUSSIAN = {'kernel':[kernels.RBF(),
+                                     kernels.Matern(),
+                                     kernels.RationalQuadratic(),
+                                     kernels.WhiteKernel()],
+                           'n_restarts_optimizer':[5,10,20,25],
+                           'random_state':[2020]}
 
                         
                        

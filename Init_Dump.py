@@ -43,6 +43,11 @@ import pandas as pd
 import numpy as np
 import itertools
 
+# Gaussian Process Regressor
+from sklearn.model_selection import *
+from sklearn.ensemble import *
+from sklearn.gaussian_process import *
+
 # Learning
 from sklearn.cluster import KMeans
 

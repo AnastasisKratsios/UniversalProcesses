@@ -21,6 +21,8 @@ if trial_run == True:
     n_iter_trees = 1#20
     # Number of CV Folds
     CV_folds = 2
+    # Number of Boostrapped Confidence Intervals
+    N_Boostraps_BCA = 50
 
 
     param_grid_Deep_Classifier = {'batch_size': [32],
@@ -66,6 +68,8 @@ else:
     n_iter_trees = 1
     # Number of CV Folds
     CV_folds = 4
+    # Number of Boostrapped Confidence Intervals
+    N_Boostraps_BCA = 10**3
     
 
     param_grid_Deep_Classifier = {'batch_size': [32],

@@ -349,6 +349,9 @@ if f_unknown_mode == "Rough_SDE":
     # Define DNN Applier
     def f_unknown(x):
         x_internal = x.reshape(-1,)
+        # Random Radius
+        rand_radius = np.random.exponential(1)
+        left_random_ball_Q = 0
         # Get fBM path
         for d in range(problem_dim):
             fBM_gen_loop = (((FBM(n=N_Euler_Steps, hurst=Hurst_Exponent, length=1, method='daviesharte')).fbm())[1:]).reshape(-1,1)
@@ -361,9 +364,10 @@ if f_unknown_mode == "Rough_SDE":
             drift_update = f_unknown_drift(x_internal)/N_Euler_Steps
             vol_update = f_unknown_vol(x_internal)
             x_internal = x_internal + drift_update + np.matmul(vol_update,fBM_gen[t,])
-        # Sum at output
-        output_indicator = np.sum(np.maximum(x_internal-(np.random.uniform(0,1,1)[0]),0))
-        return output_indicator
+            
+            # Test if the process has left the ball
+            left_random_ball_Q = max(left_random_ball_Q,(np.sqrt(np.sum((x_internal - x.reshape(-1,))**2)) <= rand_radius)*1)        
+        return left_random_ball_Q
 
     def Simulator(x_in):
         for i_MC in range(N_Monte_Carlo_Samples):

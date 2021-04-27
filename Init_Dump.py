@@ -72,6 +72,7 @@ from fbm import FBM
 
 # Statistics
 from scipy import stats
+from sklearn.mixture import GaussianMixture
 
 # Structuring
 from pathlib import Path

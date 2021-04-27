@@ -293,14 +293,11 @@ if f_unknown_mode == "DNN_with_Bayesian_Dropout":
 
 
 if f_unknown_mode == "Rough_SDE":
-    # Initialize Drouput Parameters
-    N_Dropout = int(np.maximum(1,round(width*Dropout_rate)))
-    
-    #-----------#
-    # Build DNN #
-    #-----------#
+    #-------------------#
+    # Build DNN (Drift) #
+    #-------------------#
     W_feature = np.random.uniform(size=np.array([width,problem_dim]),low=-.5,high=.5)
-    W_readout = np.random.uniform(size=np.array([1,width]),low=-.5,high=.5)
+    W_readout = np.random.uniform(size=np.array([problem_dim,width]),low=-.5,high=.5)
     # Generate Matrices
     for i_weights in range(Depth_Bayesian_DNN):
         W_hidden_loop = np.random.uniform(size=np.array([width,width]),low=-.5,high=.5)
@@ -308,6 +305,47 @@ if f_unknown_mode == "Rough_SDE":
             W_hidden_list = [W_hidden_loop]
         else:
             W_hidden_list.append(W_hidden_loop)
+    # Define DNN Applier
+    def f_unknown_drift(x):
+        x_internal = x.reshape(-1,)
+        x_internal = np.matmul(W_feature,x)
+        #Deep Layer(s)
+        for i in range(Depth_Bayesian_DNN):
+            W_internal = W_hidden_list[i]
+            x_internal = np.matmul(W_internal,x_internal)
+            x_internal = np.maximum(0,x_internal)    
+        # Readout Layer
+        x_internal = np.matmul(W_readout,x_internal)
+        return x_internal
+    
+    #-----------------#
+    # Build DNN (Vol) #
+    #-----------------#
+    W_feature_vol = np.random.uniform(size=np.array([width,problem_dim]),low=-.5,high=.5)
+    W_readout_vol = np.random.uniform(size=np.array([problem_dim,width]),low=-.5,high=.5)
+    # Generate Matrices
+    for i_weights in range(Depth_Bayesian_DNN):
+        W_hidden_loop_vol = np.random.uniform(size=np.array([width,width]),low=-.5,high=.5)
+        if i_weights == 0:
+            W_hidden_list_vol = [W_hidden_loop_vol]
+        else:
+            W_hidden_list_vol.append(W_hidden_loop_vol)
+    def f_unknown_vol(x):
+        x_internal = x.reshape(-1,)
+        x_internal = np.matmul(W_feature,x)
+        #Deep Layer(s)
+        for i in range(Depth_Bayesian_DNN):
+            W_internal = W_hidden_list[i]
+            x_internal = np.matmul(W_internal,x_internal)
+            x_internal = np.maximum(0,x_internal)    
+        # Readout Layer
+        x_internal = np.matmul(W_readout,x_internal)
+        x_internal = np.outer(x_internal,x_internal)
+        x_internal = np.tanh(x_internal)
+        return x_internal
+    
+    
+    
     # Define DNN Applier
     def f_unknown(x):
         x_internal = x.reshape(-1,)
@@ -320,11 +358,11 @@ if f_unknown_mode == "Rough_SDE":
                 fBM_gen = np.append(fBM_gen,fBM_gen_loop,axis=-1)
         # Perform Integral
         for t in range(N_Euler_Steps):
-            drift_update = alpha(t/N_Euler_Steps,x_internal)/N_Euler_Steps
-            vol_update = beta(t/N_Euler_Steps,x_internal)
+            drift_update = f_unknown_drift(x_internal)/N_Euler_Steps
+            vol_update = f_unknown_vol(x_internal)
             x_internal = x_internal + drift_update + np.matmul(vol_update,fBM_gen[t,])
         # Sum at output
-        output_indicator = np.max(x_internal)
+        output_indicator = np.sum(np.maximum(x_internal-(np.random.uniform(0,1,1)[0]),0))
         return output_indicator
 
     def Simulator(x_in):

@@ -43,7 +43,7 @@ trial_run = True
 
 
 # Random DNN
-f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
+#f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
 
 # Random DNN internal noise
 # f_unknown_mode = "DNN_with_Random_Weights"
@@ -55,7 +55,7 @@ width = 2
 Dropout_rate = 0.25
 
 # Rough SDE (time 1)
-# f_unknown_mode = "Rough_SDE"
+f_unknown_mode = "Rough_SDE"
 
 
 # ## Problem Dimension
@@ -63,7 +63,7 @@ Dropout_rate = 0.25
 # In[4]:
 
 
-problem_dim = 2
+problem_dim = 50
 
 
 # ## Note: *Why the procedure is so computationally efficient*?
@@ -80,7 +80,7 @@ problem_dim = 2
 
 # SDE with Rough Driver
 N_Euler_Steps = 10**1
-Hurst_Exponent = 0.01
+Hurst_Exponent = 0.6
 
 def alpha(t,x):
     output_drift_update = t-x
@@ -108,7 +108,7 @@ N_train_size = 10**1
 
 
 ## Monte-Carlo
-N_Monte_Carlo_Samples = 10**1
+N_Monte_Carlo_Samples = 10**2
 
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!

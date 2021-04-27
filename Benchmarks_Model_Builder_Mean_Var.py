@@ -726,8 +726,8 @@ print("--------------------------------------------")
 # Coercion
 Summary_Complexity_models = Summary_Complexity_models.T
 # Compute Complexity Metrics for GPR
-GPR_Facts = np.array([0,GRP_time,GPR_test_time_prediction/Test_Set_PredictionTime_MC])
-DGN_Facts = np.array([N_params_deep_Gaussian,(timeBuilding_Training_Set_DGN+timer_DGP),timer_output_Deep_Gaussian/Test_Set_PredictionTime_MC])
+GPR_Facts = np.array([0,0,GRP_time,GPR_test_time_prediction/Test_Set_PredictionTime_MC])
+DGN_Facts = np.array([N_params_deep_Gaussian,N_params_deep_Gaussian,(timeBuilding_Training_Set_DGN+timer_DGP),timer_output_Deep_Gaussian/Test_Set_PredictionTime_MC])
 # Update Model Complexities
 Summary_Complexity_models["GPR"] = pd.Series(GPR_Facts, index=Summary_Complexity_models.index)
 Summary_Complexity_models["DGN"] = pd.Series(DGN_Facts, index=Summary_Complexity_models.index)

@@ -370,7 +370,8 @@ Summary_pred_Qual_models_test.to_latex((results_tables_path+str(f_unknown_mode)+
 # In[ ]:
 
 
-Summary_Complexity_models = pd.DataFrame({"N_Params":np.array([2*problem_dim,GBRF_N_Params,kRidge_N_params,ffNN_N_Params]),
+Summary_Complexity_models = pd.DataFrame({"N_Params_Trainable":np.array([2*problem_dim,GBRF_N_Params,kRidge_N_params,ffNN_N_Params]),
+                                          "N_Params":np.array([2*problem_dim,GBRF_N_Params,kRidge_N_params,ffNN_N_Params]),
                                           "T_Time": np.array([Timer_ENET,Timer_GBRF,Timer_kRidge,Timer_ffNN]),
                                           "T_Test/T_test-MC": np.array([ENET_eval_time/Test_Set_PredictionTime_MC,
                                                                         GBRF_eval_time/Test_Set_PredictionTime_MC,

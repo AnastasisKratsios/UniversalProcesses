@@ -411,13 +411,13 @@ for i in tqdm(range(X_train.shape[0])):
     if i == 0:
         Y_train = y_loop
         Y_train_mean_emp = np.mean(y_loop)
-        Y_train_var_emp = np.mean((y_loop - np.mean(y_loop))**2)
+#         Y_train_var_emp = np.mean((y_loop - np.mean(y_loop))**2)
     else:
         Y_train = np.append(Y_train,y_loop,axis=0)
         Y_train_mean_emp = np.append(Y_train_mean_emp,np.mean(y_loop))
-        Y_train_var_emp = np.append(Y_train_var_emp,np.mean((y_loop - np.mean(y_loop))**2))
+#         Y_train_var_emp = np.append(Y_train_var_emp,np.mean((y_loop - np.mean(y_loop))**2))
 # Join mean and Variance Training Data
-Y_train_var_emp = np.append(Y_train_mean_emp.reshape(-1,1),Y_train_var_emp.reshape(-1,1),axis=1)
+# Y_train_var_emp = np.append(Y_train_mean_emp.reshape(-1,1),Y_train_var_emp.reshape(-1,1),axis=1)
 
 
 # #### Get Test Set

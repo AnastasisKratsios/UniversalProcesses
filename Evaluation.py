@@ -128,7 +128,7 @@ def get_deterministic_errors(X_inputs, mean_predictions,Y_targets,N_Bootstraps=1
     Higher_Moment_Errors = np.array(bootstrap(np.abs(Higher_Moments_Errors),n=N_Bootstraps)(.95))
     
     # Format Error Metrics
-    output = np.array([W1_Errors,Mean_Errors,Var_Errors,Skewness_Errors,Ex_Kurtosis_Errors,Higher_Moment_Errors])
+    output = np.array([W1_Errors,Mean_Errors,Var_Errors,Skewness_Errors,Ex_Kurtosis_Errors])
     print("#-----------------#")
     print(" Get Error(s): END ")
     print("#-----------------#")

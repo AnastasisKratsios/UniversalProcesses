@@ -352,13 +352,13 @@ Summary_pred_Qual_models = pd.DataFrame({"ENET":ENET_errors_test[:,1],
                                     "kRidge":kRidge_errors_test[:,1],
                                     "GBRF":GBRF_errors_test[:,1],
                                     "ffNN":ffNN_errors_test[:,1],
-                                   },index=["W1","Mean","Var","Skewness","Ex_Kur","Higher"])
+                                   },index=["W1","Mean","Var","Skewness","Ex_Kur"])
 
 Summary_pred_Qual_models_test = pd.DataFrame({"ENET":ENET_errors[:,1],
                                     "kRidge":kRidge_errors[:,1],
                                     "GBRF":GBRF_errors[:,1],
                                     "ffNN":ffNN_errors[:,1],
-                                   },index=["W1","Mean","Var","Skewness","Ex_Kur","Higher"])
+                                   },index=["W1","Mean","Var","Skewness","Ex_Kur"])
 
 ## Save Facts
 Summary_pred_Qual_models.to_latex((results_tables_path+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))

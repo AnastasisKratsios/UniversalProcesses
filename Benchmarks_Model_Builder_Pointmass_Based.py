@@ -208,7 +208,7 @@ def get_Kernel_Ridge_Regressor(data_x_in,data_x_test_in,data_y_in):
     eval_time_kr = time.time() - eval_time_kr
 
     # Count Parameters of best model
-    N_params_kR = len(relic.get_params()) + 2*problem_dim
+    N_params_kR = len(best_kernel_ridge_model.get_params()) + 2*problem_dim
     
     Path('./outputs/models/Kernel_Ridge/').mkdir(parents=True, exist_ok=True)
     pd.DataFrame.from_dict(kernel_ridge_CVer.best_params_,orient='index').to_latex("./outputs/models/Kernel_Ridge/Best_Parameters.tex")
@@ -241,7 +241,7 @@ ENET_reg.fit(X_train,Y_train_mean_emp)
 # Get Predictions
 ENET_predict = ENET_reg.predict(X_train)
 ENET_eval_time = time.time()
-ENET_predict_test = Lin_reg.predict(X_test)
+ENET_predict_test = ENET_reg.predict(X_test)
 ENET_eval_time = time.time() - ENET_eval_time
 
 # Get Prediction Errors

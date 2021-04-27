@@ -63,7 +63,7 @@ f_unknown_mode = "Rough_SDE"
 # In[4]:
 
 
-problem_dim = 50
+problem_dim = 5
 
 
 # ## Note: *Why the procedure is so computationally efficient*?
@@ -79,7 +79,7 @@ problem_dim = 50
 
 
 # SDE with Rough Driver
-N_Euler_Steps = 10**1
+N_Euler_Steps = 10**2
 Hurst_Exponent = 0.6
 
 def alpha(t,x):
@@ -99,7 +99,7 @@ def beta(t,x):
 
 
 train_test_ratio = .2
-N_train_size = 10**1
+N_train_size = 10**2
 
 
 # Monte-Carlo Paramters

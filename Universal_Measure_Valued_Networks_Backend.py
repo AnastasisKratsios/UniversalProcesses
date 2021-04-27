@@ -350,9 +350,9 @@ if f_unknown_mode == "Rough_SDE":
     def f_unknown(x):
         x_internal = x.reshape(-1,)
         # Random Radius
-        #rand_radius = np.random.exponential(10)
-        #left_random_ball_Q = 0
-        running_max = max(x_internal)
+#         rand_radius = np.random.exponential(1)
+#         left_random_ball_Q = 0
+        exit_time = 0
         # Get fBM path
         for d in range(problem_dim):
             fBM_gen_loop = (((FBM(n=N_Euler_Steps, hurst=Hurst_Exponent, length=1, method='daviesharte')).fbm())[1:]).reshape(-1,1)
@@ -368,8 +368,11 @@ if f_unknown_mode == "Rough_SDE":
             
             # Test if the process has left the ball
             #left_random_ball_Q = max(left_random_ball_Q,(np.sqrt(np.sum((x_internal - x.reshape(-1,))**2)) <= rand_radius)*1)        
-            running_max = max(running_max,max(x_internal))
-        return left_random_ball_Q
+            if np.sqrt(np.sum((x_internal - x.reshape(-1,))**2)) <= 1:
+                exit_time = t/N_Euler_Steps
+            else:
+                break
+        return exit_time
 
     def Simulator(x_in):
         for i_MC in range(N_Monte_Carlo_Samples):

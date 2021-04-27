@@ -601,7 +601,7 @@ print("--------------------------------------------")
 # Coercion
 Summary_Complexity_models = Summary_Complexity_models.T
 # Compute Complexity Metrics for GPR
-MDN_Facts = np.array([N_params_MDN_tot,(timeBuilding_Training_Set_DGN+timer_DGP),Test_set_prediction_time_MDN_tot/Test_Set_PredictionTime_MC])
+MDN_Facts = np.array([N_params_MDN_tot,N_params_MDN_tot,(timeBuilding_Training_Set_DGN+timer_DGP),Test_set_prediction_time_MDN_tot/Test_Set_PredictionTime_MC])
 # Update Model Complexities
 Summary_Complexity_models["MDN"] = pd.Series(MDN_Facts, index=Summary_Complexity_models.index)
 # Coercion

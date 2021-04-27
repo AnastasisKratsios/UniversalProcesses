@@ -108,7 +108,7 @@ N_train_size = 10**1
 
 
 ## Monte-Carlo
-N_Monte_Carlo_Samples = 10**2
+N_Monte_Carlo_Samples = 10**3
 
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!

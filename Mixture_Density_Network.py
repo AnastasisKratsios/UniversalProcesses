@@ -26,6 +26,10 @@ Bishop_MDN_Timer = time.time()
 # In[ ]:
 
 
+print("======================================================")
+print("Preparing Training Outputs for MDNs using EM-Algorithm")
+print("======================================================")
+
 # Initializizations #
 #-------------------#
 ## Count Number of Centers
@@ -57,6 +61,10 @@ for i in tqdm(range(X_train.shape[0])):
 
 # Timer: Stop
 timer_GMM_data_preparation = time.time() - timer_GMM_data_preparation
+
+print("======================================================")
+print("Prepared Training Outputs for MDNs using EM-Algorithm!")
+print("======================================================")
 
 
 # ## Define Model Components (Sub-Networks)

@@ -25,8 +25,8 @@ Path(results_tables_path_final).mkdir(parents=True, exist_ok=True)
 # Coercion
 Summary_Complexity_models = Summary_Complexity_models.T
 # Compute Complexity Metrics for GPR
-Deep_Neural_Model_Facts = np.array([(N_Monte_Carlo_Samples*(X_train.shape[0]+X_test.shape[0])),Test_Set_PredictionTime_MC,1])
 MCOracle_Facts = np.array([(N_Monte_Carlo_Samples*(X_train.shape[0]+X_test.shape[0])),Test_Set_PredictionTime_MC,1])
+Deep_Neural_Model_Facts = np.array([(N_Monte_Carlo_Samples*(X_train.shape[0]+X_test.shape[0])),Time_Lapse_Model_A,(timer_output/Test_Set_PredictionTime_MC)])
 # Update Model Complexities
 Summary_Complexity_models["DNM"] = pd.Series(Deep_Neural_Model_Facts, index=Summary_Complexity_models.index)
 Summary_Complexity_models["MC_Oracle"] = pd.Series(MCOracle_Facts, index=Summary_Complexity_models.index)

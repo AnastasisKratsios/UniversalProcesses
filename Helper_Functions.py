@@ -126,7 +126,7 @@ def def_trainable_layers_Nice_Input_Output(height, depth, learning_rate, input_d
     # Define Optimizer & Compile Archs.
     #----------------------------------#
     opt = Adam(lr=learning_rate)
-    trainable_layers_model.compile(optimizer=opt, loss="mae", metrics=["mse", "mae", "mape"])
+    trainable_layers_model.compile(optimizer=opt, loss="mae", metrics=["mse", "mae"])
 
     return trainable_layers_model
 

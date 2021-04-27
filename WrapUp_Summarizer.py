@@ -115,6 +115,20 @@ print("Updated Performance Metrics Dataframe and Saved!")
 print("------------------------------------------------")
 
 
+# ## Write Which Kernel Was Used 
+# *(to count parameters by hand for GPR)...*
+
+# In[ ]:
+
+
+print("Kernel_Used_in_GPR: "+str(GPR_trash.kernel))
+# Write Kernel Information to File
+path_kernel_facts = (results_tables_path_final+"KERNELUSEDFORGRP_Latent_Width_NSDE"+str(width)+"Problemdimension"+str(problem_dim)+"__KernelUsed.tex")
+text_file = open(path_kernel_facts, "w")
+text_file.write("Kernel_Used_in_GPR: "+str(GPR_trash.kernel))
+text_file.close()
+
+
 # ---
 # # Fin
 # ---

@@ -363,6 +363,14 @@ X_test = X_test + np.random.uniform(low=-(delta/np.sqrt(problem_dim)),
                                     size = X_test.shape)
 
 
+# ### Get the measures $\hat{\mu}_n$ via Barycenters...*aka "K-Means"*!
+# - We first identify N-balls in the input space (which is equivalent to identifying N balls in the output space by uniform continuity)
+# - We then project each of the centers of these balls onto the nearest element of the training set.
+# - The corresponing (observed) $f(x)\in \mathcal{P}_1(\mathbb{R})$ are our $\hat{\mu}_n$ (for $n=1,\dots,N$).
+# 
+# 
+# **NB:** *This is essentially what is done in the proof, exect there, we have access to the correct N and the optimal balls (outside the training dataset)...which we clearly do not here...*
+
 # In[15]:
 
 
@@ -375,15 +383,19 @@ Train_classes = np.array(pd.get_dummies(kmeans.labels_))
 Barycenters_Array_x = kmeans.cluster_centers_
 
 
-# ### Get Barycenters
-# *Here we make the assumption that we can directly resample $f(X=x,U)$ if necessary...or that it is available as part of the dataset.*
-
 # In[16]:
 
 
 for i in tqdm(range(Barycenters_Array_x.shape[0])):
-    # Put Datum
+    # Identify Nearest Datapoint to a ith Barycenter
+    #------------------------------------------------------------------------------------------------------#
+    ## Get Barycenter "out of sample" in X (NB there is no data-leakage since we know nothing about Y!)
     Bar_x_loop = Barycenters_Array_x[i,]
+    ## Project Barycenter onto testset
+    distances = np.sum(np.abs(X_train-Bar_x_loop.reshape(-1,)),axis=1)
+    Bar_x_loop = X_train[np.argmin(distances),]
+    #------------------------------------------------------------------------------------------------------#
+    
     # Product Monte-Carlo Sample for Input
     Bar_y_loop = (Simulator(Bar_x_loop)).reshape(1,-1)
 
@@ -392,6 +404,23 @@ for i in tqdm(range(Barycenters_Array_x.shape[0])):
         Barycenters_Array = Bar_y_loop
     else:
         Barycenters_Array = np.append(Barycenters_Array,Bar_y_loop,axis=0)
+
+
+
+# ONLY USE THIS VARIANT IF YOU CAN RESIMULATE FROM THE UNKNOWN LAW #
+#------------------------------------------------------------------#
+# NB: There are contexts in which this would make sense, esp. if the model is known and we are trying to learn the conditional law.
+# for i in tqdm(range(Barycenters_Array_x.shape[0])):
+#     # Put Datum
+#     Bar_x_loop = Barycenters_Array_x[i,]
+#     # Product Monte-Carlo Sample for Input
+#     Bar_y_loop = (Simulator(Bar_x_loop)).reshape(1,-1)
+
+#     # Update Dataset
+#     if i == 0:
+#         Barycenters_Array = Bar_y_loop
+#     else:
+#         Barycenters_Array = np.append(Barycenters_Array,Bar_y_loop,axis=0)
 
 
 # ### Initialize Training Data (Outputs)

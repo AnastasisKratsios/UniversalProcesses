@@ -12,17 +12,12 @@
 # ---
 # 
 # ## What does this code do?
-# 1. Learn Heteroskedastic Non-Linear Regression Problem
-#      - $Y\sim f_{\text{unkown}}(x) + \epsilon$ where $f$ is an known function and $\epsilon\sim Laplace(0,\|x\|)$
-# 2. Learn Random Bayesian Network's Law:
-#     - $Y = W_J Y^{J-1}, \qquad Y^{j}\triangleq \sigma\bullet A^{j}Y^{j-1} + b^{j}, \qquad Y^0\triangleq x$
-# 
-# 3. In the above example if $A_j = M_j\odot \tilde{A_j}$ where $\tilde{A}_j$ is a deterministic matrix and $M_j$ is a "mask", that is, a random matrix with binary entries and $\odot$ is the Hadamard product then we recover the dropout framework.
+# Described in GUI file...
 
 # #### Mode:
 # Software/Hardware Testing or Real-Deal?
 
-# In[1]:
+# In[191]:
 
 
 # trial_run = True
@@ -30,7 +25,7 @@
 
 # ### Simulation Method:
 
-# In[2]:
+# In[194]:
 
 
 # # Random DNN
@@ -38,7 +33,7 @@
 
 # # Random DNN internal noise
 # # f_unknown_mode = "DNN_with_Random_Weights"
-# Depth_Bayesian_DNN = 10
+# Depth_Bayesian_DNN = 2
 # width = 20
 
 # # Random Dropout applied to trained DNN
@@ -48,10 +43,14 @@
 # # Rough SDE (time 1)
 # # f_unknown_mode = "Rough_SDE"
 
+# GD with Randomized Input
+# f_unknown_mode = "GD_with_randomized_input"
+# GD_epochs = 2
+
 
 # #### Rough SDE Meta-Parameters
 
-# In[3]:
+# In[196]:
 
 
 # # SDE with Rough Driver
@@ -84,7 +83,7 @@
 
 # ## Load Auxiliaries
 
-# In[4]:
+# In[198]:
 
 
 # Load Packages/Modules
@@ -93,9 +92,11 @@ exec(open('Init_Dump.py').read())
 exec(open('CV_Grid.py').read())
 # Load Helper Function(s)
 exec(open('Helper_Functions.py').read())
+# Architecture Builder
+exec(open('Benchmarks_Model_Builder.py').read())
 # Import time separately
 import time
-os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+#os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
 # load dataset
@@ -117,7 +118,7 @@ tf.random.set_seed(2021)
 
 # ## Problem Dimension
 
-# In[5]:
+# In[201]:
 
 
 # problem_dim = 3
@@ -127,7 +128,7 @@ tf.random.set_seed(2021)
 # - Ratio $\frac{\text{Testing Datasize}}{\text{Training Datasize}}$.
 # - Number of Training Points to Generate
 
-# In[6]:
+# In[203]:
 
 
 # train_test_ratio = .2
@@ -136,7 +137,7 @@ tf.random.set_seed(2021)
 
 # Monte-Carlo Paramters
 
-# In[7]:
+# In[205]:
 
 
 # ## Monte-Carlo
@@ -145,7 +146,7 @@ tf.random.set_seed(2021)
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!
 
-# In[8]:
+# In[207]:
 
 
 # # Hyper-parameters of Cover
@@ -154,6 +155,32 @@ tf.random.set_seed(2021)
 
 
 # **Note**: Setting *N_Quantizers_to_parameterize* prevents any barycenters and sub-sampling.
+
+# ## Initialize Data
+
+# In[208]:
+
+
+N_test_size = int(np.round(N_train_size*train_test_ratio,0))
+
+
+# ### Initialize Training Data (Inputs)
+
+# Try initial sampling-type implementation!  It worked nicely..i.e.: centers were given!
+
+# In[209]:
+
+
+# Get Training Set
+X_train = np.random.uniform(size=np.array([N_train_size,problem_dim]),low=.5,high=1.5)
+
+# Get Testing Set
+test_set_indices = np.random.choice(range(X_train.shape[0]),N_test_size)
+X_test = X_train[test_set_indices,]
+X_test = X_test + np.random.uniform(low=-(delta/np.sqrt(problem_dim)), 
+                                    high = -(delta/np.sqrt(problem_dim)),
+                                    size = X_test.shape)
+
 
 # # Simulate from: $Y=f(X,W)$ 
 # - Random DNN (internal noise): 
@@ -165,7 +192,7 @@ tf.random.set_seed(2021)
 
 # ## Heteroskedastic Regression Problem
 
-# In[9]:
+# In[210]:
 
 
 if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
@@ -207,7 +234,7 @@ if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
 
 # ## Bayesian DNN
 
-# In[10]:
+# In[211]:
 
 
 if f_unknown_mode == "DNN_with_Random_Weights":
@@ -239,7 +266,7 @@ if f_unknown_mode == "DNN_with_Random_Weights":
 
 # ## Bayesian Dropout
 
-# In[11]:
+# In[212]:
 
 
 if f_unknown_mode == "DNN_with_Bayesian_Dropout":
@@ -289,7 +316,7 @@ if f_unknown_mode == "DNN_with_Bayesian_Dropout":
 # ### fSDEs
 # Lean the conditional law of $I_{X_1 \in Ball(0,1)}$ where $X_t$ solves an SDE with fBM driver.
 
-# In[12]:
+# In[213]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -384,30 +411,214 @@ if f_unknown_mode == "Rough_SDE":
         return y_MC
 
 
-# ## Initialize Data
+# ### Gradient Descent with random initialization:
+# $$
+# Y_x\triangleq \hat{f}_{\theta_T}(x),\qquad \theta_{t+1} \triangleq \theta_t - \nabla \sum_{x\in \mathbb{X}} \|\hat{f}_{\theta_t}(x)-f(x)\|, \qquad \theta_0 \sim N_d(0,1).
+# $$
 
-# In[13]:
-
-
-N_test_size = int(np.round(N_train_size*train_test_ratio,0))
-
-
-# ### Initialize Training Data (Inputs)
-
-# Try initial sampling-type implementation!  It worked nicely..i.e.: centers were given!
-
-# In[14]:
+# In[214]:
 
 
-# Get Training Set
-X_train = np.random.uniform(size=np.array([N_train_size,problem_dim]),low=.5,high=1.5)
+if f_unknown_mode == "GD_with_randomized_input":
+    # Auxiliary Initialization(s)
+    Train_step_proportion = 1-train_test_ratio
 
-# Get Testing Set
-test_set_indices = np.random.choice(range(X_train.shape[0]),N_test_size)
-X_test = X_train[test_set_indices,]
-X_test = X_test + np.random.uniform(low=-(delta/np.sqrt(problem_dim)), 
-                                    high = -(delta/np.sqrt(problem_dim)),
-                                    size = X_test.shape)
+    #--------------#
+    # Prepare Data #
+    #--------------#
+    # Read Dataset
+    crypto_data = pd.read_csv('inputs/data/cryptocurrencies/Cryptos_All_in_one.csv')
+    # Format Date-Time
+    crypto_data['Date'] = pd.to_datetime(crypto_data['Date'],infer_datetime_format=True)
+    crypto_data.set_index('Date', drop=True, inplace=True)
+    crypto_data.index.names = [None]
+
+    # Remove Missing Data
+    crypto_data = crypto_data[crypto_data.isna().any(axis=1)==False]
+
+    # Get Returns
+    crypto_returns = crypto_data.diff().iloc[1:]
+
+    # Parse Regressors from Targets
+    ## Get Regression Targets
+    crypto_target_data = pd.DataFrame({'BITCOIN-closing':crypto_returns['BITCOIN-Close']})
+    ## Get Regressors
+    crypto_data_returns = crypto_returns.drop('BITCOIN-Close', axis=1)  
+
+    #-------------#
+    # Subset Data #
+    #-------------#
+    # Get indices
+    N_train_step = int(round(crypto_data_returns.shape[0]*Train_step_proportion,0))
+    N_test_set = int(crypto_data_returns.shape[0] - round(crypto_data_returns.shape[0]*Train_step_proportion,0))
+    # # Get Datasets
+    X_train = crypto_data_returns[:N_train_step]
+    X_test = crypto_data_returns[-N_test_set:]
+
+    ## Coerce into format used in benchmark model(s)
+    data_x = X_train
+    data_x_test = X_test
+    # Get Targets 
+    data_y = crypto_target_data[:N_train_step]
+    data_y_test = crypto_target_data[-N_test_set:]
+
+    # Scale Data
+    scaler = StandardScaler()
+    data_x = scaler.fit_transform(data_x)
+    data_x_test = scaler.transform(data_x_test)
+
+    # # Update User
+    print('#================================================#')
+    print(' Training Datasize: '+str(X_train.shape[0])+' and test datasize: ' + str(X_test.shape[0]) + '.  ')
+    print('#================================================#')
+
+    # # Set First Run to Off
+    First_run = False
+
+    #-----------#
+    # Plot Data #
+    #-----------#
+    fig = crypto_data_returns.plot(figsize=(16, 16))
+    fig.get_legend().remove()
+    plt.title("Crypto_Market Returns")
+
+    # SAVE Figure to .eps
+    plt.savefig('./outputs/plots/Crypto_Data_returns.pdf', format='pdf')
+
+    # Redefine Meta-Parameters #
+    #--------------------------#
+    # Redefine Training Set inputs and ys to train DNN:
+    data_y_to_train_DNN_on = (data_y.to_numpy()).reshape(-1,)
+    X_train = data_x
+    X_test = data_x_test
+    problem_dim=data_x.shape[1]
+
+
+
+    # Initialize Target Function #
+    #----------------------------#
+    # Initialize DNN to train
+    f_model = get_ffNN(width, Depth_Bayesian_DNN, 0.001, problem_dim, 1)
+
+    # Define Stochastic Prediction Function:
+    def f_unknown():
+        f_model.fit(data_x,data_y_to_train_DNN_on,epochs = GD_epochs)
+        f_x_trained_with_random_initialization_x_train = f_model.predict(X_train)
+        f_x_trained_with_random_initialization_x_test = f_model.predict(X_test)
+        return f_x_trained_with_random_initialization_x_train, f_x_trained_with_random_initialization_x_test
+
+    def Simulator(x_in):
+        for i_MC in range(N_Monte_Carlo_Samples):
+            y_MC_loop = f_unknown(x_in)
+            if i_MC == 0:
+                y_MC = y_MC_loop
+            else:
+                y_MC = np.append(y_MC,y_MC_loop)
+        return y_MC
+
+
+# ### Initialize Training Data (Outputs)
+
+# #### Get Training Set
+
+# In[215]:
+
+
+if f_unknown_mode != "GD_with_randomized_input":
+    for i in tqdm(range(X_train.shape[0])):
+        # Put Datum
+        x_loop = X_train[i,]
+        # Product Monte-Carlo Sample for Input
+        y_loop = (Simulator(x_loop)).reshape(1,-1)
+
+        # Update Dataset
+        if i == 0:
+            Y_train = y_loop
+            Y_train_mean_emp = np.mean(y_loop)
+    #         Y_train_var_emp = np.mean((y_loop - np.mean(y_loop))**2)
+        else:
+            Y_train = np.append(Y_train,y_loop,axis=0)
+            Y_train_mean_emp = np.append(Y_train_mean_emp,np.mean(y_loop))
+    #         Y_train_var_emp = np.append(Y_train_var_emp,np.mean((y_loop - np.mean(y_loop))**2))
+    # Join mean and Variance Training Data
+    # Y_train_var_emp = np.append(Y_train_mean_emp.reshape(-1,1),Y_train_var_emp.reshape(-1,1),axis=1)
+
+
+# #### Get Test Set
+
+# In[216]:
+
+
+if f_unknown_mode != "GD_with_randomized_input":
+    # Start Timer
+    Test_Set_PredictionTime_MC = time.time()
+
+    # Generate Data
+    for i in tqdm(range(X_test.shape[0])):
+        # Put Datum
+        x_loop = X_test[i,]
+        # Product Monte-Carlo Sample for Input
+        y_loop = (Simulator(x_loop)).reshape(1,-1)
+
+        # Update Dataset
+        if i == 0:
+            Y_test = y_loop
+        else:
+            Y_test = np.append(Y_test,y_loop,axis=0)
+
+    # End Timer
+    Test_Set_PredictionTime_MC = time.time() - Test_Set_PredictionTime_MC
+
+
+# #### Do it differently for *"GD_with_randomized_input"* Example.
+# This variant is more efficient in the case of the gradient-descent with randomized initializations
+
+# In[217]:
+
+
+# This implemention of the GD algorithm is more efficient (but this only holds for the GD Monte-Carlo method):
+if f_unknown_mode == "GD_with_randomized_input":
+    # Start Timer
+    Test_Set_PredictionTime_MC = time.time()
+    for j_MC in range(N_Monte_Carlo_Samples):
+        # MC of SGD
+        Y_train_loop,Y_test_loop = f_unknown()
+        # Update Dataset
+        if j_MC == 0:
+            Y_train = Y_train_loop
+            Y_test = Y_test_loop
+        else:
+            Y_train = np.append(Y_train,Y_train_loop,axis=1)
+            Y_test = np.append(Y_test,Y_test_loop,axis=1)
+    # End Timer
+    Test_Set_PredictionTime_MC = time.time() - Test_Set_PredictionTime_MC
+    
+## Get means for mean-prediction models
+    ## Training
+    for i in tqdm(range(X_train.shape[0])):
+        # Product Monte-Carlo Sample for Input
+        y_loop = Y_train[i,]
+
+        # Update Dataset
+        if i == 0:
+            Y_train_mean_emp = np.mean(y_loop)
+        else:
+            Y_train_mean_emp = np.append(Y_train_mean_emp,np.mean(y_loop))
+    ## Testing
+    ### Continue Timer
+    Test_Set_PredictionTime_MC2 = time.time()
+    for i in tqdm(range(X_test.shape[0])):
+        # Product Monte-Carlo Sample for Input
+        y_loop_test = Y_test[i,]
+
+        # Update Dataset
+        if i == 0:
+            Y_test_mean_emp = np.mean(y_loop_test)
+        else:
+            Y_test_mean_emp = np.append(Y_test_mean_emp,np.mean(y_loop_test))
+    
+    # End Timer
+    Test_Set_PredictionTime_MC = (time.time() - Test_Set_PredictionTime_MC2) + Test_Set_PredictionTime_MC
 
 
 # ### Get the measures $\hat{\mu}_n$ via Barycenters...*aka "K-Means"*!
@@ -418,7 +629,7 @@ X_test = X_test + np.random.uniform(low=-(delta/np.sqrt(problem_dim)),
 # 
 # **NB:** *This is essentially what is done in the proof, exect there, we have access to the correct N and the optimal balls (outside the training dataset)...which we clearly do not here...*
 
-# In[15]:
+# In[218]:
 
 
 # Initialize k_means
@@ -430,7 +641,7 @@ Train_classes = np.array(pd.get_dummies(kmeans.labels_))
 Barycenters_Array_x = kmeans.cluster_centers_
 
 
-# In[16]:
+# In[255]:
 
 
 for i in tqdm(range(Barycenters_Array_x.shape[0])):
@@ -442,90 +653,22 @@ for i in tqdm(range(Barycenters_Array_x.shape[0])):
     distances = np.sum(np.abs(X_train-Bar_x_loop.reshape(-1,)),axis=1)
     Bar_x_loop = X_train[np.argmin(distances),]
     #------------------------------------------------------------------------------------------------------#
-    
+
     # Product Monte-Carlo Sample for Input
-    Bar_y_loop = (Simulator(Bar_x_loop)).reshape(1,-1)
+    Bar_y_loop = (np.array(Y_train[np.argmin(distances),],dtype=float)).reshape(-1,1)
 
     # Update Dataset
     if i == 0:
         Barycenters_Array = Bar_y_loop
     else:
-        Barycenters_Array = np.append(Barycenters_Array,Bar_y_loop,axis=0)
-
-
-
-# ONLY USE THIS VARIANT IF YOU CAN RESIMULATE FROM THE UNKNOWN LAW #
-#------------------------------------------------------------------#
-# NB: There are contexts in which this would make sense, esp. if the model is known and we are trying to learn the conditional law.
-# for i in tqdm(range(Barycenters_Array_x.shape[0])):
-#     # Put Datum
-#     Bar_x_loop = Barycenters_Array_x[i,]
-#     # Product Monte-Carlo Sample for Input
-#     Bar_y_loop = (Simulator(Bar_x_loop)).reshape(1,-1)
-
-#     # Update Dataset
-#     if i == 0:
-#         Barycenters_Array = Bar_y_loop
-#     else:
-#         Barycenters_Array = np.append(Barycenters_Array,Bar_y_loop,axis=0)
-
-
-# ### Initialize Training Data (Outputs)
-
-# #### Get Training Set
-
-# In[17]:
-
-
-for i in tqdm(range(X_train.shape[0])):
-    # Put Datum
-    x_loop = X_train[i,]
-    # Product Monte-Carlo Sample for Input
-    y_loop = (Simulator(x_loop)).reshape(1,-1)
-
-    # Update Dataset
-    if i == 0:
-        Y_train = y_loop
-        Y_train_mean_emp = np.mean(y_loop)
-#         Y_train_var_emp = np.mean((y_loop - np.mean(y_loop))**2)
-    else:
-        Y_train = np.append(Y_train,y_loop,axis=0)
-        Y_train_mean_emp = np.append(Y_train_mean_emp,np.mean(y_loop))
-#         Y_train_var_emp = np.append(Y_train_var_emp,np.mean((y_loop - np.mean(y_loop))**2))
-# Join mean and Variance Training Data
-# Y_train_var_emp = np.append(Y_train_mean_emp.reshape(-1,1),Y_train_var_emp.reshape(-1,1),axis=1)
-
-
-# #### Get Test Set
-
-# In[18]:
-
-
-# Start Timer
-Test_Set_PredictionTime_MC = time.time()
-
-# Generate Data
-for i in tqdm(range(X_test.shape[0])):
-    # Put Datum
-    x_loop = X_test[i,]
-    # Product Monte-Carlo Sample for Input
-    y_loop = (Simulator(x_loop)).reshape(1,-1)
-
-    # Update Dataset
-    if i == 0:
-        Y_test = y_loop
-    else:
-        Y_test = np.append(Y_test,y_loop,axis=0)
-        
-# End Timer
-Test_Set_PredictionTime_MC = time.time() - Test_Set_PredictionTime_MC
+        Barycenters_Array = np.append(Barycenters_Array,Bar_y_loop,axis=1)
 
 
 # # Train Model
 
 # #### Start Timer
 
-# In[19]:
+# In[256]:
 
 
 # Start Timer
@@ -544,7 +687,7 @@ Type_A_timer_Begin = time.time()
 
 # Re-Load Packages and CV Grid
 
-# In[20]:
+# In[257]:
 
 
 # Re-Load Hyper-parameter Grid
@@ -555,7 +698,7 @@ exec(open('Helper_Functions.py').read())
 
 # Train Deep Classifier
 
-# In[21]:
+# In[258]:
 
 
 print("==========================================")
@@ -584,30 +727,31 @@ print("===============================================")
 # - Each *row* of "Predicted_Weights" is the $\beta\in \Delta_N$.
 # - Each *Column* of "Barycenters_Array" denotes the $x_1,\dots,x_N$ making up the points of the corresponding empirical measures.
 
-# In[22]:
+# In[268]:
 
 
 # Initialize Empirical Weights
 empirical_weights = (np.ones(N_Monte_Carlo_Samples)/N_Monte_Carlo_Samples).reshape(-1,)
 
-for i in range(N_Quantizers_to_parameterize):
+for i in range(Barycenters_Array.shape[0]):
     if i == 0:
         points_of_mass = Barycenters_Array[i,]
     else:
         points_of_mass = np.append(points_of_mass,Barycenters_Array[i,])
 
 
-# In[23]:
+# In[269]:
 
 
-# Get Noisless Mean
-direct_facts = np.apply_along_axis(f_unknown, 1, X_train)
-direct_facts_test = np.apply_along_axis(f_unknown, 1, X_test)
+if f_unknown_mode != "GD_with_randomized_input":
+    # Get Noisless Mean
+    direct_facts = np.apply_along_axis(f_unknown, 1, X_train)
+    direct_facts_test = np.apply_along_axis(f_unknown, 1, X_test)
 
 
 # #### Get Error(s)
 
-# In[24]:
+# In[270]:
 
 
 # %run Evaluation.ipynb
@@ -616,7 +760,7 @@ exec(open('Evaluation.py').read())
 
 # #### Compute *Training* Error(s)
 
-# In[25]:
+# In[271]:
 
 
 print("#--------------------#")
@@ -734,7 +878,7 @@ print("#-------------------------#")
 
 # #### Compute *Testing* Errors
 
-# In[26]:
+# In[273]:
 
 
 print("#----------------#")
@@ -765,7 +909,6 @@ for i in tqdm(range((X_test.shape[0]))):
         Mu_test = direct_facts_test[i,]
     else:
         Mu_test = Mu_MC_test
-    Mu_test = direct_facts_test[i,]
     ### Error(s)
     Mean_loop_test = (Mu_hat_test-Mu_test)
     Mean_loop_MC_test = (Mu_hat_test-Mu_MC_test)
@@ -851,7 +994,7 @@ print("#-------------------------#")
 
 # #### Stop Timer
 
-# In[27]:
+# In[274]:
 
 
 # Stop Timer

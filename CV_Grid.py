@@ -62,7 +62,7 @@ else:
     # Training Parameters
     #----------------------#
     # Number of Jobs (Cores to use)
-    n_jobs = 50
+    n_jobs = 40
     # Number of Random CV Draws
     n_iter = 20
     n_iter_trees = 20
@@ -73,8 +73,8 @@ else:
     
 
     param_grid_Deep_Classifier = {'batch_size': [8,16,32],
-                        'epochs': [100,200,250,400,600,700],
-                        'learning_rate': [0.0001,0.00001,0.000001,0.000001],
+                        'epochs': [150,200,250,400,600,700],
+                        'learning_rate': [0.00001,0.000001,0.000001],
                         'height': [50,100,200,250,400],
                         'depth': [2,3,4],
                         'input_dim':[15],

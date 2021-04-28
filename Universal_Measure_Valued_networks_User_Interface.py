@@ -20,8 +20,17 @@
 # X_t^x = x + \int_0^t \alpha(s,X_s^x)ds + \int_0^t \beta(s,X_s^x)dB_s^H
 # $$
 # belongs, at time $t=1$, to a ball about the initial point $x$ of random radius given by an independant exponential random-variable with shape parameter $\lambda=2$
+# 5. Train a DNN to predict the returns of bitcoin with GD.  Since this has random initialization then each prediction of a given $x$ is stochastic...We learn the distribution of this conditional RV (conditioned on x in the input space).
+# $$
+# Y_x \triangleq \hat{f}_{\theta_{T}}(x), \qquad \theta_{(t+1)}\triangleq \theta_{(t)} + \lambda \sum_{x \in \mathbb{X}} \nabla_{\theta}\|\hat{f}_{\theta_t}(x) - f(x)\|, \qquad \theta_0 \sim N_d(0,1);
+# $$
+# $T\in \mathbb{N}$ is a fixed number of "SGD" iterations (typically identified by cross-validation on a single SGD trajectory for a single initialization) and where $\theta \in \mathbb{R}^{(d_{J}+1)+\sum_{j=0}^{J-1} (d_{j+1}d_j + 1)}$ and $d_j$ is the dimension of the "bias" vector $b_j$ defining each layer of the DNN with layer dimensions:
+# $$
+# \hat{f}_{\theta}(x)\triangleq A^{(J)}x^{(J)} + b^{(J)},\qquad x^{(j+1)}\sigma\bullet A^{j}x^{(j)} + b^{j},\qquad x^{(0)}\triangleq x
+# .
+# $$
 
-# In[25]:
+# In[1]:
 
 
 # Load Packages/Modules
@@ -31,7 +40,7 @@ exec(open('Init_Dump.py').read())
 # #### Mode:
 # Software/Hardware Testing or Real-Deal?
 
-# In[26]:
+# In[2]:
 
 
 trial_run = True
@@ -39,28 +48,32 @@ trial_run = True
 
 # ### Simulation Method:
 
-# In[27]:
+# In[3]:
 
 
-# Random DNN
+# # Random DNN
 # f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
 
-# Random DNN internal noise
-# f_unknown_mode = "DNN_with_Random_Weights"
+# # Random DNN internal noise
+# # f_unknown_mode = "DNN_with_Random_Weights"
 Depth_Bayesian_DNN = 2
-width = 2
+width = 20
 
-# Random Dropout applied to trained DNN
+# # Random Dropout applied to trained DNN
 # f_unknown_mode = "DNN_with_Bayesian_Dropout"
-Dropout_rate = 0.25
+Dropout_rate = 0.1
 
-# Rough SDE (time 1)
-f_unknown_mode = "Rough_SDE"
+# # Rough SDE (time 1)
+# f_unknown_mode = "Rough_SDE"
+
+# GD with Randomized Input
+f_unknown_mode = "GD_with_randomized_input"
+GD_epochs = 2
 
 
 # ## Problem Dimension
 
-# In[28]:
+# In[4]:
 
 
 problem_dim = 2
@@ -75,7 +88,7 @@ problem_dim = 2
 
 # #### Rough SDE Meta-Parameters
 
-# In[29]:
+# In[5]:
 
 
 # SDE with Rough Driver
@@ -95,7 +108,7 @@ def beta(t,x):
 # - Ratio $\frac{\text{Testing Datasize}}{\text{Training Datasize}}$.
 # - Number of Training Points to Generate
 
-# In[30]:
+# In[6]:
 
 
 train_test_ratio = .2
@@ -104,7 +117,7 @@ N_train_size = 10**1
 
 # Monte-Carlo Paramters
 
-# In[31]:
+# In[7]:
 
 
 ## Monte-Carlo
@@ -113,7 +126,7 @@ N_Monte_Carlo_Samples = 10**1
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!
 
-# In[32]:
+# In[8]:
 
 
 # Hyper-parameters of Cover
@@ -123,7 +136,7 @@ Proportion_per_cluster = .01
 
 # # Run Main:
 
-# In[33]:
+# In[9]:
 
 
 print("------------------------------")
@@ -146,7 +159,7 @@ print("------------------------------------")
 # \mathbb{R}^d \ni x \to f(x) \to \delta_{f(x)}\in \cap_{1\leq q<\infty}\mathcal{P}_{q}(\mathbb{R}).
 # $$
 
-# In[ ]:
+# In[10]:
 
 
 exec(open('CV_Grid.py').read())
@@ -162,7 +175,7 @@ exec(open('Benchmarks_Model_Builder_Pointmass_Based.py').read())
 
 # #### Training Model Facts
 
-# In[ ]:
+# In[11]:
 
 
 print(Summary_pred_Qual_models)
@@ -171,7 +184,7 @@ Summary_pred_Qual_models
 
 # #### Testing Model Facts
 
-# In[ ]:
+# In[12]:
 
 
 print(Summary_pred_Qual_models_test)
@@ -180,7 +193,7 @@ Summary_pred_Qual_models_test
 
 # #### Model Complexitie(s)
 
-# In[ ]:
+# In[13]:
 
 
 print(Summary_Complexity_models)
@@ -199,14 +212,14 @@ Summary_Complexity_models
 # 
 # Examples of this type of architecture are especially prevalent in uncertainty quantification; see ([Deep Ensembles](https://arxiv.org/abs/1612.01474)] or [NOMU: Neural Optimization-based Model Uncertainty](https://arxiv.org/abs/2102.13640).  Moreover, their universality in $C(\mathbb{R}^d,\mathcal{G}_2)$ is known, and has been shown in [Corollary 4.7](https://arxiv.org/abs/2101.05390).
 
-# In[ ]:
+# In[14]:
 
 
 # %run Benchmarks_Model_Builder_Mean_Var.ipynb
 exec(open('Benchmarks_Model_Builder_Mean_Var.py').read())
 
 
-# In[ ]:
+# In[15]:
 
 
 print("Prediction Quality (Updated)")
@@ -214,7 +227,7 @@ print(Summary_pred_Qual_models_test)
 Summary_pred_Qual_models_test
 
 
-# In[ ]:
+# In[16]:
 
 
 print("Model Complexities Quality (Updated)")

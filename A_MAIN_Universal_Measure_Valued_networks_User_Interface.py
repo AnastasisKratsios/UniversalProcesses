@@ -43,19 +43,19 @@ trial_run = True
 
 
 # Random DNN
-#f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
+f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
 
 # Random DNN internal noise
 # f_unknown_mode = "DNN_with_Random_Weights"
-Depth_Bayesian_DNN = 2
-width = 2
+Depth_Bayesian_DNN = 20
+width = 20
 
 # Random Dropout applied to trained DNN
 # f_unknown_mode = "DNN_with_Bayesian_Dropout"
 Dropout_rate = 0.25
 
 # Rough SDE (time 1)
-f_unknown_mode = "Rough_SDE"
+#f_unknown_mode = "Rough_SDE"
 
 
 # ## Problem Dimension
@@ -63,7 +63,7 @@ f_unknown_mode = "Rough_SDE"
 # In[4]:
 
 
-problem_dim = 5
+problem_dim = 100
 
 
 # ## Note: *Why the procedure is so computationally efficient*?
@@ -99,7 +99,7 @@ def beta(t,x):
 
 
 train_test_ratio = .2
-N_train_size = 10**2
+N_train_size = 10**3
 
 
 # Monte-Carlo Paramters
@@ -108,7 +108,7 @@ N_train_size = 10**2
 
 
 ## Monte-Carlo
-N_Monte_Carlo_Samples = 10**3
+N_Monte_Carlo_Samples = 10**4
 
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!
@@ -118,7 +118,7 @@ N_Monte_Carlo_Samples = 10**3
 
 # Hyper-parameters of Cover
 delta = 0.01
-Proportion_per_cluster = .01
+Proportion_per_cluster = .5
 
 
 # # Run Main:

@@ -20,6 +20,15 @@
 # X_t^x = x + \int_0^t \alpha(s,X_s^x)ds + \int_0^t \beta(s,X_s^x)dB_s^H
 # $$
 # belongs, at time $t=1$, to a ball about the initial point $x$ of random radius given by an independant exponential random-variable with shape parameter $\lambda=2$
+# 5. Train a DNN to predict the returns of bitcoin with GD.  Since this has random initialization then each prediction of a given $x$ is stochastic...We learn the distribution of this conditional RV (conditioned on x in the input space).
+# $$
+# Y_x \triangleq \hat{f}_{\theta_{T}}(x), \qquad \theta_{(t+1)}\triangleq \theta_{(t)} + \lambda \sum_{x \in \mathbb{X}} \nabla_{\theta}\|\hat{f}_{\theta_t}(x) - f(x)\|, \qquad \theta_0 \sim N_d(0,1);
+# $$
+# $T\in \mathbb{N}$ is a fixed number of "SGD" iterations (typically identified by cross-validation on a single SGD trajectory for a single initialization) and where $\theta \in \mathbb{R}^{(d_{J}+1)+\sum_{j=0}^{J-1} (d_{j+1}d_j + 1)}$ and $d_j$ is the dimension of the "bias" vector $b_j$ defining each layer of the DNN with layer dimensions:
+# $$
+# \hat{f}_{\theta}(x)\triangleq A^{(J)}x^{(J)} + b^{(J)},\qquad x^{(j+1)}\triangleq \sigma\bullet A^{j}x^{(j)} + b^{j},\qquad x^{(0)}\triangleq x
+# .
+# $$
 
 # In[1]:
 
@@ -34,7 +43,7 @@ exec(open('Init_Dump.py').read())
 # In[2]:
 
 
-trial_run = True
+trial_run = False
 
 
 # ### Simulation Method:
@@ -42,20 +51,24 @@ trial_run = True
 # In[3]:
 
 
-# Random DNN
-f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
+# # Random DNN
+# f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
 
-# Random DNN internal noise
-# f_unknown_mode = "DNN_with_Random_Weights"
-Depth_Bayesian_DNN = 20
-width = 20
+# # Random DNN internal noise
+# # f_unknown_mode = "DNN_with_Random_Weights"
+Depth_Bayesian_DNN = 2
+width = 50
 
-# Random Dropout applied to trained DNN
+# # Random Dropout applied to trained DNN
 # f_unknown_mode = "DNN_with_Bayesian_Dropout"
-Dropout_rate = 0.25
+Dropout_rate = 0.1
 
-# Rough SDE (time 1)
-#f_unknown_mode = "Rough_SDE"
+# # Rough SDE (time 1)
+# f_unknown_mode = "Rough_SDE"
+
+# GD with Randomized Input
+f_unknown_mode = "GD_with_randomized_input"
+GD_epochs = 100
 
 
 # ## Problem Dimension
@@ -63,7 +76,7 @@ Dropout_rate = 0.25
 # In[4]:
 
 
-problem_dim = 100
+problem_dim = 2
 
 
 # ## Note: *Why the procedure is so computationally efficient*?
@@ -79,8 +92,8 @@ problem_dim = 100
 
 
 # SDE with Rough Driver
-N_Euler_Steps = 10**2
-Hurst_Exponent = 0.6
+N_Euler_Steps = 10**1
+Hurst_Exponent = 0.01
 
 def alpha(t,x):
     output_drift_update = t-x
@@ -99,7 +112,7 @@ def beta(t,x):
 
 
 train_test_ratio = .2
-N_train_size = 10**3
+N_train_size = 10**1
 
 
 # Monte-Carlo Paramters
@@ -118,12 +131,12 @@ N_Monte_Carlo_Samples = 10**4
 
 # Hyper-parameters of Cover
 delta = 0.01
-Proportion_per_cluster = .5
+Proportion_per_cluster = .75
 
 
 # # Run Main:
 
-# In[23]:
+# In[9]:
 
 
 print("------------------------------")
@@ -146,7 +159,7 @@ print("------------------------------------")
 # \mathbb{R}^d \ni x \to f(x) \to \delta_{f(x)}\in \cap_{1\leq q<\infty}\mathcal{P}_{q}(\mathbb{R}).
 # $$
 
-# In[10]:
+# In[ ]:
 
 
 exec(open('CV_Grid.py').read())
@@ -162,7 +175,7 @@ exec(open('Benchmarks_Model_Builder_Pointmass_Based.py').read())
 
 # #### Training Model Facts
 
-# In[11]:
+# In[ ]:
 
 
 print(Summary_pred_Qual_models)
@@ -171,7 +184,7 @@ Summary_pred_Qual_models
 
 # #### Testing Model Facts
 
-# In[12]:
+# In[ ]:
 
 
 print(Summary_pred_Qual_models_test)
@@ -180,7 +193,7 @@ Summary_pred_Qual_models_test
 
 # #### Model Complexitie(s)
 
-# In[13]:
+# In[ ]:
 
 
 print(Summary_Complexity_models)
@@ -199,14 +212,14 @@ Summary_Complexity_models
 # 
 # Examples of this type of architecture are especially prevalent in uncertainty quantification; see ([Deep Ensembles](https://arxiv.org/abs/1612.01474)] or [NOMU: Neural Optimization-based Model Uncertainty](https://arxiv.org/abs/2102.13640).  Moreover, their universality in $C(\mathbb{R}^d,\mathcal{G}_2)$ is known, and has been shown in [Corollary 4.7](https://arxiv.org/abs/2101.05390).
 
-# In[14]:
+# In[ ]:
 
 
 # %run Benchmarks_Model_Builder_Mean_Var.ipynb
 exec(open('Benchmarks_Model_Builder_Mean_Var.py').read())
 
 
-# In[15]:
+# In[ ]:
 
 
 print("Prediction Quality (Updated)")
@@ -214,7 +227,7 @@ print(Summary_pred_Qual_models_test)
 Summary_pred_Qual_models_test
 
 
-# In[16]:
+# In[ ]:
 
 
 print("Model Complexities Quality (Updated)")
@@ -228,7 +241,7 @@ Summary_Complexity_models
 # - For every $x$ in the trainingdata-set we fit a GMM $\hat{\nu}_x$, using the [Expectation-Maximization (EM) algorithm](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm), with the same number of centers as the deep neural model in $\mathcal{NN}_{1_{\mathbb{R}^d},\mathcal{D}}^{\sigma:\star}$ which we are evaluating.  
 # - A Mixture density network is then trained to predict the infered parameters; given any $x \in \mathbb{R}^d$.
 
-# In[17]:
+# In[ ]:
 
 
 # %run Mixture_Density_Network.ipynb
@@ -238,7 +251,7 @@ exec(open('Mixture_Density_Network.py').read())
 # ## Get Final Outputs
 # Now we piece together all the numerical experiments and report a nice summary.
 
-# In[18]:
+# In[ ]:
 
 
 # %run WrapUp_Summarizer.ipynb
@@ -249,7 +262,7 @@ exec(open('WrapUp_Summarizer.py').read())
 
 # ## Model Complexities
 
-# In[19]:
+# In[ ]:
 
 
 Summary_Complexity_models
@@ -259,7 +272,7 @@ Summary_Complexity_models
 
 # #### Training
 
-# In[20]:
+# In[ ]:
 
 
 PredictivePerformance_Metrics_Train
@@ -267,7 +280,7 @@ PredictivePerformance_Metrics_Train
 
 # #### Test
 
-# In[21]:
+# In[ ]:
 
 
 PredictivePerformance_Metrics_Test
@@ -275,7 +288,7 @@ PredictivePerformance_Metrics_Test
 
 # # For Terminal Runner(s):
 
-# In[22]:
+# In[ ]:
 
 
 # For Terminal Running

@@ -26,7 +26,7 @@
 # $$
 # $T\in \mathbb{N}$ is a fixed number of "SGD" iterations (typically identified by cross-validation on a single SGD trajectory for a single initialization) and where $\theta \in \mathbb{R}^{(d_{J}+1)+\sum_{j=0}^{J-1} (d_{j+1}d_j + 1)}$ and $d_j$ is the dimension of the "bias" vector $b_j$ defining each layer of the DNN with layer dimensions:
 # $$
-# \hat{f}_{\theta}(x)\triangleq A^{(J)}x^{(J)} + b^{(J)},\qquad x^{(j+1)}\sigma\bullet A^{j}x^{(j)} + b^{j},\qquad x^{(0)}\triangleq x
+# \hat{f}_{\theta}(x)\triangleq A^{(J)}x^{(J)} + b^{(J)},\qquad x^{(j+1)}\triangleq \sigma\bullet A^{j}x^{(j)} + b^{j},\qquad x^{(0)}\triangleq x
 # .
 # $$
 
@@ -43,7 +43,7 @@ exec(open('Init_Dump.py').read())
 # In[2]:
 
 
-trial_run = True
+trial_run = False
 
 
 # ### Simulation Method:
@@ -57,7 +57,7 @@ trial_run = True
 # # Random DNN internal noise
 # # f_unknown_mode = "DNN_with_Random_Weights"
 Depth_Bayesian_DNN = 2
-width = 20
+width = 50
 
 # # Random Dropout applied to trained DNN
 # f_unknown_mode = "DNN_with_Bayesian_Dropout"
@@ -68,7 +68,7 @@ Dropout_rate = 0.1
 
 # GD with Randomized Input
 f_unknown_mode = "GD_with_randomized_input"
-GD_epochs = 2
+GD_epochs = 100
 
 
 # ## Problem Dimension
@@ -121,7 +121,7 @@ N_train_size = 10**1
 
 
 ## Monte-Carlo
-N_Monte_Carlo_Samples = 10**1
+N_Monte_Carlo_Samples = 10**4
 
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!
@@ -131,7 +131,7 @@ N_Monte_Carlo_Samples = 10**1
 
 # Hyper-parameters of Cover
 delta = 0.01
-Proportion_per_cluster = .01
+Proportion_per_cluster = .75
 
 
 # # Run Main:
@@ -159,7 +159,7 @@ print("------------------------------------")
 # \mathbb{R}^d \ni x \to f(x) \to \delta_{f(x)}\in \cap_{1\leq q<\infty}\mathcal{P}_{q}(\mathbb{R}).
 # $$
 
-# In[10]:
+# In[ ]:
 
 
 exec(open('CV_Grid.py').read())
@@ -175,7 +175,7 @@ exec(open('Benchmarks_Model_Builder_Pointmass_Based.py').read())
 
 # #### Training Model Facts
 
-# In[11]:
+# In[ ]:
 
 
 print(Summary_pred_Qual_models)
@@ -184,7 +184,7 @@ Summary_pred_Qual_models
 
 # #### Testing Model Facts
 
-# In[12]:
+# In[ ]:
 
 
 print(Summary_pred_Qual_models_test)
@@ -193,7 +193,7 @@ Summary_pred_Qual_models_test
 
 # #### Model Complexitie(s)
 
-# In[13]:
+# In[ ]:
 
 
 print(Summary_Complexity_models)
@@ -212,14 +212,14 @@ Summary_Complexity_models
 # 
 # Examples of this type of architecture are especially prevalent in uncertainty quantification; see ([Deep Ensembles](https://arxiv.org/abs/1612.01474)] or [NOMU: Neural Optimization-based Model Uncertainty](https://arxiv.org/abs/2102.13640).  Moreover, their universality in $C(\mathbb{R}^d,\mathcal{G}_2)$ is known, and has been shown in [Corollary 4.7](https://arxiv.org/abs/2101.05390).
 
-# In[14]:
+# In[ ]:
 
 
 # %run Benchmarks_Model_Builder_Mean_Var.ipynb
 exec(open('Benchmarks_Model_Builder_Mean_Var.py').read())
 
 
-# In[15]:
+# In[ ]:
 
 
 print("Prediction Quality (Updated)")
@@ -227,7 +227,7 @@ print(Summary_pred_Qual_models_test)
 Summary_pred_Qual_models_test
 
 
-# In[16]:
+# In[ ]:
 
 
 print("Model Complexities Quality (Updated)")

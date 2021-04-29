@@ -64,8 +64,8 @@ else:
     # Number of Jobs (Cores to use)
     n_jobs = 40
     # Number of Random CV Draws
-    n_iter = 20
-    n_iter_trees = 20
+    n_iter = 10
+    n_iter_trees = 10
     # Number of CV Folds
     CV_folds = 4
     # Number of Boostrapped Confidence Intervals

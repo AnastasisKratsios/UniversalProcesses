@@ -2,6 +2,6 @@
 \toprule
 {} &  N Estimators &  Min Samples Leaf &  Learning Rate &  Max Depth &  N\_parameters \\
 \midrule
-0 &           500 &                 3 &           0.01 &         10 &          5000 \\
+0 &          1500 &                 9 &         0.0001 &          3 &       2111800 \\
 \bottomrule
 \end{tabular}

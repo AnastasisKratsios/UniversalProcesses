@@ -58,7 +58,7 @@ def get_ffNN(height, depth, learning_rate, input_dim, output_dim):
     # Define Optimizer & Compile Archs.
     #----------------------------------#
     opt = Adam(lr=learning_rate)
-    trainable_layers_model.compile(optimizer=opt, loss="mae", metrics=["mse", "mae", "mape"])
+    trainable_layers_model.compile(optimizer=opt, loss="mae", metrics=["mse", "mae"])
 
     return trainable_layers_model
 
@@ -81,7 +81,7 @@ def build_ffNN(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train,X_test)
                                     n_iter=n_iter,
                                     return_train_score=True,
                                     random_state=2020,
-                                    verbose=10)
+                                    verbose=20)
     
     # Fit Model #
     #-----------#

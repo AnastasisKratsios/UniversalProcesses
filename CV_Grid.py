@@ -25,10 +25,10 @@ if trial_run == True:
     N_Boostraps_BCA = 50
 
 
-    param_grid_Deep_Classifier = {'batch_size': [32],
-                        'epochs': [50],
+    param_grid_Deep_Classifier = {'batch_size': [8],
+                        'epochs': [5],
                         'learning_rate': [0.00001],
-                        'height': [20],
+                        'height': [10],
                         'depth': [1],
                         'input_dim':[15],
                         'output_dim':[1]}

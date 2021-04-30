@@ -5,9 +5,65 @@
 
 # ---
 
+# In[5]:
+
+
+# ##### DEGUBBING MENU:
+
+
+# trial_run = True
+# N_train_size= 5
+# train_test_ratio = .5
+# N_Monte_Carlo_Samples = 100
+# # # Random DNN
+# # f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
+
+# # # Random DNN internal noise
+# # # f_unknown_mode = "DNN_with_Random_Weights"
+# Depth_Bayesian_DNN = 2
+# width = 50
+
+# # # Random Dropout applied to trained DNN
+# # f_unknown_mode = "DNN_with_Bayesian_Dropout"
+# Dropout_rate = 0.1
+
+# # GD with Randomized Input
+# # f_unknown_mode = "GD_with_randomized_input"
+# GD_epochs = 100
+
+# # SDE with fractional Driver
+# f_unknown_mode = "Rough_SDE"
+# N_Euler_Steps = 10**1
+# Hurst_Exponent = 0.5
+# problem_dim = 3
+
+# # Hyper-parameters of Cover
+# delta = 0.01
+# Proportion_per_cluster = .75
+
+# # %run Loader.ipynb
+# exec(open('Loader.py').read())
+# # Load Packages/Modules
+# exec(open('Init_Dump.py').read())
+# import time as time #<- Note sure why...but its always seems to need 'its own special loading...'
+
+# # %run Data_Simulator_and_Parser.ipynb
+# exec(open('Data_Simulator_and_Parser.py').read())
+
+# print("------------------------------")
+# print("Running script for main model!")
+# print("------------------------------")
+# # %run Universal_Measure_Valued_Networks_Backend.ipynb
+# exec(open('Universal_Measure_Valued_Networks_Backend.py').read())
+
+# print("------------------------------------")
+# print("Done: Running script for main model!")
+# print("------------------------------------")
+
+
 # ## Elastic Net Regressor
 
-# In[ ]:
+# In[6]:
 
 
 #=====================#
@@ -24,7 +80,7 @@ ENET_reg = ElasticNetCV(cv=5, random_state=0, alphas = np.linspace(0,(10**2),(10
 
 # ## ffNN Builder
 
-# In[1]:
+# In[7]:
 
 
 def get_ffNN(height, depth, learning_rate, input_dim, output_dim):
@@ -118,7 +174,7 @@ print('Deep Feature Builder - Ready')
 
 # # Gradient-Boosted Random Forest Regressor
 
-# In[ ]:
+# In[8]:
 
 
 def get_GBRF(X_train,X_test,y_train):
@@ -179,7 +235,7 @@ def get_GBRF(X_train,X_test,y_train):
 
 # ## Kernel Ridge Regressor
 
-# In[ ]:
+# In[9]:
 
 
 def get_Kernel_Ridge_Regressor(data_x_in,data_x_test_in,data_y_in):
@@ -225,37 +281,101 @@ def get_Kernel_Ridge_Regressor(data_x_in,data_x_test_in,data_y_in):
 
 # ### Elastic Net
 
-# In[ ]:
+# In[169]:
 
 
-# Stop Timer
+# Start Timer
 Timer_ENET = time.time()
 
 print("--------------")
 print("Training: ENET")
 print("--------------")
 
-# Fit Elastic Net Model
-ENET_reg.fit(X_train,Y_train_mean_emp)
+if output_dim == 1:
+    # Fit Elastic Net Model
+    ENET_reg.fit(X_train,Y_train_mean_emp)
 
-# Get Predictions
-ENET_predict = ENET_reg.predict(X_train)
-ENET_eval_time = time.time()
-ENET_predict_test = ENET_reg.predict(X_test)
-ENET_eval_time = time.time() - ENET_eval_time
+    # Get Predictions
+    ENET_predict = ENET_reg.predict(X_train)
+    ENET_eval_time = time.time()
+    ENET_predict_test = ENET_reg.predict(X_test)
+    ENET_eval_time = time.time() - ENET_eval_time
+    
+else:
+    for d in tqdm(range(output_dim)):
+        # Fit Elastic Net Model
+        ENET_reg.fit(X_train,Y_train_mean_emp[:,d])
 
-# Get Prediction Errors
-## Train
-ENET_errors = get_deterministic_errors(X_train,ENET_predict,Y_train,N_Bootstraps=N_Boostraps_BCA)
-## Test
-ENET_errors_test = get_deterministic_errors(X_test,ENET_predict_test,Y_test,N_Bootstraps=N_Boostraps_BCA)
-# Compute Lapsed Time Needed For Training
+        # Get Predictions
+        ENET_predict_loop = ENET_reg.predict(X_train)
+        ENET_eval_time_loop = time.time()
+        ENET_predict_loop_test = ENET_reg.predict(X_test)
+        ENET_eval_time_loop = time.time() - ENET_eval_time_loop
+    
+        if d == 0:
+            ENET_predict_train = ENET_predict_loop.reshape(-1,1)
+            ENET_predict_test = ENET_predict_loop_test.reshape(-1,1)
+            ENET_N_Params = X_train.shape[0]*2
+            ENET_eval_time = ENET_eval_time_loop
+        else:
+            ENET_predict_train = np.append(ENET_predict_train,ENET_predict_loop.reshape(-1,1),axis=1)
+            ENET_predict_test = np.append(ENET_predict_test,ENET_predict_loop_test.reshape(-1,1),axis=1)
+            ENET_N_Params = ENET_N_Params + X_train.shape[0]*2
+            ENET_eval_time = ENET_eval_time + ENET_eval_time_loop
+
+# Stop Timer
 Timer_ENET = time.time() - Timer_ENET
+print("---------------------")
+print("Training: ENET - Done")
+print("---------------------")
+
+
+# #### Evaluate Prediction Quality
+
+# In[171]:
+
+
+## Train
+ENET_errors_W1, ENET_errors_M1 = get_deterministic_errors(X_train,ENET_predict_train,Y_train,N_Bootstraps=N_Boostraps_BCA)
+## Test
+ENET_errors_W1_test, ENET_errors_M1_test = get_deterministic_errors(X_test,ENET_predict_test,Y_test,N_Bootstraps=N_Boostraps_BCA)
+# Stop Timer
+Timer_ENET = time.time() - Timer_ENET
+
+
+# #### Update DataFrame
+
+# In[172]:
+
+
+# Train
+Summary_pred_Qual_models["ENET"] = pd.Series(np.append(np.append(ENET_errors_W1,
+                                                                ENET_errors_M1),
+                                                         np.array([ENET_N_Params,
+                                                                   Timer_ENET,
+                                                                   (ENET_eval_time/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models.index)
+# Test
+Summary_pred_Qual_models_test["ENET"] = pd.Series(np.append(np.append(ENET_errors_W1_test,
+                                                                     ENET_errors_M1_test),
+                                                           np.array([ENET_N_Params,
+                                                                     Timer_ENET,
+                                                                     (ENET_eval_time/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models_test.index)
+
+print("Updated DataFrame")
+print(Summary_pred_Qual_models_test)
+Summary_pred_Qual_models_test
 
 
 # ## Kernel Ridge Regression
 
-# In[ ]:
+# In[116]:
+
+
+# %run Evaluation.ipynb
+exec(open('Evaluation.py').read())
+
+
+# In[117]:
 
 
 # Stop Timer
@@ -269,43 +389,116 @@ print("-----------------")
 Xhat_Kridge, Xhat_Kridge_test , relic, kRidge_N_params, KRidge_eval_time = get_Kernel_Ridge_Regressor(X_train,X_test,Y_train_mean_emp)
 
 
-# Get Prediction Errors
+# #### Get Prediction Errors
+
+# In[137]:
+
+
 ## Train
-kRidge_errors = get_deterministic_errors(X_train,Xhat_Kridge,Y_train,N_Bootstraps=N_Boostraps_BCA)
+kRidge_errors_W1, kRidge_errors_M1 = get_deterministic_errors(X_train,Xhat_Kridge,Y_train,N_Bootstraps=N_Boostraps_BCA)
 ## Test
-kRidge_errors_test = get_deterministic_errors(X_test,Xhat_Kridge_test,Y_test,N_Bootstraps=N_Boostraps_BCA)
+kRidge_errors_W1_test, kRidge_errors_M1_test = get_deterministic_errors(X_test,Xhat_Kridge_test,Y_test,N_Bootstraps=N_Boostraps_BCA)
 # Stop Timer
 Timer_kRidge = time.time() - Timer_kRidge
 
 
+# #### Update DataFrame
+
+# In[138]:
+
+
+# Train
+Summary_pred_Qual_models["KRidge"] = pd.Series(np.append(np.append(kRidge_errors_W1,
+                                                                kRidge_errors_M1),
+                                                         np.array([0,
+                                                                   Timer_kRidge,
+                                                                   (KRidge_eval_time/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models.index)
+# Test
+Summary_pred_Qual_models_test["KRidge"] = pd.Series(np.append(np.append(kRidge_errors_W1_test,
+                                                                     kRidge_errors_M1_test),
+                                                           np.array([0,
+                                                                     Timer_kRidge,
+                                                                     (KRidge_eval_time/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models_test.index)
+
+print("Updated DataFrame")
+print(Summary_pred_Qual_models_test)
+Summary_pred_Qual_models_test
+
+
 # ## Gradient-Boosted Random Forest
 
-# In[ ]:
+# In[162]:
 
 
-# Stop Timer
+# Start Timer
 Timer_GBRF = time.time()
 
 print("--------------")
 print("Training: GBRF")
 print("--------------")
 
-GBRF_y_hat_train, GBRF_y_hat_test, GBRF_model, GBRF_N_Params, GBRF_eval_time = get_GBRF(X_train,X_test,Y_train_mean_emp)
+if output_dim == 1:
+    GBRF_y_hat_train, GBRF_y_hat_test, GBRF_model, GBRF_N_Params, GBRF_eval_time = get_GBRF(X_train,
+                                                                                            X_test,
+                                                                                            Y_train_mean_emp)
+else:
+    for d in range(output_dim):
+        GBRF_y_hat_train_loop, GBRF_y_hat_test_loop, GBRF_model, GBRF_N_Params_loop, GBRF_eval_time_loop = get_GBRF(X_train,
+                                                                                                                X_test,
+                                                                                                                Y_train_mean_emp[:,d])
+        if d == 0:
+            GBRF_y_hat_train = GBRF_y_hat_train_loop.reshape(-1,1)
+            GBRF_y_hat_test = GBRF_y_hat_test_loop.reshape(-1,1)
+            GBRF_N_Params = GBRF_N_Params_loop
+            GBRF_eval_tim = GBRF_eval_time_loop
+        else:
+            GBRF_y_hat_train = np.append(GBRF_y_hat_train,GBRF_y_hat_train_loop.reshape(-1,1),axis=1)
+            GBRF_y_hat_test = np.append(GBRF_y_hat_test,GBRF_y_hat_test_loop.reshape(-1,1),axis=1)
+            GBRF_N_Params = GBRF_N_Params + GBRF_N_Params_loop
+            GBRF_eval_tim = GBRF_eval_tim + GBRF_eval_time_loop
 
-# Get Prediction Errors
+
+# #### Get Prediction Errors
+
+# In[164]:
+
+
 ## Train
-GBRF_errors = get_deterministic_errors(X_train,GBRF_y_hat_train,Y_train,N_Bootstraps=N_Boostraps_BCA)
+GBRF_errors_W1, GBRF_errors_M1 = get_deterministic_errors(X_train,GBRF_y_hat_train,Y_train,N_Bootstraps=N_Boostraps_BCA)
 ## Test
-GBRF_errors_test = get_deterministic_errors(X_test,GBRF_y_hat_test,Y_test,N_Bootstraps=N_Boostraps_BCA)
+GBRF_errors_W1_test, GBRF_errors_M1_test = get_deterministic_errors(X_test,GBRF_y_hat_test,Y_test,N_Bootstraps=N_Boostraps_BCA)
 
 
 # Compute Lapsed Time Needed For Training
 Timer_GBRF = time.time() - Timer_GBRF
 
 
+# #### Update Dataframe
+
+# In[165]:
+
+
+# Train
+Summary_pred_Qual_models["GBRF"] = pd.Series(np.append(np.append(GBRF_errors_W1,
+                                                                GBRF_errors_M1),
+                                                         np.array([GBRF_N_Params,
+                                                                   Timer_GBRF,
+                                                                   (GBRF_eval_tim/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models.index)
+# Test
+Summary_pred_Qual_models_test["GBRF"] = pd.Series(np.append(np.append(GBRF_errors_W1_test,
+                                                                     GBRF_errors_M1_test),
+                                                           np.array([GBRF_N_Params,
+                                                                     Timer_GBRF,
+                                                                     (GBRF_eval_tim/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models_test.index)
+
+print("Updated DataFrame")
+print(Summary_pred_Qual_models_test)
+Summary_pred_Qual_models_test
+
+
 # ## Feed-Forward DNN
 
-# In[ ]:
+# In[129]:
 
 
 # Stop Timer
@@ -316,7 +509,7 @@ print("-------------")
 
 # Redefine (Dimension-related) Elements of Grid
 param_grid_Deep_Classifier['input_dim'] = [problem_dim]
-param_grid_Deep_Classifier['output_dim'] = [1]
+param_grid_Deep_Classifier['output_dim'] = [output_dim]
 
 YHat_ffNN, YHat_ffNN_test, ffNN_N_Params, ffNN_eval_time = build_ffNN(n_folds = CV_folds,
                                                                       n_jobs = n_jobs, 
@@ -327,57 +520,41 @@ YHat_ffNN, YHat_ffNN_test, ffNN_N_Params, ffNN_eval_time = build_ffNN(n_folds = 
                                                                       X_test = X_test)
 
 
-# Get Prediction Errors
+# #### Get Prediction Errors
+
+# In[130]:
+
+
 ## Train
-ffNN_errors = get_deterministic_errors(X_train,YHat_ffNN,Y_train,N_Bootstraps=N_Boostraps_BCA)
+ffNN_errors_W1,ffNN_errors_M1 = get_deterministic_errors(X_train,YHat_ffNN,Y_train,N_Bootstraps=N_Boostraps_BCA)
 ## Test
-ffNN_errors_test = get_deterministic_errors(X_test,YHat_ffNN_test,Y_test,N_Bootstraps=N_Boostraps_BCA)
+ffNN_errors_W1_test,ffNN_errors_M1_test = get_deterministic_errors(X_test,YHat_ffNN_test,Y_test,N_Bootstraps=N_Boostraps_BCA)
 
 # Compute Lapsed Time Needed For Training
 Timer_ffNN =  time.time() - Timer_ffNN
 
 
-# # Compute Metric(s)
+# #### Update DataFrame
 
-# ### Get Prediction Quality Metrics
-
-# In[ ]:
+# In[139]:
 
 
-print("-----------------------")
-print("Computing Error Metrics")
-print("-----------------------")
+# Train
+Summary_pred_Qual_models["DNN"] = pd.Series(np.append(np.append(ffNN_errors_W1,
+                                                                ffNN_errors_M1),
+                                                         np.array([ffNN_N_Params,
+                                                                   Timer_ffNN,
+                                                                   (ffNN_eval_time/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models.index)
+# Test
+Summary_pred_Qual_models_test["DNN"] = pd.Series(np.append(np.append(ffNN_errors_W1_test,
+                                                                     ffNN_errors_M1_test),
+                                                           np.array([ffNN_N_Params,
+                                                                     Timer_ffNN,
+                                                                     (ffNN_eval_time/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models_test.index)
 
-Summary_pred_Qual_models = pd.DataFrame({"ENET":ENET_errors_test[:,1],
-                                    "kRidge":kRidge_errors_test[:,1],
-                                    "GBRF":GBRF_errors_test[:,1],
-                                    "ffNN":ffNN_errors_test[:,1],
-                                   },index=["W1","Mean","Var","Skewness","Ex_Kur"])
-
-Summary_pred_Qual_models_test = pd.DataFrame({"ENET":ENET_errors[:,1],
-                                    "kRidge":kRidge_errors[:,1],
-                                    "GBRF":GBRF_errors[:,1],
-                                    "ffNN":ffNN_errors[:,1],
-                                   },index=["W1","Mean","Var","Skewness","Ex_Kur"])
-
-## Save Facts
-Summary_pred_Qual_models.to_latex((results_tables_path+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
-Summary_pred_Qual_models_test.to_latex((results_tables_path+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
+print("Updated DataFrame")
+print(Summary_pred_Qual_models_test)
+Summary_pred_Qual_models_test
 
 
-# ### Get Complexity Metrics
-
-# In[ ]:
-
-
-Summary_Complexity_models = pd.DataFrame({"N_Params_Trainable":np.array([2*problem_dim,GBRF_N_Params,kRidge_N_params,ffNN_N_Params]),
-                                          "N_Params":np.array([2*problem_dim,GBRF_N_Params,kRidge_N_params,ffNN_N_Params]),
-                                          "T_Time": np.array([Timer_ENET,Timer_GBRF,Timer_kRidge,Timer_ffNN]),
-                                          "T_Test/T_test-MC": np.array([ENET_eval_time/Test_Set_PredictionTime_MC,
-                                                                        GBRF_eval_time/Test_Set_PredictionTime_MC,
-                                                                        KRidge_eval_time/Test_Set_PredictionTime_MC,
-                                                                        ffNN_eval_time/Test_Set_PredictionTime_MC]),
-                                         },index=["ENET","GBRF","kRidge","ffNN"])
-
-Summary_Complexity_models.to_latex((results_tables_path+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_Model_complexities.tex"))
-
+# ---

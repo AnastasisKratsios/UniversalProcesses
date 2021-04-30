@@ -6,6 +6,14 @@
 # 
 # ---
 
+# In[38]:
+
+
+print("---------------------------------------")
+print("Beginning Data-Parsing/Simulation Phase")
+print("---------------------------------------")
+
+
 # #### For Debugging
 
 # In[15]:
@@ -80,7 +88,19 @@
 # N_test_size = int(np.round(N_train_size*train_test_ratio,0))
 
 
+# In[ ]:
+
+
+Train_Set_PredictionTime_MC = time.time()
+
+
 # # Decide on Which Simulator/Parser To Load:
+
+# In[33]:
+
+
+print("Deciding on Which Simulator/Parser To Load")
+
 
 # ## Heteroskedastic_NonLinear_Regression:
 # $$
@@ -341,6 +361,12 @@ if f_unknown_mode == "Rough_SDE":
 
 # # Set/Define: Internal Parameters
 
+# In[34]:
+
+
+print("Setting/Defining: Internal Parameters")
+
+
 # ### Dimension of outputs space $\mathcal{Y}=\mathbb{R}^D$.
 # 
 # **Note:** *This is only relevant for (fractional) SDE Example which is multi-dimensional in the output space.*
@@ -365,6 +391,12 @@ N_test_size = int(np.round(N_train_size*train_test_ratio,0))
 # ---
 # # Decide on Which Type of Data to Get/Simulate
 # ---
+
+# In[35]:
+
+
+print("Deciding on Which Type of Data to Get/Simulate")
+
 
 # ## Initialize Inputs (Training & Testing) for: 
 # *Non-SDE and non GD with random inputs examples*.
@@ -506,6 +538,12 @@ if f_unknown_mode == "GD_with_randomized_input":
 
 # # Get Output Data
 
+# In[36]:
+
+
+print("Simulating Output Data for given input data")
+
+
 # ## Get outputs for all cases besides Gradient-Descent or fractional SDEs:
 # ### Training:
 
@@ -644,6 +682,8 @@ if f_unknown_mode == "Rough_SDE":
 
 
 if f_unknown_mode == "Rough_SDE":
+    # End Timer
+    Test_Set_PredictionTime_MC = time.time()
     for x_i in tqdm(range(x_test.shape[0])):
         # Extrain current initial condition
         x_init_loop = x_test[x_i,]
@@ -661,6 +701,28 @@ if f_unknown_mode == "Rough_SDE":
             X_test = np.append(X_test,X_inputs_to_return_loop,axis=0)
             # Update Output(s)
             Y_test = np.append(Y_test,x_sample_path_loop,axis=0)
+    # End Timer
+    Test_Set_PredictionTime_MC = time.time() - Test_Set_PredictionTime_MC
+
+
+# In[ ]:
+
+
+N_train_size = X_train.shape[0]
+
+
+# In[37]:
+
+
+print("----------------------------------")
+print("Done Data-Parsing/Simulation Phase")
+print("----------------------------------")
+
+
+# In[ ]:
+
+
+Train_Set_PredictionTime_MC = time.time() - Train_Set_PredictionTime_MC
 
 
 # ---

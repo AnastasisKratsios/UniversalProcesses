@@ -705,6 +705,15 @@ if f_unknown_mode == "Rough_SDE":
     Test_Set_PredictionTime_MC = time.time() - Test_Set_PredictionTime_MC
 
 
+# ## Extra Parsing:
+
+# In[ ]:
+
+
+if f_unknown_mode == "Rough_SDE":
+    Y_train_mean_emp = np.sum(Y_train,axis=1)
+
+
 # In[37]:
 
 
@@ -716,7 +725,7 @@ print("----------------------------------")
 # In[ ]:
 
 
-Train_Set_PredictionTime_MC = Train_Set_PredictionTime_MC - time.time()
+Train_Set_PredictionTime_MC = time.time() - Train_Set_PredictionTime_MC
 
 
 # ---

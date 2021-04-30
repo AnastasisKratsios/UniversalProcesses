@@ -374,7 +374,7 @@ print("Setting/Defining: Internal Parameters")
 # In[20]:
 
 
-if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
+if f_unknown_mode != "Rough_SDE":
     output_dim = 1
 else: 
     output_dim = problem_dim

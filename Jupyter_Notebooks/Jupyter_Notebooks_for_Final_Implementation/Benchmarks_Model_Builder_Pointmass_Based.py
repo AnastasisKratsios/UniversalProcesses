@@ -5,7 +5,7 @@
 
 # ---
 
-# In[4]:
+# In[1]:
 
 
 # ##### DEGUBBING MENU:
@@ -35,7 +35,7 @@
 # f_unknown_mode = "Rough_SDE"
 # N_Euler_Steps = 10**1
 # Hurst_Exponent = 0.5
-# problem_dim = 4
+# problem_dim = 10
 
 # # Hyper-parameters of Cover
 # delta = 0.01
@@ -63,7 +63,7 @@
 
 # ## Elastic Net Regressor
 
-# In[5]:
+# In[2]:
 
 
 #=====================#
@@ -80,7 +80,7 @@ ENET_reg = ElasticNetCV(cv=5, random_state=0, alphas = np.linspace(0,(10**2),(10
 
 # ## ffNN Builder
 
-# In[6]:
+# In[3]:
 
 
 def get_ffNN(height, depth, learning_rate, input_dim, output_dim):
@@ -174,7 +174,7 @@ print('Deep Feature Builder - Ready')
 
 # # Gradient-Boosted Random Forest Regressor
 
-# In[7]:
+# In[4]:
 
 
 def get_GBRF(X_train,X_test,y_train):
@@ -235,7 +235,7 @@ def get_GBRF(X_train,X_test,y_train):
 
 # ## Kernel Ridge Regressor
 
-# In[8]:
+# In[5]:
 
 
 def get_Kernel_Ridge_Regressor(data_x_in,data_x_test_in,data_y_in):
@@ -281,14 +281,14 @@ def get_Kernel_Ridge_Regressor(data_x_in,data_x_test_in,data_y_in):
 
 # ### Elastic Net
 
-# In[9]:
+# In[6]:
 
 
 # %run Evaluation.ipynb
 exec(open('Evaluation.py').read())
 
 
-# In[11]:
+# In[ ]:
 
 
 # Start Timer
@@ -326,7 +326,7 @@ else:
             ENET_N_Params = X_train.shape[0]*2
             ENET_eval_time = ENET_eval_time_loop
         else:
-            ENET_predict = np.append(ENET_predict,ENET_predict_loop.reshape(-1,1),axis=1)
+            ENET_predict = np.append(ENET_predict_train,ENET_predict_loop.reshape(-1,1),axis=1)
             ENET_predict_test = np.append(ENET_predict_test,ENET_predict_loop_test.reshape(-1,1),axis=1)
             ENET_N_Params = ENET_N_Params + X_train.shape[0]*2
             ENET_eval_time = ENET_eval_time + ENET_eval_time_loop
@@ -340,7 +340,7 @@ print("---------------------")
 
 # #### Evaluate Prediction Quality
 
-# In[12]:
+# In[ ]:
 
 
 ## Train
@@ -359,7 +359,7 @@ Timer_ENET = time.time() - Timer_ENET
 
 # #### Update DataFrame
 
-# In[13]:
+# In[ ]:
 
 
 # Train
@@ -382,7 +382,7 @@ Summary_pred_Qual_models_test
 
 # ## Kernel Ridge Regression
 
-# In[14]:
+# In[ ]:
 
 
 # Stop Timer
@@ -398,7 +398,7 @@ Xhat_Kridge, Xhat_Kridge_test , relic, kRidge_N_params, KRidge_eval_time = get_K
 
 # #### Get Prediction Errors
 
-# In[15]:
+# In[ ]:
 
 
 ## Train
@@ -411,7 +411,7 @@ Timer_kRidge = time.time() - Timer_kRidge
 
 # #### Update DataFrame
 
-# In[16]:
+# In[ ]:
 
 
 # Train
@@ -434,7 +434,7 @@ Summary_pred_Qual_models_test
 
 # ## Gradient-Boosted Random Forest
 
-# In[17]:
+# In[ ]:
 
 
 # Start Timer
@@ -467,7 +467,7 @@ else:
 
 # #### Get Prediction Errors
 
-# In[18]:
+# In[ ]:
 
 
 ## Train
@@ -482,7 +482,7 @@ Timer_GBRF = time.time() - Timer_GBRF
 
 # #### Update Dataframe
 
-# In[19]:
+# In[ ]:
 
 
 # Train

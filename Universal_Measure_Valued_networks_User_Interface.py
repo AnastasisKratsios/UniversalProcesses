@@ -49,19 +49,19 @@ trial_run = True
 
 # # Random DNN internal noise
 # # f_unknown_mode = "DNN_with_Random_Weights"
-Depth_Bayesian_DNN = 2
-width = 50
+Depth_Bayesian_DNN = 1
+width = 5
 
 # # Random Dropout applied to trained DNN
 # f_unknown_mode = "DNN_with_Bayesian_Dropout"
 Dropout_rate = 0.1
 
 # GD with Randomized Input
-# f_unknown_mode = "GD_with_randomized_input"
-GD_epochs = 100
+f_unknown_mode = "GD_with_randomized_input"
+GD_epochs = 2
 
 # SDE with fractional Driver
-f_unknown_mode = "Rough_SDE"
+# f_unknown_mode = "Rough_SDE"
 N_Euler_Steps = 10**1
 Hurst_Exponent = 0.5
 
@@ -71,7 +71,7 @@ Hurst_Exponent = 0.5
 # In[3]:
 
 
-problem_dim = 3
+problem_dim = 20
 
 
 # ## Note: *Why the procedure is so computationally efficient*?
@@ -125,7 +125,7 @@ import time as time #<- Note sure why...but its always seems to need 'its own sp
 
 # # Simulate or Parse Data
 
-# In[8]:
+# In[ ]:
 
 
 # %run Data_Simulator_and_Parser.ipynb
@@ -134,7 +134,7 @@ exec(open('Data_Simulator_and_Parser.py').read())
 
 # # Run Main:
 
-# In[9]:
+# In[ ]:
 
 
 print("------------------------------")
@@ -157,7 +157,7 @@ print("------------------------------------")
 # \mathbb{R}^d \ni x \to f(x) \to \delta_{f(x)}\in \cap_{1\leq q<\infty}\mathcal{P}_{q}(\mathbb{R}).
 # $$
 
-# In[10]:
+# In[ ]:
 
 
 exec(open('CV_Grid.py').read())
@@ -173,7 +173,7 @@ exec(open('Benchmarks_Model_Builder_Pointmass_Based.py').read())
 
 # #### Training Model Facts
 
-# In[11]:
+# In[ ]:
 
 
 print(Summary_pred_Qual_models)
@@ -182,7 +182,7 @@ Summary_pred_Qual_models
 
 # #### Testing Model Facts
 
-# In[12]:
+# In[ ]:
 
 
 print(Summary_pred_Qual_models_test)
@@ -195,20 +195,21 @@ Summary_pred_Qual_models_test
 # - Benchmark 2: Deep Gaussian Networks:
 # These models train models which assume Gaussianity.  We may view these as models in $\mathcal{P}_2(\mathbb{R})$ via:
 # $$
-# \mathbb{R}^d \ni x \to (\hat{\mu}(x),\hat{\sigma}(x))\triangleq f(x) \in \mathbb{R}\times [0,\infty) \to \frac1{\hat{\sigma}(x)\sqrt{2\pi}}\exp\left(\frac{-(\cdot-\hat{\mu}(x))^2}{\hat{\sigma(x)}^2}\right) \in \mathcal{G}_1\subset \mathcal{P}_2(\mathbb{R});
+# \mathbb{R}^d \ni x \to (\hat{\mu}(x),\hat{\Sigma}(x)\hat{\Sigma}^{\top})\triangleq f(x) \in \mathbb{R}\times [0,\infty) \to 
+# (2\pi)^{-\frac{d}{2}}\det(\hat{\Sigma}(x))^{-\frac{1}{2}} \, e^{ -\frac{1}{2}(\cdot - \hat{\mu}(x))^{{{\!\mathsf{T}}}} \hat{\Sigma}(x)^{-1}(\cdot - \hat{\mu}(x)) } \mu \in \mathcal{G}_d\subset \mathcal{P}_2(\mathbb{R});
 # $$
 # where $\mathcal{G}_1$ is the set of Gaussian measures on $\mathbb{R}$ equipped with the relative Wasserstein-1 topology.
 # 
 # Examples of this type of architecture are especially prevalent in uncertainty quantification; see ([Deep Ensembles](https://arxiv.org/abs/1612.01474)] or [NOMU: Neural Optimization-based Model Uncertainty](https://arxiv.org/abs/2102.13640).  Moreover, their universality in $C(\mathbb{R}^d,\mathcal{G}_2)$ is known, and has been shown in [Corollary 4.7](https://arxiv.org/abs/2101.05390).
 
-# In[14]:
+# In[ ]:
 
 
 # %run Benchmarks_Model_Builder_Mean_Var.ipynb
 exec(open('Benchmarks_Model_Builder_Mean_Var.py').read())
 
 
-# In[17]:
+# In[ ]:
 
 
 print("Prediction Quality (Updated): Test")
@@ -216,7 +217,7 @@ print(Summary_pred_Qual_models_test)
 Summary_pred_Qual_models_test
 
 
-# In[18]:
+# In[ ]:
 
 
 print("Prediction Quality (Updated): Train")
@@ -230,11 +231,12 @@ Summary_pred_Qual_models
 # - For every $x$ in the trainingdata-set we fit a GMM $\hat{\nu}_x$, using the [Expectation-Maximization (EM) algorithm](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm), with the same number of centers as the deep neural model in $\mathcal{NN}_{1_{\mathbb{R}^d},\mathcal{D}}^{\sigma:\star}$ which we are evaluating.  
 # - A Mixture density network is then trained to predict the infered parameters; given any $x \in \mathbb{R}^d$.
 
-# In[19]:
+# In[ ]:
 
 
-# %run Mixture_Density_Network.ipynb
-exec(open('Mixture_Density_Network.py').read())
+if output_dim == 1:
+    # %run Mixture_Density_Network.ipynb
+    exec(open('Mixture_Density_Network.py').read())
 
 
 # ## Get Final Outputs
@@ -246,7 +248,7 @@ exec(open('Mixture_Density_Network.py').read())
 
 # #### Training
 
-# In[24]:
+# In[ ]:
 
 
 print("Final Test-Set Result(s)")
@@ -255,7 +257,7 @@ Summary_pred_Qual_models
 
 # #### Test
 
-# In[26]:
+# In[ ]:
 
 
 print("Final Training-Set Result(s)")
@@ -264,7 +266,7 @@ Summary_pred_Qual_models_test
 
 # # For Terminal Runner(s):
 
-# In[28]:
+# In[ ]:
 
 
 # For Terminal Running

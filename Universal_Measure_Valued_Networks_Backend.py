@@ -15,57 +15,10 @@
 
 # ### Meta-Parameter Dump (easy access for debugging):
 
-# In[48]:
+# In[71]:
 
 
-# trial_run = True
-
-# problem_dim = 3
-
-
-# train_test_ratio = .2
-# N_train_size = 10
-
-
-# ## Monte-Carlo
-# N_Monte_Carlo_Samples = 10**2
-
-
-# # Hyper-parameters of Cover
-# delta = 0.01
-# Proportion_per_cluster = .5
-
-
-# # Random DNN
-# # f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
-
-# # Random DNN internal noise
-# # f_unknown_mode = "DNN_with_Random_Weights"
-# Depth_Bayesian_DNN = 2
-# width = 20
-
-# # Random Dropout applied to trained DNN
-# # f_unknown_mode = "DNN_with_Bayesian_Dropout"
-# Dropout_rate = 0.1
-
-# # Rough SDE (time 1)
-# f_unknown_mode = "Rough_SDE"
-
-# # GD with Randomized Input
-# # f_unknown_mode = "GD_with_randomized_input"
-# GD_epochs = 2
-# N_Euler_Steps = 8
-# Hurst_Exponent = 0.5
-
-# # %run Loader.ipynb
-# exec(open('Loader.py').read())
-# # Load Packages/Modules
-# exec(open('Init_Dump.py').read())
-# import time as time #<- Note sure why...but its always seems to need 'its own special loading...'
-# # %run Data_Simulator_and_Parser.ipynb
-# exec(open('Data_Simulator_and_Parser.py').read())
-
-# N_Bootstraps = 100
+# %run Debug_Menu.ipynb
 
 
 # ---

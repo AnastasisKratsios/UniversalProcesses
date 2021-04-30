@@ -8,55 +8,7 @@
 # In[4]:
 
 
-# ##### DEGUBBING MENU:
-# trial_run = True
-# N_train_size= 20
-# train_test_ratio = .5
-# N_Monte_Carlo_Samples = 10**3
-# # # Random DNN
-# # f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
-
-# # # Random DNN internal noise
-# f_unknown_mode = "DNN_with_Random_Weights"
-# Depth_Bayesian_DNN = 2
-# width = 50
-
-# # # Random Dropout applied to trained DNN
-# # f_unknown_mode = "DNN_with_Bayesian_Dropout"
-# Dropout_rate = 0.1
-
-# # GD with Randomized Input
-# # f_unknown_mode = "GD_with_randomized_input"
-# GD_epochs = 100
-
-# # SDE with fractional Driver
-# # f_unknown_mode = "Rough_SDE"
-# N_Euler_Steps = 10**1
-# Hurst_Exponent = 0.5
-# problem_dim = 3
-
-# # Hyper-parameters of Cover
-# delta = 0.01
-# Proportion_per_cluster = .75
-
-# # %run Loader.ipynb
-# exec(open('Loader.py').read())
-# # Load Packages/Modules
-# exec(open('Init_Dump.py').read())
-# import time as time #<- Note sure why...but its always seems to need 'its own special loading...'
-
-# # %run Data_Simulator_and_Parser.ipynb
-# exec(open('Data_Simulator_and_Parser.py').read())
-
-# print("------------------------------")
-# print("Running script for main model!")
-# print("------------------------------")
-# # %run Universal_Measure_Valued_Networks_Backend.ipynb
-# exec(open('Universal_Measure_Valued_Networks_Backend.py').read())
-
-# print("------------------------------------")
-# print("Done: Running script for main model!")
-# print("------------------------------------")
+# %run Debug_Menu.ipynb
 
 
 # ---

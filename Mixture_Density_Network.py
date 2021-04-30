@@ -3,9 +3,15 @@
 
 # # Training of Bishop's Mixture Density Network
 
+# In[1]:
+
+
+# %run Debug_Menu.ipynb
+
+
 # #### Reset Meta-Parameters
 
-# In[ ]:
+# In[2]:
 
 
 # Redefine (Dimension-related) Elements of Grid
@@ -13,9 +19,103 @@ exec(open('Init_Dump.py').read())
 import time
 
 
+# ---
+
+# # Re-Define ffNN Builder (Internally to this script)
+
+# In[3]:
+
+
+def get_ffNN(height, depth, learning_rate, input_dim, output_dim):
+        #----------------------------#
+        # Maximally Interacting Layer #
+        #-----------------------------#
+        # Initialize Inputs
+        input_layer = tf.keras.Input(shape=(input_dim,))
+
+
+        #------------------#
+        #   Core Layers    #
+        #------------------#
+        core_layers = fullyConnected_Dense(height)(input_layer)
+        # Activation
+        core_layers = tf.nn.swish(core_layers)
+        # Train additional Depth?
+        if depth>1:
+            # Add additional deep layer(s)
+            for depth_i in range(1,depth):
+                core_layers = fullyConnected_Dense(height)(core_layers)
+                # Activation
+                core_layers = tf.nn.swish(core_layers)
+
+        #------------------#
+        #  Readout Layers  #
+        #------------------# 
+        # Affine (Readout) Layer (Dense Fully Connected)
+        output_layers = fullyConnected_Dense(output_dim)(core_layers)  
+        # Define Input/Output Relationship (Arch.)
+        trainable_layers_model = tf.keras.Model(input_layer, output_layers)
+
+
+        #----------------------------------#
+        # Define Optimizer & Compile Archs.
+        #----------------------------------#
+        opt = Adam(lr=learning_rate)
+        trainable_layers_model.compile(optimizer=opt, loss="mae", metrics=["mse", "mae", "mape"])
+
+        return trainable_layers_model
+
+
+
+def build_ffNN(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train,X_test):
+    # Update Dictionary
+    param_grid_in_internal = param_grid_in
+    param_grid_in_internal['input_dim'] = [(X_train.shape[1])]
+
+    # Deep Feature Network
+    ffNN_CV = tf.keras.wrappers.scikit_learn.KerasRegressor(build_fn=get_ffNN, 
+                                                            verbose=True)
+
+    # Randomized CV
+    ffNN_CVer = RandomizedSearchCV(estimator=ffNN_CV, 
+                                    n_jobs=n_jobs,
+                                    cv=KFold(n_folds, random_state=2020, shuffle=True),
+                                    param_distributions=param_grid_in_internal,
+                                    n_iter=n_iter,
+                                    return_train_score=True,
+                                    random_state=2020,
+                                    verbose=10)
+
+    # Fit Model #
+    #-----------#
+    ffNN_CVer.fit(X_train,y_train)
+
+    # Write Predictions #
+    #-------------------#
+    y_hat_train = ffNN_CVer.predict(X_train)
+
+    eval_time_ffNN = time.time()
+    y_hat_test = ffNN_CVer.predict(X_test)
+    eval_time_ffNN = time.time() - eval_time_ffNN
+
+    # Counter number of parameters #
+    #------------------------------#
+    # Extract Best Model
+    best_model = ffNN_CVer.best_estimator_
+    # Count Number of Parameters
+    N_params_best_ffNN = np.sum([np.prod(v.get_shape().as_list()) for v in best_model.model.trainable_variables])
+
+
+    # Return Values #
+    #---------------#
+    return y_hat_train, y_hat_test, N_params_best_ffNN, eval_time_ffNN
+
+
+# ---
+
 # #### Start Timer:
 
-# In[ ]:
+# In[4]:
 
 
 Bishop_MDN_Timer = time.time()
@@ -23,7 +123,7 @@ Bishop_MDN_Timer = time.time()
 
 # ## Prepare Training Data
 
-# In[ ]:
+# In[5]:
 
 
 print("======================================================")
@@ -220,6 +320,7 @@ print("Training Mixture Density Network (MDN): Means: Start!")
 print("=====================================================")
 # Train simple deep classifier
 timer_MDN_Means = time.time()
+
 MDN_Means_train, MDN_Means_test, N_params_MDN_MeansNet, timer_output_MDN_MeansNet = build_ffNN(n_folds = CV_folds,
                                                                                                n_jobs = n_jobs,
                                                                                                n_iter = n_iter,
@@ -246,7 +347,6 @@ print("(1)")
 print("===================================================")
 print("Training Mixture Density Network (MDN): SD: Start!")
 print("===================================================")
-
 
 # Train simple deep classifier
 timer_MDN_SDs = time.time()
@@ -508,18 +608,12 @@ Bishop_MDN_Timer = time.time() - Bishop_MDN_Timer
 print("#---------------------------#")
 print(" Get Training Error(s): Begin")
 print("#---------------------------#")
-W1_Errors_MDN = np.array(bootstrap(np.abs(W1_Errors_MDN),n=N_Bootstraps)(.95))
-Mean_Errors_MDN = np.array(bootstrap(np.abs(Mean_Errors_MDN),n=N_Bootstraps)(.95))
-Var_Errors_MDN = np.array(bootstrap(np.abs(Var_Errors_MDN),n=N_Bootstraps)(.95))
-Skewness_Errors_MDN = np.array(bootstrap(np.abs(Skewness_Errors_MDN),n=N_Bootstraps)(.95))
-Ex_Kurtosis_Errors_MDN = np.array(bootstrap(np.abs(Ex_Kurtosis_Errors_MDN),n=N_Bootstraps)(.95))
+W1_Errors_MDN = np.array(bootstrap(np.abs(W1_Errors_MDN),n=N_Boostraps_BCA)(.95))
+Mean_Errors_MDN = np.array(bootstrap(np.abs(Mean_Errors_MDN),n=N_Boostraps_BCA)(.95))
+Var_Errors_MDN = np.array(bootstrap(np.abs(Var_Errors_MDN),n=N_Boostraps_BCA)(.95))
+Skewness_Errors_MDN = np.array(bootstrap(np.abs(Skewness_Errors_MDN),n=N_Boostraps_BCA)(.95))
+Ex_Kurtosis_Errors_MDN = np.array(bootstrap(np.abs(Ex_Kurtosis_Errors_MDN),n=N_Boostraps_BCA)(.95))
 
-# Format Error Metrics
-Summary_pred_Qual_models_MDN_train = np.array([W1_Errors_MDN,
-                                               Mean_Errors_MDN,
-                                               Var_Errors_MDN,
-                                               Skewness_Errors_MDN,
-                                               Ex_Kurtosis_Errors_MDN])
 print("#-------------------------#")
 print(" Get Training Error(s): END")
 print("#-------------------------#")
@@ -533,21 +627,27 @@ print("#-------------------------#")
 print("#--------------------------#")
 print(" Get Testing Error(s): Begin")
 print("#--------------------------#")
-W1_Errors_MDN_test = np.array(bootstrap(np.abs(W1_Errors_MDN_test),n=N_Bootstraps)(.95))
-Mean_Errors_MDN_test = np.array(bootstrap(np.abs(Mean_Errors_MDN_test),n=N_Bootstraps)(.95))
-Var_Errors_MDN_test = np.array(bootstrap(np.abs(Var_Errors_MDN_test),n=N_Bootstraps)(.95))
-Skewness_Errors_MDN_test = np.array(bootstrap(np.abs(Skewness_Errors_MDN_test),n=N_Bootstraps)(.95))
-Ex_Kurtosis_Errors_MDN_test = np.array(bootstrap(np.abs(Ex_Kurtosis_Errors_MDN_test),n=N_Bootstraps)(.95))
-
-Summary_pred_Qual_models_MDN_test = np.array([W1_Errors_MDN_test,
-                                               Mean_Errors_MDN_test,
-                                               Var_Errors_MDN_test,
-                                               Skewness_Errors_MDN_test,
-                                               Ex_Kurtosis_Errors_MDN_test])
-
+W1_Errors_MDN_test = np.array(bootstrap(np.abs(W1_Errors_MDN_test),n=N_Boostraps_BCA)(.95))
+Mean_Errors_MDN_test = np.array(bootstrap(np.abs(Mean_Errors_MDN_test),n=N_Boostraps_BCA)(.95))
+Var_Errors_MDN_test = np.array(bootstrap(np.abs(Var_Errors_MDN_test),n=N_Boostraps_BCA)(.95))
+Skewness_Errors_MDN_test = np.array(bootstrap(np.abs(Skewness_Errors_MDN_test),n=N_Boostraps_BCA)(.95))
+Ex_Kurtosis_Errors_MDN_test = np.array(bootstrap(np.abs(Ex_Kurtosis_Errors_MDN_test),n=N_Boostraps_BCA)(.95))
 print("#------------------------#")
 print(" Get Testing Error(s): END")
 print("#------------------------#")
+
+
+# #### Compute MDN Complexities
+
+# In[ ]:
+
+
+# Tally MDN Complexities #
+#------------------------#
+## Tally N-Parameters
+MDNs_Tot_N_Params = N_params_MDN_SDsNet + N_params_MDN_MixNet + N_params_MDN_MeansNet
+## Tally Time
+MDNs_Tot_time = timer_output_MDN_MixNet + timer_output_MDN_SDsNet + timer_output_MDN_MeansNet
 
 
 # ### Update Prediction Quality Metrics
@@ -558,14 +658,26 @@ print("#------------------------#")
 print("-------------------------------------------------")
 print("Updating Performance Metrics Dataframe and Saved!")
 print("-------------------------------------------------")
-# Append Gaussian Process Regressor Performance
-## Train
-Summary_pred_Qual_models["MDN"] = pd.Series((Summary_pred_Qual_models_MDN_train[:,1]), index=Summary_pred_Qual_models.index)
-## Test
-Summary_pred_Qual_models_test["MDN"] = pd.Series((Summary_pred_Qual_models_MDN_test[:,1]), index=Summary_pred_Qual_models_test.index)
+# Train
+Summary_pred_Qual_models["MDN"] = pd.Series(np.append(np.append(W1_Errors_MDN,
+                                                                Mean_Errors_MDN),
+                                                         np.array([MDNs_Tot_N_Params,
+                                                                   MDNs_Tot_time,
+                                                                   (Bishop_MDN_Timer/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models.index)
+# Test
+Summary_pred_Qual_models_test["MDN"] = pd.Series(np.append(np.append(W1_Errors_MDN_test,
+                                                                     Mean_Errors_MDN_test),
+                                                           np.array([MDNs_Tot_N_Params,
+                                                                     MDNs_Tot_time,
+                                                                     (Bishop_MDN_Timer/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models_test.index)
 
+print("Updated DataFrame")
+print(Summary_pred_Qual_models_test)
+Summary_pred_Qual_models_test
 
-# Update Performance Metrics
+#----------------------#
+# Save Quality Metrics #
+#----------------------#
 ## Train
 Summary_pred_Qual_models.to_latex((results_tables_path+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
 ## Test
@@ -576,40 +688,12 @@ print("Updated Performance Metrics Dataframe and Saved!")
 print("------------------------------------------------")
 
 
-# ## Model Complexity Metrics
-
 # In[ ]:
 
 
-# Count Number of Parameters in MDN
-N_params_MDN_tot = N_params_MDN_MixNet + N_params_MDN_MeansNet + N_params_MDN_SDsNet
+print("Have a jolly old day!")
 
 
-# In[ ]:
-
-
-# Get Test-set Evaluation Time
-Test_set_prediction_time_MDN_tot = timer_output_MDN_MixNet + timer_output_MDN_SDsNet + timer_output_MDN_MeansNet
-
-
-# In[ ]:
-
-
-print("--------------------------------------------")
-print("Computing and Updating Complexity Metrics...")
-print("--------------------------------------------")
-# Coercion
-Summary_Complexity_models = Summary_Complexity_models.T
-# Compute Complexity Metrics for GPR
-MDN_Facts = np.array([N_params_MDN_tot,N_params_MDN_tot,(timeBuilding_Training_Set_DGN+timer_DGP),Test_set_prediction_time_MDN_tot/Test_Set_PredictionTime_MC])
-# Update Model Complexities
-Summary_Complexity_models["MDN"] = pd.Series(MDN_Facts, index=Summary_Complexity_models.index)
-# Coercion
-Summary_Complexity_models = Summary_Complexity_models.T
-
-# Save Facts
-Summary_Complexity_models.to_latex((results_tables_path+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__Complexity_Metrics.tex"))
-print("-----------------------------------------------")
-print("Updated Complexity Metrics Dataframe and Saved!")
-print("-----------------------------------------------")
-
+# ---
+# # Fin
+# ---

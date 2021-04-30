@@ -48,7 +48,7 @@ trial_run = True
 # f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
 
 # # Random DNN internal noise
-# # f_unknown_mode = "DNN_with_Random_Weights"
+# f_unknown_mode = "DNN_with_Random_Weights"
 Depth_Bayesian_DNN = 1
 width = 5
 
@@ -57,11 +57,11 @@ width = 5
 Dropout_rate = 0.1
 
 # GD with Randomized Input
-f_unknown_mode = "GD_with_randomized_input"
+# f_unknown_mode = "GD_with_randomized_input"
 GD_epochs = 2
 
 # SDE with fractional Driver
-# f_unknown_mode = "Rough_SDE"
+f_unknown_mode = "Rough_SDE"
 N_Euler_Steps = 10**1
 Hurst_Exponent = 0.5
 
@@ -71,7 +71,7 @@ Hurst_Exponent = 0.5
 # In[3]:
 
 
-problem_dim = 20
+problem_dim = 5
 
 
 # ## Note: *Why the procedure is so computationally efficient*?
@@ -125,7 +125,7 @@ import time as time #<- Note sure why...but its always seems to need 'its own sp
 
 # # Simulate or Parse Data
 
-# In[ ]:
+# In[8]:
 
 
 # %run Data_Simulator_and_Parser.ipynb

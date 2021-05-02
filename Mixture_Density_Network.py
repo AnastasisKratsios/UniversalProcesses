@@ -3,15 +3,17 @@
 
 # # Training of Bishop's Mixture Density Network
 
-# In[1]:
+# In[ ]:
 
 
+# Trial_run = True
+# exec(open('Init_Dump.py').read())
 # %run Debug_Menu.ipynb
 
 
 # #### Reset Meta-Parameters
 
-# In[2]:
+# In[ ]:
 
 
 # Redefine (Dimension-related) Elements of Grid
@@ -23,7 +25,7 @@ import time
 
 # # Re-Define ffNN Builder (Internally to this script)
 
-# In[3]:
+# In[ ]:
 
 
 def get_ffNN(height, depth, learning_rate, input_dim, output_dim):
@@ -115,7 +117,7 @@ def build_ffNN(n_folds , n_jobs, n_iter, param_grid_in, X_train, y_train,X_test)
 
 # #### Start Timer:
 
-# In[4]:
+# In[ ]:
 
 
 Bishop_MDN_Timer = time.time()
@@ -123,7 +125,7 @@ Bishop_MDN_Timer = time.time()
 
 # ## Prepare Training Data
 
-# In[5]:
+# In[ ]:
 
 
 print("======================================================")
@@ -406,29 +408,32 @@ print(" Get Training Error(s)")
 print("#--------------------#")
 for i in tqdm(range((X_train.shape[0]))):
     for j in range(N_GMM_clusters):
-        points_of_mass_loop = np.random.normal(MDN_Mix_train[i,j],MDN_SDs_train[i,j],N_Monte_Carlo_Samples)
-        b_loop = np.repeat(MDN_Mix_train[i,j],N_Monte_Carlo_Samples)
+        points_of_mass_loop = np.random.normal(MDN_Means_train[i,j],
+                                               MDN_SDs_train[i,j],
+                                               N_Monte_Carlo_Samples)
+        b_loop = np.repeat(MDN_Mix_train[i,j],
+                           N_Monte_Carlo_Samples)
         if j == 0:
             b = b_loop
-            points_of_mass = points_of_mass_loop
+            points_of_mass_MDN_train = points_of_mass_loop
         else:
             b = np.append(b,b_loop)
-            points_of_mass = np.append(points_of_mass,points_of_mass_loop)
-        points_of_mass = points_of_mass.reshape(-1,1)
+            points_of_mass_MDN_train = np.append(points_of_mass_MDN_train,points_of_mass_loop)
+        points_of_mass_MDN_train = points_of_mass_MDN_train.reshape(-1,1)
         b = b.reshape(-1,1)
-    points_of_mass = np.array(points_of_mass,dtype=float).reshape(-1,)
+    points_of_mass_MDN_train = np.array(points_of_mass_MDN_train,dtype=float).reshape(-1,)
     b = np.array(b,dtype=float).reshape(-1,)
     b = b/N_Monte_Carlo_Samples
     
     # Compute Error(s)
     ## W1
-    W1_loop_MDN = ot.emd2_1d(points_of_mass,
-                             np.array(Y_train[i,]).reshape(-1,),
-                             b,
-                             empirical_weights)
+    W1_loop_MDN_train = ot.emd2_1d(points_of_mass_MDN_train,
+                                   np.array(Y_train[i,]).reshape(-1,),
+                                   b,
+                                   empirical_weights)
     
     ## M1
-    Mu_hat_MDN = np.sum(b*(points_of_mass))
+    Mu_hat_MDN = np.sum(b*(points_of_mass_MDN_train))
     Mu_MC = np.mean(np.array(Y_train[i,]))
     if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
         Mu = direct_facts[i,]
@@ -436,20 +441,20 @@ for i in tqdm(range((X_train.shape[0]))):
         Mu = Mu_MC
         
     ### Error(s)
-    Mean_loop = (Mu_hat_MDN-Mu)
+    Mean_loop = np.sum(np.abs(Mu_hat_MDN-Mu))
     
     ## Variance
-    Var_hat_MDN = np.sum(((points_of_mass-Mu_hat_MDN)**2)*b)
+    Var_hat_MDN = np.sum(((points_of_mass_MDN_train-Mu_hat_MDN)**2)*b)
     Var_MC = np.mean(np.array(Y_train[i]-Mu_MC)**2)
     if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
         Var = 2*np.sum(X_train[i,]**2)
     else:
         Var = Var_MC     
     ### Error(s)
-    Var_loop = np.abs(Var_hat-Var)
+    Var_loop = np.sum(np.abs(Var_hat-Var))
         
     # Skewness
-    Skewness_hat_MDN = np.sum((((points_of_mass-Mu_hat_MDN)/Var_hat_MDN)**3)*b)
+    Skewness_hat_MDN = np.sum((((points_of_mass_MDN_train-Mu_hat_MDN)/Var_hat_MDN)**3)*b)
     Skewness_MC = np.mean((np.array(Y_train[i]-Mu_MC)/Var_MC)**3)
     if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
         Skewness = 0
@@ -459,7 +464,7 @@ for i in tqdm(range((X_train.shape[0]))):
     Skewness_loop = np.abs(Skewness_hat_MDN-Skewness)
     
     # Skewness
-    Ex_Kurtosis_hat_MDN = np.sum((((points_of_mass-Mu_hat_MDN)/Var_hat_MDN)**4)*b) - 3
+    Ex_Kurtosis_hat_MDN = np.sum((((points_of_mass_MDN_train-Mu_hat_MDN)/Var_hat_MDN)**4)*b) - 3
     Ex_Kurtosis_MC = np.mean((np.array(Y_train[i]-Mu_MC)/Var_MC)**4) - 3
     if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
         Ex_Kurtosis = 3
@@ -471,7 +476,7 @@ for i in tqdm(range((X_train.shape[0]))):
     
     # Update
     if i == 0:
-        W1_Errors_MDN = W1_loop
+        W1_Errors_MDN = W1_loop_MDN_train
         # Moments
         Mean_Errors_MDN =  Mean_loop
         Var_Errors_MDN = Var_loop
@@ -480,7 +485,7 @@ for i in tqdm(range((X_train.shape[0]))):
         
         
     else:
-        W1_Errors_MDN = np.append(W1_Errors_MDN,W1_loop)
+        W1_Errors_MDN = np.append(W1_Errors_MDN,W1_loop_MDN_train)
         # Moments
         Mean_Errors_MDN =  np.append(Mean_Errors_MDN,Mean_loop)
         Var_Errors_MDN = np.append(Var_Errors_MDN,Var_loop)
@@ -502,29 +507,31 @@ print(" Get Test Error(s)")
 print("#--------------------#")
 for i in tqdm(range((X_test.shape[0]))):
     for j in range(N_GMM_clusters):
-        points_of_mass_loop = np.random.normal(MDN_Mix_test[i,j],MDN_SDs_test[i,j],N_Monte_Carlo_Samples)
+        points_of_mass_loop = np.random.normal(MDN_Means_test[i,j],
+                                               MDN_SDs_test[i,j],
+                                               N_Monte_Carlo_Samples)
         b_loop = np.repeat(MDN_Mix_test[i,j],N_Monte_Carlo_Samples)
         if j == 0:
             b = b_loop
-            points_of_mass = points_of_mass_loop
+            points_of_mass_MDN = points_of_mass_loop
         else:
             b = np.append(b,b_loop)
-            points_of_mass = np.append(points_of_mass,points_of_mass_loop)
-        points_of_mass = points_of_mass.reshape(-1,1)
+            points_of_mass_MDN = np.append(points_of_mass_MDN,points_of_mass_loop)
+        points_of_mass_MDN = points_of_mass_MDN.reshape(-1,1)
         b = b.reshape(-1,1)
-    points_of_mass = np.array(points_of_mass,dtype=float).reshape(-1,)
+    points_of_mass_MDN = np.array(points_of_mass_MDN,dtype=float).reshape(-1,)
     b = np.array(b,dtype=float).reshape(-1,)
     b = b/N_Monte_Carlo_Samples
     
     # Compute Error(s)
     ## W1
-    W1_loop_MDN = ot.emd2_1d(points_of_mass,
+    W1_loop_MDN = ot.emd2_1d(points_of_mass_MDN,
                              np.array(Y_test[i,]).reshape(-1,),
                              b,
                              empirical_weights)
     
     ## M1
-    Mu_hat_MDN = np.sum(b*(points_of_mass))
+    Mu_hat_MDN = np.sum(b*(points_of_mass_MDN))
     Mu_MC = np.mean(np.array(Y_test[i,]))
     if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
         Mu = direct_facts_test[i,]
@@ -532,20 +539,20 @@ for i in tqdm(range((X_test.shape[0]))):
         Mu = Mu_MC
         
     ### Error(s)
-    Mean_loop = (Mu_hat_MDN-Mu)
+    Mean_loop = np.sum(np.abs(Mu_hat_MDN-Mu))
     
     ## Variance
-    Var_hat_MDN = np.sum(((points_of_mass-Mu_hat_MDN)**2)*b)
+    Var_hat_MDN = np.sum(((points_of_mass_MDN-Mu_hat_MDN)**2)*b)
     Var_MC = np.mean(np.array(Y_test[i]-Mu_MC)**2)
     if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
         Var = 2*np.sum(X_test[i,]**2)
     else:
         Var = Var_MC     
     ### Error(s)
-    Var_loop = np.abs(Var_hat-Var)
+    Var_loop = np.sum(np.abs(Var_hat-Var))
         
     # Skewness
-    Skewness_hat_MDN = np.sum((((points_of_mass-Mu_hat_MDN)/Var_hat_MDN)**3)*b)
+    Skewness_hat_MDN = np.sum((((points_of_mass_MDN-Mu_hat_MDN)/Var_hat_MDN)**3)*b)
     Skewness_MC = np.mean((np.array(Y_test[i]-Mu_MC)/Var_MC)**3)
     if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
         Skewness = 0
@@ -555,7 +562,7 @@ for i in tqdm(range((X_test.shape[0]))):
     Skewness_loop = np.abs(Skewness_hat_MDN-Skewness)
     
     # Skewness
-    Ex_Kurtosis_hat_MDN = np.sum((((points_of_mass-Mu_hat_MDN)/Var_hat_MDN)**4)*b) - 3
+    Ex_Kurtosis_hat_MDN = np.sum((((points_of_mass_MDN-Mu_hat_MDN)/Var_hat_MDN)**4)*b) - 3
     Ex_Kurtosis_MC = np.mean((np.array(Y_test[i]-Mu_MC)/Var_MC)**4) - 3
     if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
         Ex_Kurtosis = 3
@@ -567,7 +574,7 @@ for i in tqdm(range((X_test.shape[0]))):
     
     # Update
     if i == 0:
-        W1_Errors_MDN_test = W1_loop
+        W1_Errors_MDN_test = W1_loop_MDN
         # Moments
         Mean_Errors_MDN_test =  Mean_loop
         Var_Errors_MDN_test = Var_loop
@@ -576,7 +583,7 @@ for i in tqdm(range((X_test.shape[0]))):
         
         
     else:
-        W1_Errors_MDN_test = np.append(W1_Errors_MDN_test,W1_loop)
+        W1_Errors_MDN_test = np.append(W1_Errors_MDN_test,W1_loop_MDN)
         # Moments
         Mean_Errors_MDN_test =  np.append(Mean_Errors_MDN_test,Mean_loop)
         Var_Errors_MDN_test = np.append(Var_Errors_MDN_test,Var_loop)
@@ -672,7 +679,13 @@ Summary_pred_Qual_models_test["MDN"] = pd.Series(np.append(np.append(W1_Errors_M
                                                                      (Bishop_MDN_Timer/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models_test.index)
 
 print("Updated DataFrame")
+print("-------------------------------------------------")
+print("Train")
+print(Summary_pred_Qual_models)
+print("-------------------------------------------------")
+print("Test")
 print(Summary_pred_Qual_models_test)
+print("-------------------------------------------------")
 Summary_pred_Qual_models_test
 
 #----------------------#

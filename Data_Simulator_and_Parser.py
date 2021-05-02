@@ -228,6 +228,98 @@ if f_unknown_mode == "DNN_with_Bayesian_Dropout":
         return y_MC
 
 
+# ## (fractional) SDE - Vanilla Version:
+# $$
+# (x,t)\mapsto \frac1{S}\sum_{s=1}^S\, \delta_{X_t^{x:s}}; 
+# $$
+# where $H\in (0,1)$, $\alpha,\beta$ are known "classical" functions and the $X_t^{x,s}$ are i.i.d. copies of: 
+# $$
+# X_t^x \triangleq x + \int_0^t\alpha(s,X_s)ds + \int_0^t \beta(s,X_s)dB_s^H
+# .
+# $$
+
+# In[3]:
+
+
+if f_unknown_mode == "Rough_SDE_vanilla":
+    #--------------------------#
+    # Define Process' Dynamics #
+    #--------------------------#
+    # Define DNN Applier
+    def f_unknown_drift_vanilla(x):
+        x_internal = x.reshape(-1,)
+        x_internal = drift_constant*x_internal
+        return x_internal
+    def f_unknown_vol_vanilla(x):
+        x_internal = volatility_constant*diag(problem_dim)
+        return x_internal
+    
+    
+    
+#------------------------------------------------------------------------------#   
+#------------------------------------------------------------------------------#   
+# Note: The simulator is a bit more complicated in this case that the others.
+    def Simulator(x):
+        #-------------------#
+        # Initialization(s) #
+        #-------------------#
+        x_init = x.reshape(-1,)
+
+        #--------------------------------#
+        # Perform Monte-Carlo Simulation #
+        #--------------------------------#
+        for i_MC in range(N_Monte_Carlo_Samples):
+            # (re) Coerce input_data fBM Path
+            x_internal = x_init
+            # Get fBM path
+            for d in range(problem_dim):
+                fBM_gen_loop = (((FBM(n=N_Euler_Steps, hurst=Hurst_Exponent, length=1, method='daviesharte')).fbm())[1:]).reshape(-1,1)
+                if d == 0:
+                    fBM_gen = fBM_gen_loop
+                else:
+                    fBM_gen = np.append(fBM_gen,fBM_gen_loop,axis=-1)
+
+
+            #---------------#
+            # Generate Path #
+            #---------------#
+            for t in range(N_Euler_Steps):
+                # Coerce
+                x_internal = x_internal.reshape(-1,)
+                # Evolve Path
+                drift_update = f_unknown_drift(x_internal)/N_Euler_Steps
+                vol_update = f_unknown_vol(x_internal)
+                x_internal = (x_internal + drift_update + np.matmul(vol_update,fBM_gen[t,])).reshape(1,-1,problem_dim)
+                # Coerce
+                x_internal = x_internal.reshape(1,-1,problem_dim)
+                # Update Sample path
+                if t == 0:
+                    x_sample_path_loop = x_internal
+                else:
+                    x_sample_path_loop = np.append(x_sample_path_loop,x_internal,axis=0)
+            # Update Sample Path
+            if i_MC == 0:
+                x_sample_path = x_sample_path_loop
+            else:
+                x_sample_path = np.append(x_sample_path,x_sample_path_loop,axis=1)
+
+        #------------------------------------------#
+        # Get Inputs for These Monte-Carlo Outputs #
+        #------------------------------------------#
+        ## Generate Path in time
+        t_steps = (np.linspace(start = 0, stop = 1, num = N_Euler_Steps)).reshape(-1,1)
+        ## Generate x paired with this t
+        x_position_initialization = (np.repeat(x.reshape(1,-1),N_Euler_Steps,axis=0)).reshape(-1,problem_dim)
+        ## Create (t,x) pairs
+        X_inputs_to_return = np.append(t_steps,x_position_initialization,axis=1)
+
+
+        #------------------------------------------------------#
+        # Return Monte-Carlo Sample and Dataset update to User #
+        #------------------------------------------------------#
+        return X_inputs_to_return, x_sample_path
+
+
 # ## (fractional) SDE:
 # $$
 # (x,t)\mapsto \frac1{S}\sum_{s=1}^S\, \delta_{X_t^{x:s}}; 
@@ -238,7 +330,7 @@ if f_unknown_mode == "DNN_with_Bayesian_Dropout":
 # .
 # $$
 
-# In[19]:
+# In[2]:
 
 
 if f_unknown_mode == "Rough_SDE":

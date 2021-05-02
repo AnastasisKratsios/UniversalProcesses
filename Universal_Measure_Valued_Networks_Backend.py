@@ -256,10 +256,10 @@ for i in tqdm(range((X_train.shape[0]))):
     # Compute Error(s)
     ## W1
     W1_loop = transport_dist(x_source = points_of_mass,
-               w_source = b,
-               x_sink = np.array(Y_train[i,]).reshape(-1,),
-               w_sink = empirical_weights,
-               output_dim = output_dim)
+                             w_source = b,
+                             x_sink = np.array(Y_train[i,]).reshape(-1,),
+                             w_sink = empirical_weights,
+                             output_dim = output_dim)
     
     ## M1
     Mu_hat = np.matmul(points_of_mass.T,b).reshape(-1,)

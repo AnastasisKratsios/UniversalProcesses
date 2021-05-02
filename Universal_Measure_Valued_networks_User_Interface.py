@@ -33,10 +33,10 @@
 # #### Mode:
 # Software/Hardware Testing or Real-Deal?
 
-# In[1]:
+# In[10]:
 
 
-trial_run = True
+trial_run = False
 
 
 # ### Simulation Method:
@@ -44,15 +44,15 @@ trial_run = True
 # In[2]:
 
 
-# # Random DNN
+# Random DNN
 # f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
 
-# # Random DNN internal noise
+# Random DNN internal noise
 # f_unknown_mode = "DNN_with_Random_Weights"
 Depth_Bayesian_DNN = 1
 width = 5
 
-# # Random Dropout applied to trained DNN
+# Random Dropout applied to trained DNN
 # f_unknown_mode = "DNN_with_Bayesian_Dropout"
 Dropout_rate = 0.1
 
@@ -62,8 +62,30 @@ GD_epochs = 2
 
 # SDE with fractional Driver
 f_unknown_mode = "Rough_SDE"
-N_Euler_Steps = 10**1
-Hurst_Exponent = 0.5
+N_Euler_Steps = 10**2
+Hurst_Exponent = 0.75
+
+# f_unknown_mode = "Rough_SDE_Vanilla"
+## Define Process' dynamics in (2) cell(s) below.
+
+
+# #### Vanilla fractional SDE:
+# If f_unknown_mode == "Rough_SDE_Vanilla" is selected, then we can specify the process's dynamics.  
+
+# In[ ]:
+
+
+#--------------------------#
+# Define Process' Dynamics #
+#--------------------------#
+# Define DNN Applier
+def f_unknown_drift_vanilla(x):
+    x_internal = x.reshape(-1,)
+    x_internal = drift_constant*x_internal
+    return x_internal
+def f_unknown_vol_vanilla(x):
+    x_internal = volatility_constant*diag(problem_dim)
+    return x_internal
 
 
 # ## Problem Dimension
@@ -71,7 +93,7 @@ Hurst_Exponent = 0.5
 # In[3]:
 
 
-problem_dim = 5
+problem_dim = 1
 
 
 # ## Note: *Why the procedure is so computationally efficient*?
@@ -88,7 +110,7 @@ problem_dim = 5
 # In[4]:
 
 
-train_test_ratio = .2
+train_test_ratio = .1
 N_train_size = 20
 
 
@@ -98,7 +120,7 @@ N_train_size = 20
 
 
 ## Monte-Carlo
-N_Monte_Carlo_Samples = 10**1
+N_Monte_Carlo_Samples = 10**3
 
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!
@@ -134,7 +156,7 @@ exec(open('Data_Simulator_and_Parser.py').read())
 
 # # Run Main:
 
-# In[ ]:
+# In[11]:
 
 
 print("------------------------------")
@@ -157,7 +179,7 @@ print("------------------------------------")
 # \mathbb{R}^d \ni x \to f(x) \to \delta_{f(x)}\in \cap_{1\leq q<\infty}\mathcal{P}_{q}(\mathbb{R}).
 # $$
 
-# In[ ]:
+# In[12]:
 
 
 exec(open('CV_Grid.py').read())
@@ -173,7 +195,7 @@ exec(open('Benchmarks_Model_Builder_Pointmass_Based.py').read())
 
 # #### Training Model Facts
 
-# In[ ]:
+# In[13]:
 
 
 print(Summary_pred_Qual_models)
@@ -182,7 +204,7 @@ Summary_pred_Qual_models
 
 # #### Testing Model Facts
 
-# In[ ]:
+# In[14]:
 
 
 print(Summary_pred_Qual_models_test)
@@ -251,7 +273,7 @@ if output_dim == 1:
 # In[ ]:
 
 
-print("Final Test-Set Result(s)")
+print("Final Training-Set Result(s)")
 Summary_pred_Qual_models
 
 
@@ -260,7 +282,7 @@ Summary_pred_Qual_models
 # In[ ]:
 
 
-print("Final Training-Set Result(s)")
+print("Final Test-Set Result(s)")
 Summary_pred_Qual_models_test
 
 

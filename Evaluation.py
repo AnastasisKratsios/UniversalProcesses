@@ -87,7 +87,10 @@ def transport_dist(x_source,w_source,x_sink,w_sink,output_dim,OT_method="Sliced"
 # In[ ]:
 
 
-def get_deterministic_errors(X_inputs, mean_predictions,Y_targets,N_Bootstraps=10):
+def get_deterministic_errors(X_inputs, 
+                             mean_predictions,
+                             Y_targets,
+                             N_Bootstraps=10):
     print("#------------#")
     print(" Get Error(s) ")
     print("#------------#")
@@ -104,9 +107,9 @@ def get_deterministic_errors(X_inputs, mean_predictions,Y_targets,N_Bootstraps=1
             
         else:
             W1_loop = ot.emd2_1d(np.array([mean_predictions[i]]),
-                                     np.array(Y_targets[i,]).reshape(-1,),
-                                     np.ones(1),
-                                     empirical_weights)
+                                 np.array(Y_targets[i,]).reshape(-1,),
+                                 np.ones(1),
+                                 empirical_weights)
 
             ## M1
             Mu_hat = mean_predictions[i]

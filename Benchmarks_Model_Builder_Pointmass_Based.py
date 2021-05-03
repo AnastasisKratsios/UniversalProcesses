@@ -326,8 +326,16 @@ Summary_pred_Qual_models_test["ENET"] = pd.Series(np.append(np.append(ENET_error
                                                                      (ENET_eval_time/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models_test.index)
 
 print("Updated DataFrame")
+## Get Worst-Case
+Summary_pred_Qual_models_train = Summary_pred_Qual_models
+Summary_pred_Qual_models = np.maximum(Summary_pred_Qual_models,Summary_pred_Qual_models_test)
+## Write Performance Metrics
+Summary_pred_Qual_models.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+Summary_pred_Qual_models_train.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_train.tex"))
+Summary_pred_Qual_models_test.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
+# Update User
 print(Summary_pred_Qual_models_test)
-Summary_pred_Qual_models_test
+Summary_pred_Qual_models
 
 
 # ## Kernel Ridge Regression
@@ -378,8 +386,16 @@ Summary_pred_Qual_models_test["KRidge"] = pd.Series(np.append(np.append(kRidge_e
                                                                      (KRidge_eval_time/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models_test.index)
 
 print("Updated DataFrame")
+## Get Worst-Case
+Summary_pred_Qual_models_train = Summary_pred_Qual_models
+Summary_pred_Qual_models = np.maximum(Summary_pred_Qual_models,Summary_pred_Qual_models_test)
+## Write Performance Metrics
+Summary_pred_Qual_models.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+Summary_pred_Qual_models_train.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_train.tex"))
+Summary_pred_Qual_models_test.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
+# Update User
 print(Summary_pred_Qual_models_test)
-Summary_pred_Qual_models_test
+Summary_pred_Qual_models
 
 
 # ## Gradient-Boosted Random Forest
@@ -449,8 +465,16 @@ Summary_pred_Qual_models_test["GBRF"] = pd.Series(np.append(np.append(GBRF_error
                                                                      (GBRF_eval_time/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models_test.index)
 
 print("Updated DataFrame")
+## Get Worst-Case
+Summary_pred_Qual_models_train = Summary_pred_Qual_models
+Summary_pred_Qual_models = np.maximum(Summary_pred_Qual_models,Summary_pred_Qual_models_test)
+## Write Performance Metrics
+Summary_pred_Qual_models.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+Summary_pred_Qual_models_train.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_train.tex"))
+Summary_pred_Qual_models_test.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
+# Update User
 print(Summary_pred_Qual_models_test)
-Summary_pred_Qual_models_test
+Summary_pred_Qual_models
 
 
 # ## Feed-Forward DNN
@@ -510,8 +534,16 @@ Summary_pred_Qual_models_test["DNN"] = pd.Series(np.append(np.append(ffNN_errors
                                                                      (ffNN_eval_time/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models_test.index)
 
 print("Updated DataFrame")
+## Get Worst-Case
+Summary_pred_Qual_models_train = Summary_pred_Qual_models
+Summary_pred_Qual_models = np.maximum(Summary_pred_Qual_models,Summary_pred_Qual_models_test)
+## Write Performance Metrics
+Summary_pred_Qual_models.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+Summary_pred_Qual_models_train.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_train.tex"))
+Summary_pred_Qual_models_test.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
+# Update User
 print(Summary_pred_Qual_models_test)
-Summary_pred_Qual_models_test
+Summary_pred_Qual_models
 
 
 # ---

@@ -25,20 +25,20 @@ if trial_run == True:
     N_Boostraps_BCA = 50
 
 
-    param_grid_Deep_Classifier = {'batch_size': [8],
-                        'epochs': [5],
+    param_grid_Deep_Classifier = {'batch_size': [16],
+                        'epochs': [200],
                         'learning_rate': [0.00001],
-                        'height': [10],
-                        'depth': [1],
+                        'height': [200],
+                        'depth': [2],
                         'input_dim':[15],
                         'output_dim':[1]}
     
     # Random Forest Grid
     #--------------------#
     Rand_Forest_Grid = {'learning_rate': [0.01],
-                        'max_depth': [10],
-                        'min_samples_leaf': [3],
-                        'n_estimators': [500]}
+                        'max_depth': [8],
+                        'min_samples_leaf': [5],
+                        'n_estimators': [1000]}
     
     # Kernel Ridge #
     #--------------#

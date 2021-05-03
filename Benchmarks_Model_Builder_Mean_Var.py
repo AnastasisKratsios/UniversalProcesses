@@ -687,13 +687,15 @@ Summary_pred_Qual_models_test["DGN"] = pd.Series(np.append(np.append(W1_Errors_D
                                                                      (timer_output_Deep_Gaussian/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models_test.index)
 # Update Performance Metrics
 ## Train
-Summary_pred_Qual_models.to_latex((results_tables_path+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
-print("Training Results to date:")
-print(Summary_pred_Qual_models_test)
-## Test
-Summary_pred_Qual_models_test.to_latex((results_tables_path+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
-print("Test Results to date:")
-print(Summary_pred_Qual_models_test)
+## Get Worst-Case
+Summary_pred_Qual_models_train = Summary_pred_Qual_models
+Summary_pred_Qual_models = np.maximum(Summary_pred_Qual_models,Summary_pred_Qual_models_test)
+## Write Performance Metrics
+Summary_pred_Qual_models.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+Summary_pred_Qual_models_train.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_train.tex"))
+Summary_pred_Qual_models_test.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
+# Update User
+print(Summary_pred_Qual_models)
 print("------------------------------------------------")
 print("Updated Performance Metrics Dataframe and Saved!")
 print("------------------------------------------------")

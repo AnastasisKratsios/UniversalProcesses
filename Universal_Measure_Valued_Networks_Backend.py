@@ -273,7 +273,7 @@ for i in tqdm(range((X_train.shape[0]))):
     ## Tally W1-Related Errors
     ## Mu
     Mean_loop = np.sum(np.abs((Mu_hat-Mu)))
-    Mean_loop_MC = np.sum(np.abs((Mu_hat-Mu_MC)))
+    Mean_loop_MC = np.sum(np.abs((Mu-Mu_MC)))
     
     if f_unknown_mode != "Rough_SDE":
         ## Variance
@@ -396,7 +396,7 @@ for i in tqdm(range((X_test.shape[0]))):
     ## Tally W1-Related Errors
     ## Mu
     Mean_loop_test = np.sum(np.abs((Mu_hat_test-Mu_test)))
-    Mean_loop_MC_test = np.sum(np.abs((Mu_hat_test-Mu_MC_test)))
+    Mean_loop_MC_test = np.sum(np.abs((Mu_test-Mu_MC_test)))
     
     if f_unknown_mode != "Rough_SDE":
         ## M2

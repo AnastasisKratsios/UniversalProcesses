@@ -33,7 +33,7 @@
 # #### Mode:
 # Software/Hardware Testing or Real-Deal?
 
-# In[52]:
+# In[38]:
 
 
 trial_run = True
@@ -41,14 +41,14 @@ trial_run = True
 
 # ### Simulation Method:
 
-# In[53]:
+# In[39]:
 
 
 # Random DNN
 # f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
 
 # Random DNN internal noise
-# f_unknown_mode = "DNN_with_Random_Weights"
+f_unknown_mode = "DNN_with_Random_Weights"
 Depth_Bayesian_DNN = 1
 width = 5
 
@@ -58,21 +58,29 @@ Dropout_rate = 0.1
 
 # GD with Randomized Input
 # f_unknown_mode = "GD_with_randomized_input"
-GD_epochs = 2
+GD_epochs = 50
 
 # SDE with fractional Driver
-# f_unknown_mode = "Rough_SDE"
+#f_unknown_mode = "Rough_SDE"
 N_Euler_Steps = 10**2
 Hurst_Exponent = 0.75
 
-f_unknown_mode = "Rough_SDE_Vanilla"
+# f_unknown_mode = "Rough_SDE_Vanilla"
 ## Define Process' dynamics in (2) cell(s) below.
+
+
+# ## Problem Dimension
+
+# In[40]:
+
+
+problem_dim = 1
 
 
 # #### Vanilla fractional SDE:
 # If f_unknown_mode == "Rough_SDE_Vanilla" is selected, then we can specify the process's dynamics.  
 
-# In[54]:
+# In[41]:
 
 
 #--------------------------#
@@ -91,14 +99,6 @@ def f_unknown_vol_vanilla(x):
     return x_internal
 
 
-# ## Problem Dimension
-
-# In[44]:
-
-
-problem_dim = 1
-
-
 # ## Note: *Why the procedure is so computationally efficient*?
 # ---
 #  - The sample barycenters do not require us to solve for any new Wasserstein-1 Barycenters; which is much more computationally costly,
@@ -110,16 +110,16 @@ problem_dim = 1
 # - Ratio $\frac{\text{Testing Datasize}}{\text{Training Datasize}}$.
 # - Number of Training Points to Generate
 
-# In[45]:
+# In[42]:
 
 
-train_test_ratio = .1
+train_test_ratio = .2
 N_train_size = 10
 
 
 # Monte-Carlo Paramters
 
-# In[46]:
+# In[43]:
 
 
 ## Monte-Carlo
@@ -128,17 +128,17 @@ N_Monte_Carlo_Samples = 10**5
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!
 
-# In[47]:
+# In[44]:
 
 
 # Hyper-parameters of Cover
-delta = 0.01
+delta = 0.1
 Proportion_per_cluster = .75
 
 
 # ## Dependencies and Auxiliary Script(s)
 
-# In[48]:
+# In[45]:
 
 
 # %run Loader.ipynb
@@ -150,7 +150,7 @@ import time as time #<- Note sure why...but its always seems to need 'its own sp
 
 # # Simulate or Parse Data
 
-# In[62]:
+# In[46]:
 
 
 # %run Data_Simulator_and_Parser.ipynb
@@ -160,7 +160,7 @@ exec(open('Data_Simulator_and_Parser.py').read())
 # #### Scale Data
 # This is especially important to avoid exploding gradient problems when training the ML-models.
 
-# In[70]:
+# In[62]:
 
 
 scaler = StandardScaler()
@@ -172,7 +172,7 @@ X_test = scaler.transform(X_test)
 
 # # Run Main:
 
-# In[71]:
+# In[63]:
 
 
 print("------------------------------")
@@ -195,7 +195,7 @@ print("------------------------------------")
 # \mathbb{R}^d \ni x \to f(x) \to \delta_{f(x)}\in \cap_{1\leq q<\infty}\mathcal{P}_{q}(\mathbb{R}).
 # $$
 
-# In[72]:
+# In[65]:
 
 
 exec(open('CV_Grid.py').read())
@@ -211,7 +211,7 @@ exec(open('Benchmarks_Model_Builder_Pointmass_Based.py').read())
 
 # #### Training Model Facts
 
-# In[ ]:
+# In[66]:
 
 
 print(Summary_pred_Qual_models)
@@ -220,7 +220,7 @@ Summary_pred_Qual_models
 
 # #### Testing Model Facts
 
-# In[ ]:
+# In[68]:
 
 
 print(Summary_pred_Qual_models_test)
@@ -240,14 +240,14 @@ Summary_pred_Qual_models_test
 # 
 # Examples of this type of architecture are especially prevalent in uncertainty quantification; see ([Deep Ensembles](https://arxiv.org/abs/1612.01474)] or [NOMU: Neural Optimization-based Model Uncertainty](https://arxiv.org/abs/2102.13640).  Moreover, their universality in $C(\mathbb{R}^d,\mathcal{G}_2)$ is known, and has been shown in [Corollary 4.7](https://arxiv.org/abs/2101.05390).
 
-# In[ ]:
+# In[69]:
 
 
 # %run Benchmarks_Model_Builder_Mean_Var.ipynb
 exec(open('Benchmarks_Model_Builder_Mean_Var.py').read())
 
 
-# In[ ]:
+# In[70]:
 
 
 print("Prediction Quality (Updated): Test")
@@ -255,7 +255,7 @@ print(Summary_pred_Qual_models_test)
 Summary_pred_Qual_models_test
 
 
-# In[ ]:
+# In[71]:
 
 
 print("Prediction Quality (Updated): Train")
@@ -269,7 +269,7 @@ Summary_pred_Qual_models
 # - For every $x$ in the trainingdata-set we fit a GMM $\hat{\nu}_x$, using the [Expectation-Maximization (EM) algorithm](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm), with the same number of centers as the deep neural model in $\mathcal{NN}_{1_{\mathbb{R}^d},\mathcal{D}}^{\sigma:\star}$ which we are evaluating.  
 # - A Mixture density network is then trained to predict the infered parameters; given any $x \in \mathbb{R}^d$.
 
-# In[ ]:
+# In[72]:
 
 
 if output_dim == 1:
@@ -280,51 +280,40 @@ if output_dim == 1:
 # ## Get Final Outputs
 # Now we piece together all the numerical experiments and report a nice summary.
 
-# # Result(s)
+# ---
+# # Final Results
+# ---
 
-# ## Prediction Quality
+# ## Prasing Quality Metric Results
 
-# #### Training
+# #### Finalizing Saving
 
-# In[ ]:
-
-
-print("Final Training-Set Result(s)")
-Summary_pred_Qual_models
+# In[73]:
 
 
-# #### Test
-
-# In[ ]:
-
-
-print("Final Test-Set Result(s)")
-Summary_pred_Qual_models_test
+## Write Performance Metrics
+Summary_pred_Qual_models.to_latex((results_tables_path+"/Final_Results/"+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"),
+                                 caption=("Quality Metrics; d:"+str(problem_dim)+", D:"+str(output_dim)+", Depth:"+str(Depth_Bayesian_DNN)+", Width:"+str(width)+", Dropout rate:"+str(Dropout_rate)+"."),
+                                 float_format="{:0.3g}".format)
 
 
 # # For Terminal Runner(s):
 
-# In[ ]:
+# In[74]:
 
 
 # For Terminal Running
-print("============================")
-print("Training Predictive Quality:")
-print("============================")
+print("===================")
+print("Predictive Quality:")
+print("===================")
 print(Summary_pred_Qual_models)
-print(" ")
-print(" ")
-print(" ")
-print("===========================")
-print("Testing Predictive Quality:")
-print("===========================")
-print(Summary_pred_Qual_models_test)
-print("================================")
+print("===================")
 print(" ")
 print(" ")
 print(" ")
 print("Kernel_Used_in_GPR: "+str(GPR_trash.kernel))
 print("🙃🙃 Have a wonderful day! 🙃🙃")
+Summary_pred_Qual_models
 
 
 # ---

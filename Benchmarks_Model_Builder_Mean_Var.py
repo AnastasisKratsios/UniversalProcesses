@@ -5,7 +5,7 @@
 # 
 # **Note:** *NB, this means that this script *must* be run after the point-mass benchmarks script!*
 
-# In[4]:
+# In[1]:
 
 
 # %run Debug_Menu.ipynb
@@ -662,7 +662,7 @@ print("Updating Performance Metrics Dataframe and Saved!")
 print("-------------------------------------------------")
 # Append Gaussian Process Regressor Performance
 # Train
-Summary_pred_Qual_models["GPR"] = pd.Series(np.append(np.append(W1_Errors_GPR,
+Summary_pred_Qual_models_internal["GPR"] = pd.Series(np.append(np.append(W1_Errors_GPR,
                                                                 M1_Errors_GPR),
                                                          np.array([0,
                                                                    GRP_time,
@@ -674,7 +674,7 @@ Summary_pred_Qual_models_test["GPR"] = pd.Series(np.append(np.append(W1_Errors_G
                                                                    GRP_time,
                                                                    (GPR_test_time_prediction/Test_Set_PredictionTime_MC)])), index=Summary_pred_Qual_models_test.index)
 # Append Deep Gaussian Network Performance
-Summary_pred_Qual_models["DGN"] = pd.Series(np.append(np.append(W1_Errors_DGN,
+Summary_pred_Qual_models_internal["DGN"] = pd.Series(np.append(np.append(W1_Errors_DGN,
                                                                 M1_Errors_DGN),
                                                       np.array([N_params_deep_Gaussian,
                                                                 timer_DGN,
@@ -688,12 +688,18 @@ Summary_pred_Qual_models_test["DGN"] = pd.Series(np.append(np.append(W1_Errors_D
 # Update Performance Metrics
 ## Train
 ## Get Worst-Case
-Summary_pred_Qual_models_train = Summary_pred_Qual_models
-Summary_pred_Qual_models = np.maximum(Summary_pred_Qual_models,Summary_pred_Qual_models_test)
+Summary_pred_Qual_models_train = Summary_pred_Qual_models_internal
+Summary_pred_Qual_models_internal = np.maximum(Summary_pred_Qual_models_internal,Summary_pred_Qual_models_test)
 ## Write Performance Metrics
-Summary_pred_Qual_models.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+Summary_pred_Qual_models_internal.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
 Summary_pred_Qual_models_train.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_train.tex"))
 Summary_pred_Qual_models_test.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
+
+# Remove W1 estimates from x \mapsto \delta_{f(x)}
+Summary_pred_Qual_models = Summary_pred_Qual_models_internal.copy()
+Summary_pred_Qual_models.loc[['W1-95L','W1','W1-95R'],['ENET','KRidge','ENET','GBRF','DNN']] = "-"
+Summary_pred_Qual_models.to_latex((results_tables_path+"Final_Results/Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+
 # Update User
 print(Summary_pred_Qual_models)
 print("------------------------------------------------")

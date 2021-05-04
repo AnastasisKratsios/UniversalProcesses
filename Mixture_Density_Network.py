@@ -666,7 +666,7 @@ print("-------------------------------------------------")
 print("Updating Performance Metrics Dataframe and Saved!")
 print("-------------------------------------------------")
 # Train
-Summary_pred_Qual_models["MDN"] = pd.Series(np.append(np.append(W1_Errors_MDN,
+Summary_pred_Qual_models_internal["MDN"] = pd.Series(np.append(np.append(W1_Errors_MDN,
                                                                 Mean_Errors_MDN),
                                                          np.array([MDNs_Tot_N_Params,
                                                                    MDNs_Tot_time,
@@ -692,12 +692,17 @@ Summary_pred_Qual_models_test
 # Save Quality Metrics #
 #----------------------#
 ## Get Worst-Case
-Summary_pred_Qual_models_train = Summary_pred_Qual_models
-Summary_pred_Qual_models = np.maximum(Summary_pred_Qual_models,Summary_pred_Qual_models_test)
+Summary_pred_Qual_models_train = Summary_pred_Qual_models_internal
+Summary_pred_Qual_models_internal = np.maximum(Summary_pred_Qual_models_internal,Summary_pred_Qual_models_test)
 ## Write Performance Metrics
-Summary_pred_Qual_models.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+Summary_pred_Qual_models_internal.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
 Summary_pred_Qual_models_train.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_train.tex"))
 Summary_pred_Qual_models_test.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
+
+# Remove W1 estimates from x \mapsto \delta_{f(x)}
+Summary_pred_Qual_models = Summary_pred_Qual_models_internal.copy()
+Summary_pred_Qual_models.loc[['W1-95L','W1','W1-95R'],['ENET','KRidge','ENET','GBRF','DNN']] = "-"
+Summary_pred_Qual_models.to_latex((results_tables_path+"Final_Results/Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
 # Update User
 print(Summary_pred_Qual_models)
 Summary_pred_Qual_models

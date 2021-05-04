@@ -313,7 +313,7 @@ Timer_ENET = time.time() - Timer_ENET
 
 
 # Train
-Summary_pred_Qual_models["ENET"] = pd.Series(np.append(np.append(ENET_errors_W1,
+Summary_pred_Qual_models_internal["ENET"] = pd.Series(np.append(np.append(ENET_errors_W1,
                                                                 ENET_errors_M1),
                                                          np.array([ENET_N_Params,
                                                                    Timer_ENET,
@@ -327,15 +327,24 @@ Summary_pred_Qual_models_test["ENET"] = pd.Series(np.append(np.append(ENET_error
 
 print("Updated DataFrame")
 ## Get Worst-Case
-Summary_pred_Qual_models_train = Summary_pred_Qual_models
-Summary_pred_Qual_models = np.maximum(Summary_pred_Qual_models,Summary_pred_Qual_models_test)
+Summary_pred_Qual_models_train = Summary_pred_Qual_models_internal
+Summary_pred_Qual_models_internal = np.maximum(Summary_pred_Qual_models_internal,Summary_pred_Qual_models_test)
+Summary_pred_Qual_models = np.copy(Summary_pred_Qual_models_internal)
 ## Write Performance Metrics
-Summary_pred_Qual_models.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+Summary_pred_Qual_models_internal.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
 Summary_pred_Qual_models_train.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_train.tex"))
 Summary_pred_Qual_models_test.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
+
+# Remove W1 estimates from x \mapsto \delta_{f(x)}
+Summary_pred_Qual_models = Summary_pred_Qual_models_internal.copy()
+Summary_pred_Qual_models.loc[['W1-95L','W1','W1-95R'],['ENET','KRidge','ENET','GBRF','DNN']] = "-"
+Summary_pred_Qual_models.to_latex((results_tables_path+"Final_Results/Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+
 # Update User
-print(Summary_pred_Qual_models_test)
-Summary_pred_Qual_models
+print(Summary_pred_Qual_models)
+print("------------------------------------------------")
+print("Updated Performance Metrics Dataframe and Saved!")
+print("------------------------------------------------")
 
 
 # ## Kernel Ridge Regression
@@ -373,7 +382,7 @@ Timer_kRidge = time.time() - Timer_kRidge
 
 
 # Train
-Summary_pred_Qual_models["KRidge"] = pd.Series(np.append(np.append(kRidge_errors_W1,
+Summary_pred_Qual_models_internal["KRidge"] = pd.Series(np.append(np.append(kRidge_errors_W1,
                                                                 kRidge_errors_M1),
                                                          np.array([0,
                                                                    Timer_kRidge,
@@ -387,15 +396,24 @@ Summary_pred_Qual_models_test["KRidge"] = pd.Series(np.append(np.append(kRidge_e
 
 print("Updated DataFrame")
 ## Get Worst-Case
-Summary_pred_Qual_models_train = Summary_pred_Qual_models
-Summary_pred_Qual_models = np.maximum(Summary_pred_Qual_models,Summary_pred_Qual_models_test)
+Summary_pred_Qual_models_train = Summary_pred_Qual_models_internal
+Summary_pred_Qual_models_internal = np.maximum(Summary_pred_Qual_models_internal,Summary_pred_Qual_models_test)
+Summary_pred_Qual_models = np.copy(Summary_pred_Qual_models_internal)
 ## Write Performance Metrics
-Summary_pred_Qual_models.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+Summary_pred_Qual_models_internal.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
 Summary_pred_Qual_models_train.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_train.tex"))
 Summary_pred_Qual_models_test.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
+
+# Remove W1 estimates from x \mapsto \delta_{f(x)}
+Summary_pred_Qual_models = Summary_pred_Qual_models_internal.copy()
+Summary_pred_Qual_models.loc[['W1-95L','W1','W1-95R'],['ENET','KRidge','ENET','GBRF','DNN']] = "-"
+Summary_pred_Qual_models.to_latex((results_tables_path+"Final_Results/Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+
 # Update User
-print(Summary_pred_Qual_models_test)
-Summary_pred_Qual_models
+print(Summary_pred_Qual_models)
+print("------------------------------------------------")
+print("Updated Performance Metrics Dataframe and Saved!")
+print("------------------------------------------------")
 
 
 # ## Gradient-Boosted Random Forest
@@ -452,7 +470,7 @@ Timer_GBRF = time.time() - Timer_GBRF
 
 
 # Train
-Summary_pred_Qual_models["GBRF"] = pd.Series(np.append(np.append(GBRF_errors_W1,
+Summary_pred_Qual_models_internal["GBRF"] = pd.Series(np.append(np.append(GBRF_errors_W1,
                                                                 GBRF_errors_M1),
                                                          np.array([GBRF_N_Params,
                                                                    Timer_GBRF,
@@ -466,15 +484,24 @@ Summary_pred_Qual_models_test["GBRF"] = pd.Series(np.append(np.append(GBRF_error
 
 print("Updated DataFrame")
 ## Get Worst-Case
-Summary_pred_Qual_models_train = Summary_pred_Qual_models
-Summary_pred_Qual_models = np.maximum(Summary_pred_Qual_models,Summary_pred_Qual_models_test)
+Summary_pred_Qual_models_train = Summary_pred_Qual_models_internal
+Summary_pred_Qual_models_internal = np.maximum(Summary_pred_Qual_models_internal,Summary_pred_Qual_models_test)
+Summary_pred_Qual_models = np.copy(Summary_pred_Qual_models_internal)
 ## Write Performance Metrics
-Summary_pred_Qual_models.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+Summary_pred_Qual_models_internal.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
 Summary_pred_Qual_models_train.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_train.tex"))
 Summary_pred_Qual_models_test.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
+
+# Remove W1 estimates from x \mapsto \delta_{f(x)}
+Summary_pred_Qual_models = Summary_pred_Qual_models_internal.copy()
+Summary_pred_Qual_models.loc[['W1-95L','W1','W1-95R'],['ENET','KRidge','ENET','GBRF','DNN']] = "-"
+Summary_pred_Qual_models.to_latex((results_tables_path+"Final_Results/Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+
 # Update User
-print(Summary_pred_Qual_models_test)
-Summary_pred_Qual_models
+print(Summary_pred_Qual_models)
+print("------------------------------------------------")
+print("Updated Performance Metrics Dataframe and Saved!")
+print("------------------------------------------------")
 
 
 # ## Feed-Forward DNN
@@ -521,7 +548,7 @@ Timer_ffNN =  time.time() - Timer_ffNN
 
 
 # Train
-Summary_pred_Qual_models["DNN"] = pd.Series(np.append(np.append(ffNN_errors_W1,
+Summary_pred_Qual_models_internal["DNN"] = pd.Series(np.append(np.append(ffNN_errors_W1,
                                                                 ffNN_errors_M1),
                                                          np.array([ffNN_N_Params,
                                                                    Timer_ffNN,
@@ -535,15 +562,35 @@ Summary_pred_Qual_models_test["DNN"] = pd.Series(np.append(np.append(ffNN_errors
 
 print("Updated DataFrame")
 ## Get Worst-Case
-Summary_pred_Qual_models_train = Summary_pred_Qual_models
-Summary_pred_Qual_models = np.maximum(Summary_pred_Qual_models,Summary_pred_Qual_models_test)
+Summary_pred_Qual_models_train = Summary_pred_Qual_models_internal
+Summary_pred_Qual_models_internal = np.maximum(Summary_pred_Qual_models_internal,Summary_pred_Qual_models_test)
+Summary_pred_Qual_models = np.copy(Summary_pred_Qual_models_internal)
 ## Write Performance Metrics
-Summary_pred_Qual_models.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+Summary_pred_Qual_models_internal.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
 Summary_pred_Qual_models_train.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_train.tex"))
 Summary_pred_Qual_models_test.to_latex((results_tables_path+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS_test.tex"))
+
+# Remove W1 estimates from x \mapsto \delta_{f(x)}
+Summary_pred_Qual_models = Summary_pred_Qual_models_internal.copy()
+Summary_pred_Qual_models.loc[['W1-95L','W1','W1-95R'],['ENET','KRidge','ENET','GBRF','DNN']] = "-"
+Summary_pred_Qual_models.to_latex((results_tables_path+"Final_Results/Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
+
 # Update User
-print(Summary_pred_Qual_models_test)
-Summary_pred_Qual_models
+print(Summary_pred_Qual_models)
+print("------------------------------------------------")
+print("Updated Performance Metrics Dataframe and Saved!")
+print("------------------------------------------------")
+
+
+# ### Remove meaningless value of $\delta_{f(x)}$
+
+# In[1]:
+
+
+# Remove W1 estimates from x \mapsto \delta_{f(x)}
+Summary_pred_Qual_models = Summary_pred_Qual_models_internal.copy()
+Summary_pred_Qual_models.loc[['W1-95L','W1','W1-95R'],['ENET','KRidge','ENET','GBRF','DNN']] = "-"
+Summary_pred_Qual_models.to_latex((results_tables_path+"Final_Results/Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"))
 
 
 # ---

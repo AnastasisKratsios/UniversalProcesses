@@ -53,7 +53,7 @@ Depth_Bayesian_DNN = 2
 width = 10
 
 # Random Dropout applied to trained DNN
-# f_unknown_mode = "DNN_with_Bayesian_Dropout"
+f_unknown_mode = "DNN_with_Bayesian_Dropout"
 Dropout_rate = 0.1
 
 # GD with Randomized Input
@@ -61,7 +61,7 @@ Dropout_rate = 0.1
 GD_epochs = 50
 
 # SDE with fractional Driver
-f_unknown_mode = "Rough_SDE"
+# f_unknown_mode = "Rough_SDE"
 N_Euler_Steps = 10**2
 Hurst_Exponent = 0.75
 
@@ -151,7 +151,7 @@ import time as time #<- Note sure why...but its always seems to need 'its own sp
 
 # # Simulate or Parse Data
 
-# In[ ]:
+# In[9]:
 
 
 # %run Data_Simulator_and_Parser.ipynb
@@ -161,7 +161,7 @@ exec(open('Data_Simulator_and_Parser.py').read())
 # #### Scale Data
 # This is especially important to avoid exploding gradient problems when training the ML-models.
 
-# In[ ]:
+# In[10]:
 
 
 scaler = StandardScaler()
@@ -173,7 +173,7 @@ X_test = scaler.transform(X_test)
 
 # # Run Main:
 
-# In[ ]:
+# In[11]:
 
 
 print("------------------------------")
@@ -196,7 +196,7 @@ print("------------------------------------")
 # \mathbb{R}^d \ni x \to f(x) \to \delta_{f(x)}\in \cap_{1\leq q<\infty}\mathcal{P}_{q}(\mathbb{R}).
 # $$
 
-# In[ ]:
+# In[12]:
 
 
 exec(open('CV_Grid.py').read())
@@ -212,7 +212,7 @@ exec(open('Benchmarks_Model_Builder_Pointmass_Based.py').read())
 
 # #### Training Model Facts
 
-# In[ ]:
+# In[13]:
 
 
 print(Summary_pred_Qual_models)
@@ -221,7 +221,7 @@ Summary_pred_Qual_models
 
 # #### Testing Model Facts
 
-# In[ ]:
+# In[14]:
 
 
 print(Summary_pred_Qual_models_test)
@@ -241,14 +241,14 @@ Summary_pred_Qual_models_test
 # 
 # Examples of this type of architecture are especially prevalent in uncertainty quantification; see ([Deep Ensembles](https://arxiv.org/abs/1612.01474)] or [NOMU: Neural Optimization-based Model Uncertainty](https://arxiv.org/abs/2102.13640).  Moreover, their universality in $C(\mathbb{R}^d,\mathcal{G}_2)$ is known, and has been shown in [Corollary 4.7](https://arxiv.org/abs/2101.05390).
 
-# In[ ]:
+# In[15]:
 
 
 # %run Benchmarks_Model_Builder_Mean_Var.ipynb
 exec(open('Benchmarks_Model_Builder_Mean_Var.py').read())
 
 
-# In[ ]:
+# In[16]:
 
 
 print("Prediction Quality (Updated): Test")
@@ -256,7 +256,7 @@ print(Summary_pred_Qual_models_test)
 Summary_pred_Qual_models_test
 
 
-# In[ ]:
+# In[17]:
 
 
 print("Prediction Quality (Updated): Train")
@@ -270,7 +270,7 @@ Summary_pred_Qual_models
 # - For every $x$ in the trainingdata-set we fit a GMM $\hat{\nu}_x$, using the [Expectation-Maximization (EM) algorithm](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm), with the same number of centers as the deep neural model in $\mathcal{NN}_{1_{\mathbb{R}^d},\mathcal{D}}^{\sigma:\star}$ which we are evaluating.  
 # - A Mixture density network is then trained to predict the infered parameters; given any $x \in \mathbb{R}^d$.
 
-# In[ ]:
+# In[18]:
 
 
 if output_dim == 1:
@@ -289,10 +289,19 @@ if output_dim == 1:
 
 # #### Finalizing Saving
 
-# In[ ]:
+# In[23]:
 
 
 ## Write Performance Metrics
+### Incase caption breaks
+Summary_pred_Qual_models.to_latex((results_tables_path+"/Final_Results/"+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"),
+                                 float_format="{:0.3g}".format)
+text_file = open((results_tables_path+"/Final_Results/"+"ZZZ_CAPTION_Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS___CAPTION.tex"), "w")
+text_file.write("Quality Metrics; d:"+str(problem_dim)+", D:"+str(output_dim)+", Depth:"+str(Depth_Bayesian_DNN)+", Width:"+str(width)+", Dropout rate:"+str(Dropout_rate)+".")
+text_file.close()
+
+
+### Incase caption does not break
 Summary_pred_Qual_models.to_latex((results_tables_path+"/Final_Results/"+"Performance_metrics_Problem_Type_"+str(f_unknown_mode)+"Problemdimension"+str(problem_dim)+"__SUMMARY_METRICS.tex"),
                                  caption=("Quality Metrics; d:"+str(problem_dim)+", D:"+str(output_dim)+", Depth:"+str(Depth_Bayesian_DNN)+", Width:"+str(width)+", Dropout rate:"+str(Dropout_rate)+"."),
                                  float_format="{:0.3g}".format)
@@ -300,7 +309,7 @@ Summary_pred_Qual_models.to_latex((results_tables_path+"/Final_Results/"+"Perfor
 
 # # For Terminal Runner(s):
 
-# In[ ]:
+# In[20]:
 
 
 # For Terminal Running

@@ -6,7 +6,7 @@
 # 
 # ---
 
-# In[38]:
+# In[1]:
 
 
 print("---------------------------------------")
@@ -16,8 +16,10 @@ print("---------------------------------------")
 
 # #### For Debugging
 
-# In[9]:
+# In[24]:
 
+
+# trial_run = True
 
 # problem_dim = 3
 
@@ -38,9 +40,14 @@ print("---------------------------------------")
 
 
 # # Random DNN
-# f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
+# # f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
 
 # # Random DNN internal noise
+# # Real-world data version
+# f_unknown_mode = "Extreme_Learning_Machine"
+# dataset_option = 'crypto'
+# N_Random_Features = 10**2
+# # Simulated Data version
 # # f_unknown_mode = "DNN_with_Random_Weights"
 # Depth_Bayesian_DNN = 2
 # width = 20
@@ -50,7 +57,7 @@ print("---------------------------------------")
 # Dropout_rate = 0.1
 
 # # Rough SDE (time 1)
-# f_unknown_mode = "Rough_SDE"
+# # f_unknown_mode = "Rough_SDE"
 
 # # GD with Randomized Input
 # # f_unknown_mode = "GD_with_randomized_input"
@@ -58,7 +65,7 @@ print("---------------------------------------")
 
 
 
-# %run Loader.py
+# exec(open('Loader.py').read())
 # # Load Packages/Modules
 # exec(open('Init_Dump.py').read())
 # trial_run = True
@@ -88,7 +95,7 @@ print("---------------------------------------")
 # N_test_size = int(np.round(N_train_size*train_test_ratio,0))
 
 
-# In[7]:
+# In[3]:
 
 
 Train_Set_PredictionTime_MC = time.time()
@@ -96,7 +103,7 @@ Train_Set_PredictionTime_MC = time.time()
 
 # # Decide on Which Simulator/Parser To Load:
 
-# In[8]:
+# In[4]:
 
 
 print("Deciding on Which Simulator/Parser To Load")
@@ -107,7 +114,7 @@ print("Deciding on Which Simulator/Parser To Load")
 # Y_x \sim f(x) + \text{Laplace}\left(\tilde{f}(x),\|x\|\right).
 # $$
 
-# In[9]:
+# In[5]:
 
 
 if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
@@ -149,7 +156,7 @@ if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
 
 # ## Bayesian DNN
 
-# In[10]:
+# In[6]:
 
 
 if f_unknown_mode == "DNN_with_Random_Weights":
@@ -181,7 +188,7 @@ if f_unknown_mode == "DNN_with_Random_Weights":
 
 # ## Vanilla DNN with MC-Droupout
 
-# In[11]:
+# In[7]:
 
 
 if f_unknown_mode == "DNN_with_Bayesian_Dropout":
@@ -238,7 +245,7 @@ if f_unknown_mode == "DNN_with_Bayesian_Dropout":
 # .
 # $$
 
-# In[12]:
+# In[8]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -369,7 +376,7 @@ if f_unknown_mode == "Rough_SDE":
 # .
 # $$
 
-# In[13]:
+# In[9]:
 
 
 if f_unknown_mode == "Rough_SDE_Vanilla": 
@@ -443,7 +450,7 @@ if f_unknown_mode == "Rough_SDE_Vanilla":
 
 # # Set/Define: Internal Parameters
 
-# In[14]:
+# In[10]:
 
 
 print("Setting/Defining: Internal Parameters")
@@ -453,7 +460,7 @@ print("Setting/Defining: Internal Parameters")
 # 
 # **Note:** *This is only relevant for (fractional) SDE Example which is multi-dimensional in the output space.*
 
-# In[15]:
+# In[11]:
 
 
 if f_unknown_mode != "Rough_SDE":
@@ -464,7 +471,7 @@ else:
 
 # ## Decide on Testing Set's Size
 
-# In[16]:
+# In[12]:
 
 
 N_test_size = int(np.round(N_train_size*train_test_ratio,0))
@@ -474,7 +481,7 @@ N_test_size = int(np.round(N_train_size*train_test_ratio,0))
 # # Decide on Which Type of Data to Get/Simulate
 # ---
 
-# In[35]:
+# In[13]:
 
 
 print("Deciding on Which Type of Data to Get/Simulate")
@@ -483,7 +490,7 @@ print("Deciding on Which Type of Data to Get/Simulate")
 # ## Initialize Inputs (Training & Testing) for: 
 # *Non-SDE and non GD with random inputs examples*.
 
-# In[22]:
+# In[14]:
 
 
 if f_unknown_mode != "GD_with_randomized_input":
@@ -501,7 +508,7 @@ if f_unknown_mode != "GD_with_randomized_input":
 # #### Relabel if fSDE is used instead
 # **Explanation:** *The "lowercase x" is used to highlight that the X is made of time-space pairs: (t,x).*
 
-# In[23]:
+# In[15]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -515,74 +522,311 @@ if f_unknown_mode == "Rough_SDE":
 # Y_x\triangleq \hat{f}_{\theta_T}(x),\qquad \theta_{t+1} \triangleq \theta_t - \nabla \sum_{x\in \mathbb{X}} \|\hat{f}_{\theta_t}(x)-f(x)\|, \qquad \theta_0 \sim N_d(0,1).
 # $$
 
-# In[24]:
+# In[16]:
 
 
 if f_unknown_mode == "GD_with_randomized_input":
     # Auxiliary Initialization(s)
     Train_step_proportion = 1-train_test_ratio
 
-    #--------------#
-    # Prepare Data #
-    #--------------#
-    # Read Dataset
-    crypto_data = pd.read_csv('inputs/data/cryptocurrencies/Cryptos_All_in_one.csv')
-    # Format Date-Time
-    crypto_data['Date'] = pd.to_datetime(crypto_data['Date'],infer_datetime_format=True)
-    crypto_data.set_index('Date', drop=True, inplace=True)
-    crypto_data.index.names = [None]
+    
+    if dataset_option == "crypto":
+        #--------------#
+        # Prepare Data #
+        #--------------#
+        # Read Dataset
+        crypto_data = pd.read_csv('inputs/data/cryptocurrencies/Cryptos_All_in_one.csv')
+        # Format Date-Time
+        crypto_data['Date'] = pd.to_datetime(crypto_data['Date'],infer_datetime_format=True)
+        crypto_data.set_index('Date', drop=True, inplace=True)
+        crypto_data.index.names = [None]
 
-    # Remove Missing Data
-    crypto_data = crypto_data[crypto_data.isna().any(axis=1)==False]
+        # Remove Missing Data
+        crypto_data = crypto_data[crypto_data.isna().any(axis=1)==False]
 
-    # Get Returns
-    crypto_returns = crypto_data.diff().iloc[1:]
+        # Get Returns
+        crypto_returns = crypto_data.diff().iloc[1:]
 
-    # Parse Regressors from Targets
-    ## Get Regression Targets
-    crypto_target_data = pd.DataFrame({'BITCOIN-closing':crypto_returns['BITCOIN-Close']})
-    ## Get Regressors
-    crypto_data_returns = crypto_returns.drop('BITCOIN-Close', axis=1)  
+        # Parse Regressors from Targets
+        ## Get Regression Targets
+        crypto_target_data = pd.DataFrame({'BITCOIN-closing':crypto_returns['BITCOIN-Close']})
+        ## Get Regressors
+        crypto_data_returns = crypto_returns.drop('BITCOIN-Close', axis=1)  
 
-    #-------------#
-    # Subset Data #
-    #-------------#
-    # Get indices
-    N_train_step = int(round(crypto_data_returns.shape[0]*Train_step_proportion,0))
-    N_test_set = int(crypto_data_returns.shape[0] - round(crypto_data_returns.shape[0]*Train_step_proportion,0))
-    # # Get Datasets
-    X_train = crypto_data_returns[:N_train_step]
-    X_test = crypto_data_returns[-N_test_set:]
+        #-------------#
+        # Subset Data #
+        #-------------#
+        # Get indices
+        N_train_step = int(round(crypto_data_returns.shape[0]*Train_step_proportion,0))
+        N_test_set = int(crypto_data_returns.shape[0] - round(crypto_data_returns.shape[0]*Train_step_proportion,0))
+        # # Get Datasets
+        X_train = crypto_data_returns[:N_train_step]
+        X_test = crypto_data_returns[-N_test_set:]
 
-    ## Coerce into format used in benchmark model(s)
-    data_x = X_train
-    data_x_test = X_test
-    # Get Targets 
-    data_y = crypto_target_data[:N_train_step]
-    data_y_test = crypto_target_data[-N_test_set:]
+        ## Coerce into format used in benchmark model(s)
+        data_x = X_train
+        data_x_test = X_test
+        # Get Targets 
+        data_y = crypto_target_data[:N_train_step]
+        data_y_test = crypto_target_data[-N_test_set:]
 
-    # Scale Data
-    scaler = StandardScaler()
-    data_x = scaler.fit_transform(data_x)
-    data_x_test = scaler.transform(data_x_test)
+        # Scale Data
+        scaler = StandardScaler()
+        data_x = scaler.fit_transform(data_x)
+        data_x_test = scaler.transform(data_x_test)
 
-    # # Update User
-    print('#================================================#')
-    print(' Training Datasize: '+str(X_train.shape[0])+' and test datasize: ' + str(X_test.shape[0]) + '.  ')
-    print('#================================================#')
+        # # Update User
+        print('#================================================#')
+        print(' Training Datasize: '+str(X_train.shape[0])+' and test datasize: ' + str(X_test.shape[0]) + '.  ')
+        print('#================================================#')
+    
+    if dataset_option == "SnP":
+        #--------------#
+        # Get S&P Data #
+        #--------------#
+        #=# SnP Constituents #=#
+        # Load Data
+        snp_data = pd.read_csv('inputs/data/snp500_data/snp500-adjusted-close.csv')
+        # Format Data
+        ## Index by Time
+        snp_data['date'] = pd.to_datetime(snp_data['date'],infer_datetime_format=True)
+        #-------------------------------------------------------------------------------#
 
+        #=# SnP Index #=#
+        ## Read Regression Target
+        snp_index_target_data = pd.read_csv('inputs/data/snp500_data/GSPC.csv')
+        ## Get (Reference) Dates
+        dates_temp = pd.to_datetime(snp_data['date'],infer_datetime_format=True).tail(600)
+        ## Format Target
+        snp_index_target_data = pd.DataFrame({'SnP_Index': snp_index_target_data['Close'],'date':dates_temp.reset_index(drop=True)})
+        snp_index_target_data['date'] = pd.to_datetime(snp_index_target_data['date'],infer_datetime_format=True)
+        snp_index_target_data.set_index('date', drop=True, inplace=True)
+        snp_index_target_data.index.names = [None]
+        #-------------------------------------------------------------------------------#
+
+        ## Get Rid of Rubbish
+        snp_data.set_index('date', drop=True, inplace=True)
+        snp_data.index.names = [None]
+        ## Get Rid of NAs and Expired Trends
+        snp_data = (snp_data.tail(600)).dropna(axis=1).fillna(0)
+
+        # Apple
+        snp_index_target_data = snp_data[{'AAPL'}]
+        snp_data = snp_data[{'IBM','QCOM','MSFT','CSCO','ADI','MU','MCHP','NVR','NVDA','GOOGL','GOOG'}]
+        # Get Return(s)
+        snp_data_returns = snp_data.diff().iloc[1:]
+        snp_index_target_data_returns = snp_index_target_data.diff().iloc[1:]
+        #--------------------------------------------------------#
+
+        #-------------#
+        # Subset Data #
+        #-------------#
+        # Get indices
+        N_train_step = int(round(snp_index_target_data_returns.shape[0]*Train_step_proportion,0))
+        N_test_set = int(snp_index_target_data_returns.shape[0] - round(snp_index_target_data_returns.shape[0]*Train_step_proportion,0))
+        # # Get Datasets
+        X_train = snp_data_returns[:N_train_step]
+        X_test = snp_data_returns[-N_test_set:]
+        ## Coerce into format used in benchmark model(s)
+        data_x = X_train
+        data_x_test = X_test
+        # Get Targets 
+        data_y = snp_index_target_data_returns[:N_train_step]
+        data_y_test = snp_index_target_data_returns[-N_test_set:]
+
+        # Scale Data
+        scaler = StandardScaler()
+        data_x = scaler.fit_transform(data_x)
+        data_x_test = scaler.transform(data_x_test)
+
+        # # Update User
+        print('#================================================#')
+        print(' Training Datasize: '+str(X_train.shape[0])+' and test datasize: ' + str(X_test.shape[0]) + '.  ')
+        print('#================================================#')
+
+    
     # # Set First Run to Off
     First_run = False
 
-    #-----------#
-    # Plot Data #
-    #-----------#
-    fig = crypto_data_returns.plot(figsize=(16, 16))
-    fig.get_legend().remove()
-    plt.title("Crypto_Market Returns")
+#     #-----------#
+#     # Plot Data #
+#     #-----------#
+#     fig = crypto_data_returns.plot(figsize=(16, 16))
+#     fig.get_legend().remove()
+#     plt.title("Crypto_Market Returns")
 
-    # SAVE Figure to .eps
-    plt.savefig('./outputs/plots/Crypto_Data_returns.pdf', format='pdf')
+#     # SAVE Figure to .eps
+#     plt.savefig('./outputs/plots/'+str(dataset_option)+'_returns.pdf', format='pdf')
+
+    # Redefine Meta-Parameters #
+    #--------------------------#
+    # Redefine Training Set inputs and ys to train DNN:
+    data_y_to_train_DNN_on = (data_y.to_numpy()).reshape(-1,)
+    X_train = data_x
+    X_test = data_x_test
+    problem_dim=data_x.shape[1]
+
+
+
+    # Initialize Target Function #
+    #----------------------------#
+    # Initialize DNN to train
+    f_model = get_ffNN(width, Depth_Bayesian_DNN, 0.001, problem_dim, 1)
+
+    # Define Stochastic Prediction Function:
+    def f_unknown():
+        f_model.fit(data_x,data_y_to_train_DNN_on,epochs = GD_epochs)
+        f_x_trained_with_random_initialization_x_train = f_model.predict(X_train)
+        f_x_trained_with_random_initialization_x_test = f_model.predict(X_test)
+        return f_x_trained_with_random_initialization_x_train, f_x_trained_with_random_initialization_x_test
+
+    def Simulator(x_in):
+        for i_MC in range(N_Monte_Carlo_Samples):
+            y_MC_loop = f_unknown(x_in)
+            if i_MC == 0:
+                y_MC = y_MC_loop
+            else:
+                y_MC = np.append(y_MC,y_MC_loop)
+        return y_MC
+
+
+# ### Extreme Learning-Machine Version
+
+# In[17]:
+
+
+if f_unknown_mode == "Extreme_Learning_Machine":
+    # Auxiliary Initialization(s)
+    Train_step_proportion = 1-train_test_ratio
+
+    
+    if dataset_option == "crypto":
+        #--------------#
+        # Prepare Data #
+        #--------------#
+        # Read Dataset
+        crypto_data = pd.read_csv('inputs/data/cryptocurrencies/Cryptos_All_in_one.csv')
+        # Format Date-Time
+        crypto_data['Date'] = pd.to_datetime(crypto_data['Date'],infer_datetime_format=True)
+        crypto_data.set_index('Date', drop=True, inplace=True)
+        crypto_data.index.names = [None]
+
+        # Remove Missing Data
+        crypto_data = crypto_data[crypto_data.isna().any(axis=1)==False]
+
+        # Get Returns
+        crypto_returns = crypto_data.diff().iloc[1:]
+
+        # Parse Regressors from Targets
+        ## Get Regression Targets
+        crypto_target_data = pd.DataFrame({'BITCOIN-closing':crypto_returns['BITCOIN-Close']})
+        ## Get Regressors
+        crypto_data_returns = crypto_returns.drop('BITCOIN-Close', axis=1)  
+
+        #-------------#
+        # Subset Data #
+        #-------------#
+        # Get indices
+        N_train_step = int(round(crypto_data_returns.shape[0]*Train_step_proportion,0))
+        N_test_set = int(crypto_data_returns.shape[0] - round(crypto_data_returns.shape[0]*Train_step_proportion,0))
+        # # Get Datasets
+        X_train = crypto_data_returns[:N_train_step]
+        X_test = crypto_data_returns[-N_test_set:]
+
+        ## Coerce into format used in benchmark model(s)
+        data_x = X_train
+        data_x_test = X_test
+        # Get Targets 
+        data_y = crypto_target_data[:N_train_step]
+        data_y_test = crypto_target_data[-N_test_set:]
+
+        # Scale Data
+        scaler = StandardScaler()
+        data_x = scaler.fit_transform(data_x)
+        data_x_test = scaler.transform(data_x_test)
+
+        # # Update User
+        print('#================================================#')
+        print(' Training Datasize: '+str(X_train.shape[0])+' and test datasize: ' + str(X_test.shape[0]) + '.  ')
+        print('#================================================#')
+    
+    if dataset_option == "SnP":
+        #--------------#
+        # Get S&P Data #
+        #--------------#
+        #=# SnP Constituents #=#
+        # Load Data
+        snp_data = pd.read_csv('inputs/data/snp500_data/snp500-adjusted-close.csv')
+        # Format Data
+        ## Index by Time
+        snp_data['date'] = pd.to_datetime(snp_data['date'],infer_datetime_format=True)
+        #-------------------------------------------------------------------------------#
+
+        #=# SnP Index #=#
+        ## Read Regression Target
+        snp_index_target_data = pd.read_csv('inputs/data/snp500_data/GSPC.csv')
+        ## Get (Reference) Dates
+        dates_temp = pd.to_datetime(snp_data['date'],infer_datetime_format=True).tail(600)
+        ## Format Target
+        snp_index_target_data = pd.DataFrame({'SnP_Index': snp_index_target_data['Close'],'date':dates_temp.reset_index(drop=True)})
+        snp_index_target_data['date'] = pd.to_datetime(snp_index_target_data['date'],infer_datetime_format=True)
+        snp_index_target_data.set_index('date', drop=True, inplace=True)
+        snp_index_target_data.index.names = [None]
+        #-------------------------------------------------------------------------------#
+
+        ## Get Rid of Rubbish
+        snp_data.set_index('date', drop=True, inplace=True)
+        snp_data.index.names = [None]
+        ## Get Rid of NAs and Expired Trends
+        snp_data = (snp_data.tail(600)).dropna(axis=1).fillna(0)
+
+        # Apple
+        snp_index_target_data = snp_data[{'AAPL'}]
+        snp_data = snp_data[{'IBM','QCOM','MSFT','CSCO','ADI','MU','MCHP','NVR','NVDA','GOOGL','GOOG'}]
+        # Get Return(s)
+        snp_data_returns = snp_data.diff().iloc[1:]
+        snp_index_target_data_returns = snp_index_target_data.diff().iloc[1:]
+        #--------------------------------------------------------#
+
+        #-------------#
+        # Subset Data #
+        #-------------#
+        # Get indices
+        N_train_step = int(round(snp_index_target_data_returns.shape[0]*Train_step_proportion,0))
+        N_test_set = int(snp_index_target_data_returns.shape[0] - round(snp_index_target_data_returns.shape[0]*Train_step_proportion,0))
+        # # Get Datasets
+        X_train = snp_data_returns[:N_train_step]
+        X_test = snp_data_returns[-N_test_set:]
+        ## Coerce into format used in benchmark model(s)
+        data_x = X_train
+        data_x_test = X_test
+        # Get Targets 
+        data_y = snp_index_target_data_returns[:N_train_step]
+        data_y_test = snp_index_target_data_returns[-N_test_set:]
+
+        # Scale Data
+        scaler = StandardScaler()
+        data_x = scaler.fit_transform(data_x)
+        data_x_test = scaler.transform(data_x_test)
+
+        # # Update User
+        print('#================================================#')
+        print(' Training Datasize: '+str(X_train.shape[0])+' and test datasize: ' + str(X_test.shape[0]) + '.  ')
+        print('#================================================#')
+
+    
+    # # Set First Run to Off
+    First_run = False
+
+#     #-----------#
+#     # Plot Data #
+#     #-----------#
+#     fig = crypto_data_returns.plot(figsize=(16, 16))
+#     fig.get_legend().remove()
+#     plt.title("Crypto_Market Returns")
+
+#     # SAVE Figure to .eps
+#     plt.savefig('./outputs/plots/'+str(dataset_option)+'_returns.pdf', format='pdf')
 
     # Redefine Meta-Parameters #
     #--------------------------#
@@ -620,7 +864,7 @@ if f_unknown_mode == "GD_with_randomized_input":
 
 # # Get Output Data
 
-# In[36]:
+# In[18]:
 
 
 print("Simulating Output Data for given input data")
@@ -629,10 +873,10 @@ print("Simulating Output Data for given input data")
 # ## Get outputs for all cases besides Gradient-Descent or fractional SDEs:
 # ### Training:
 
-# In[25]:
+# In[19]:
 
 
-if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_input"):
+if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != 'Extreme_Learning_Machine'):
     for i in tqdm(range(X_train.shape[0])):
         # Put Datum
         x_loop = X_train[i,]
@@ -654,10 +898,10 @@ if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_in
 
 # ### Testing:
 
-# In[26]:
+# In[20]:
 
 
-if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_input"):
+if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != 'Extreme_Learning_Machine'):
     # Start Timer
     Test_Set_PredictionTime_MC = time.time()
 
@@ -683,7 +927,7 @@ if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_in
 # ### For: "GD_with_randomized_input":
 # This variant is more efficient in the case of the gradient-descent with randomized initializations
 
-# In[27]:
+# In[21]:
 
 
 # This implemention of the GD algorithm is more efficient (but this only holds for the GD Monte-Carlo method):
@@ -731,11 +975,113 @@ if f_unknown_mode == "GD_with_randomized_input":
     Test_Set_PredictionTime_MC = (time.time() - Test_Set_PredictionTime_MC2) + Test_Set_PredictionTime_MC
 
 
+# In[31]:
+
+
+if f_unknown_mode == 'Extreme_Learning_Machine':
+    
+    # Initialization(s) #
+    #-------------------#
+    # Timer(s)
+    Test_time_elapse = 0
+    Train_time_elapse = 0
+    # Features
+    X_train_rand_features = X_train
+    X_test_rand_features = X_test
+
+    for j_loop in tqdm(range(N_Monte_Carlo_Samples)):
+        #--------------------#
+        ## Perform Learning ##
+        #--------------------#    
+        for d_loop in range(Depth_Bayesian_DNN):
+            # Timer
+            Update_train_time_elapse = time.time()
+            # Get Random Features
+            #---------------------------------------------------------------------------------------------------#
+            Weights_rand = randsp(m=(X_train_rand_features.shape[1]),n=N_Random_Features,density = 0.75)
+            biases_rand = np.random.uniform(low=-.5,high=.5,size = N_Random_Features)
+            ## Get Random Features
+            #---------------------------------------------------------------------------------------------------#
+            ### Training
+            #### Apply Random (hidden) Weights
+            X_train_rand_features = sparse.csr_matrix.dot(X_train_rand_features,Weights_rand)
+            #### Apply Random (hidden) Biases
+            X_train_rand_features = X_train_rand_features + biases_rand
+            #### Apply Discontinuous (Step) Activation function
+            X_train_rand_features[X_train_rand_features>0] = 1
+            X_train_rand_features[X_train_rand_features<=0] = 0
+            #### Compress
+            X_train_rand_features = sparse.csr_matrix(X_train_rand_features)
+            # TIMER
+            Update_train_time_elapse = time.time() - Update_train_time_elapse
+            Train_time_elapse = Train_time_elapse + Update_train_time_elapse
+            #---------------------------------------------------------------------------------------------------#
+            ### Testing
+
+            # TIMER
+            Update_test_time_elapse = time.time()
+
+            #### Apply Random (hidden) Weights
+            X_test_rand_features = sparse.csr_matrix.dot(X_test_rand_features,Weights_rand) 
+            #### Apply Random (hidden) Biases
+            X_test_rand_features = X_test_rand_features + biases_rand
+            #### Apply Discontinuous (Step) Activation function
+            X_test_rand_features[X_test_rand_features>0] = 1
+            X_test_rand_features[X_test_rand_features<=0] = 0
+            #### Compress
+            X_train_rand_features = sparse.csr_matrix(X_train_rand_features)
+
+            # TIMER
+            Update_test_time_elapse = time.time() - Update_test_time_elapse
+            Test_time_elapse = Test_time_elapse + Update_test_time_elapse
+
+        #---------------------------------------------------------------------------------------------------#
+        # Timer
+        Update_train_time_elapse = time.time()
+        # Train Extreme Learning Machine
+        ExLM_reg = Ridge(alpha=(np.random.uniform(low=0,high=1,size=1)[0]))
+        ExLM_reg.fit(X_train_rand_features,data_y)
+        # Get Predictions
+        ## Training Set
+        ExLM_predict_train = ExLM_reg.predict(X_train_rand_features)
+        # TIMER
+        Update_train_time_elapse = time.time() - Update_train_time_elapse
+        Train_time_elapse = Train_time_elapse + Update_train_time_elapse
+
+
+
+        # TIMER
+        Update_test_time_elapse = time.time()
+        ## Get Test-Set Prediction(s)
+        ExLM_predict_test = ExLM_reg.predict(X_test_rand_features)
+        # TIMER
+        Update_test_time_elapse = time.time() - Update_test_time_elapse
+        Test_time_elapse = Test_time_elapse + Update_test_time_elapse
+
+
+        # Update Prediction(s) #
+        #----------------------#
+        if j_loop == 0:
+            Y_train = ExLM_predict_train
+            Y_test = ExLM_predict_test
+        else:
+            Y_train = np.append(Y_train,ExLM_predict_train,axis=1)
+            Y_test = np.append(Y_test,ExLM_predict_test,axis=1)
+        
+    # Update MC Training Time
+    Train_Set_PredictionTime_MC = Train_time_elapse
+    Test_Set_PredictionTime_MC = Test_time_elapse
+    
+    # Get Mean Training Data
+    Y_train_mean_emp = np.mean(Y_train,axis=1)
+    Y_test_mean_emp = np.mean(Y_test,axis=1)
+
+
 # ## Prepare Data for (f)SDE Case
 
 # #### Build Training Set
 
-# In[29]:
+# In[ ]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -760,7 +1106,7 @@ if f_unknown_mode == "Rough_SDE":
 
 # #### Build Testing Set
 
-# In[32]:
+# In[ ]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -785,6 +1131,8 @@ if f_unknown_mode == "Rough_SDE":
             Y_test = np.append(Y_test,x_sample_path_loop,axis=0)
     # End Timer
     Test_Set_PredictionTime_MC = time.time() - Test_Set_PredictionTime_MC
+    
+    f_unknown_mode = "GD_with_randomized_input"
 
 
 # ## Extra Parsing:
@@ -796,7 +1144,7 @@ if f_unknown_mode == "Rough_SDE":
     Y_train_mean_emp = np.sum(Y_train,axis=1)
 
 
-# In[37]:
+# In[ ]:
 
 
 print("----------------------------------")

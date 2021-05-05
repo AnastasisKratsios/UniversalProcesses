@@ -15,7 +15,7 @@
 
 # ### Meta-Parameter Dump (easy access for debugging):
 
-# In[4]:
+# In[ ]:
 
 
 # Trial_run = True
@@ -37,7 +37,7 @@
 
 # #### Index and identify: $\{f^{-1}[\hat{\mu}_{n=1}^N]\}_{n=1}^N\subset \mathbb{X}!$
 
-# In[3]:
+# In[45]:
 
 
 # Initialize k_means
@@ -51,7 +51,7 @@ Barycenters_Array_x = kmeans.cluster_centers_
 
 # ### Get $\{\hat{\mu}_{n=1}^{N}\}$!
 
-# In[50]:
+# In[46]:
 
 
 for i in tqdm(range(Barycenters_Array_x.shape[0])):
@@ -79,7 +79,7 @@ else:
 
 # #### Start Timer
 
-# In[51]:
+# In[8]:
 
 
 # Start Timer
@@ -98,7 +98,7 @@ Type_A_timer_Begin = time.time()
 
 # Re-Load Packages and CV Grid
 
-# In[52]:
+# In[9]:
 
 
 # Re-Load Hyper-parameter Grid
@@ -109,7 +109,7 @@ exec(open('Helper_Functions.py').read())
 
 # Train Deep Classifier
 
-# In[53]:
+# In[10]:
 
 
 print("==========================================")
@@ -138,7 +138,7 @@ print("===============================================")
 # - Each *row* of "Predicted_Weights" is the $\beta\in \Delta_N$.
 # - Each *Column* of "Barycenters_Array" denotes the $x_1,\dots,x_N$ making up the points of the corresponding empirical measures.
 
-# In[54]:
+# In[35]:
 
 
 if f_unknown_mode != "Rough_SDE":
@@ -157,10 +157,10 @@ else:
             points_of_mass = np.append(points_of_mass,Barycenters_Array[i,],axis=0)
 
 
-# In[55]:
+# In[36]:
 
 
-if (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != "Rough_SDE"):
+if (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Extreme_Learning_Machine"):
     # Get Noisless Mean
     direct_facts = np.apply_along_axis(f_unknown, 1, X_train)
     direct_facts_test = np.apply_along_axis(f_unknown, 1, X_test)
@@ -168,7 +168,7 @@ if (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != "Rough_
 
 # ### Get Error(s)
 
-# In[56]:
+# In[37]:
 
 
 # %run Evaluation.ipynb
@@ -180,7 +180,7 @@ exec(open('Evaluation.py').read())
 # - Sinkhorn Regularized Wasserstein Distance of: [Cuturi - Sinkhorn Distances: Lightspeed Computation of Optimal Transport (2016)](https://papers.nips.cc/paper/2013/hash/af21d0c97db2e27e13572cbf59eb343d-Abstract.html)
 # - Slices Wasserstein Distance of: [Bonneel, Nicolas, et al. “Sliced and radon wasserstein barycenters of measures.” Journal of Mathematical Imaging and Vision 51.1 (2015): 22-45](https://dl.acm.org/doi/10.1007/s10851-014-0506-3)
 
-# In[57]:
+# In[38]:
 
 
 # Transport-problem initializations #
@@ -237,7 +237,7 @@ def transport_dist(x_source,w_source,x_sink,w_sink,output_dim,OT_method="Sliced"
 
 # #### Compute *Training* Error(s)
 
-# In[58]:
+# In[39]:
 
 
 print("#--------------------#")

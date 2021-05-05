@@ -12,6 +12,11 @@
 # Alert(s)
 import smtplib
 
+# Compression
+from scipy import sparse
+from scipy.sparse import random as randsp
+from scipy.sparse import csr_matrix
+
 # CV
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV
 from sklearn.model_selection import cross_val_score
@@ -170,6 +175,8 @@ from pathlib import Path
 # Training Test Split
 from sklearn.model_selection import train_test_split
 
+# Vanilla
+from sklearn.linear_model import Ridge
 
 # ## Helper Function(s)
 

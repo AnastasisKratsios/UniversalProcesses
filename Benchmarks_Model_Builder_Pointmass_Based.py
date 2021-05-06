@@ -5,7 +5,7 @@
 
 # ---
 
-# In[4]:
+# In[8]:
 
 
 # %run Debug_Menu.ipynb
@@ -13,7 +13,7 @@
 
 # ## Elastic Net Regressor
 
-# In[5]:
+# In[16]:
 
 
 #=====================#
@@ -30,7 +30,7 @@ ENET_reg = ElasticNetCV(cv=5, random_state=0, alphas = np.linspace(0,(10**2),(10
 
 # ## ffNN Builder
 
-# In[6]:
+# In[17]:
 
 
 def get_ffNN(height, depth, learning_rate, input_dim, output_dim):
@@ -124,7 +124,7 @@ print('Deep Feature Builder - Ready')
 
 # # Gradient-Boosted Random Forest Regressor
 
-# In[7]:
+# In[18]:
 
 
 def get_GBRF(X_train,X_test,y_train):
@@ -185,7 +185,7 @@ def get_GBRF(X_train,X_test,y_train):
 
 # ## Kernel Ridge Regressor
 
-# In[8]:
+# In[19]:
 
 
 def get_Kernel_Ridge_Regressor(data_x_in,data_x_test_in,data_y_in):
@@ -231,14 +231,14 @@ def get_Kernel_Ridge_Regressor(data_x_in,data_x_test_in,data_y_in):
 
 # ### Elastic Net
 
-# In[9]:
+# In[20]:
 
 
 # %run Evaluation.ipynb
 exec(open('Evaluation.py').read())
 
 
-# In[11]:
+# In[21]:
 
 
 # Start Timer
@@ -257,7 +257,7 @@ if output_dim == 1:
     ENET_eval_time = time.time()
     ENET_predict_test = ENET_reg.predict(X_test)
     ENET_eval_time = time.time() - ENET_eval_time
-    ENET_N_Params = X_train.shape[0]*2
+    ENET_N_Params = X_train.shape[1]*2
     
 else:
     for d in tqdm(range(output_dim)):
@@ -273,7 +273,7 @@ else:
         if d == 0:
             ENET_predict = ENET_predict_loop.reshape(-1,1)
             ENET_predict_test = ENET_predict_loop_test.reshape(-1,1)
-            ENET_N_Params = X_train.shape[0]*2
+            ENET_N_Params = X_train.shape[1]*2
             ENET_eval_time = ENET_eval_time_loop
         else:
             ENET_predict = np.append(ENET_predict,ENET_predict_loop.reshape(-1,1),axis=1)
@@ -290,7 +290,7 @@ print("---------------------")
 
 # #### Evaluate Prediction Quality
 
-# In[12]:
+# In[15]:
 
 
 ## Train

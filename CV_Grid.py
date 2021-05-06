@@ -26,10 +26,10 @@ if trial_run == True:
 
 
     param_grid_Deep_Classifier = {'batch_size': [16],
-                        'epochs': [2],
+                        'epochs': [50],
                         'learning_rate': [0.00001],
                         'height': [50],
-                        'depth': [1],
+                        'depth': [2],
                         'input_dim':[15],
                         'output_dim':[1]}
     
@@ -38,7 +38,7 @@ if trial_run == True:
     Rand_Forest_Grid = {'learning_rate': [0.01],
                         'max_depth': [8],
                         'min_samples_leaf': [5],
-                        'n_estimators': [1000]}
+                        'n_estimators': [10]}
     
     # Kernel Ridge #
     #--------------#

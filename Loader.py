@@ -15,6 +15,8 @@ exec(open('CV_Grid.py').read())
 exec(open('Helper_Functions.py').read())
 # Architecture Builder
 exec(open('Benchmarks_Model_Builder.py').read())
+# Auxiliary Helper Function(s)
+exec(open('MISC_HELPER_FUNCTIONS.py').read())
 # Import time separately
 import time
 #os.environ['CUDA_VISIBLE_DEVICES'] = '0'

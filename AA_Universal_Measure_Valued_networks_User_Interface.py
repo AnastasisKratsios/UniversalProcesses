@@ -36,7 +36,7 @@
 # #### Mode:
 # Software/Hardware Testing or Real-Deal?
 
-# In[1]:
+# In[21]:
 
 
 trial_run = True
@@ -44,7 +44,7 @@ trial_run = True
 
 # ### Simulation Method:
 
-# In[2]:
+# In[82]:
 
 
 # Random DNN
@@ -72,28 +72,28 @@ Dropout_rate = 0.1
 # GD_epochs = 50
 
 # SDE with fractional Driver
-f_unknown_mode = "Rough_SDE"
-N_Euler_Steps = 10**2
-Hurst_Exponent = 0.75
+# f_unknown_mode = "Rough_SDE"
+N_Euler_Steps = 10**1
+Hurst_Exponent = 0.5
 
-# f_unknown_mode = "Rough_SDE_Vanilla"
+f_unknown_mode = "Rough_SDE_Vanilla"
 ## Define Process' dynamics in (2) cell(s) below.
 
 
 # ## Problem Dimension
 
-# In[3]:
+# In[23]:
 
 
 problem_dim = 1
 if f_unknown_mode != 'Extreme_Learning_Machine':
-    width = int(2*(problem_dim+1))
+    width = int(max(width,2*(problem_dim+1)))
 
 
 # #### Vanilla fractional SDE:
 # If f_unknown_mode == "Rough_SDE_Vanilla" is selected, then we can specify the process's dynamics.  
 
-# In[4]:
+# In[24]:
 
 
 #--------------------------#
@@ -123,25 +123,25 @@ def f_unknown_vol_vanilla(x):
 # - Ratio $\frac{\text{Testing Datasize}}{\text{Training Datasize}}$.
 # - Number of Training Points to Generate
 
-# In[5]:
+# In[83]:
 
 
 train_test_ratio = .2
-N_train_size = 10
+N_train_size = 10*2
 
 
 # Monte-Carlo Paramters
 
-# In[6]:
+# In[84]:
 
 
 ## Monte-Carlo
-N_Monte_Carlo_Samples = 10**2
+N_Monte_Carlo_Samples = 10**3
 
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!
 
-# In[7]:
+# In[85]:
 
 
 # Hyper-parameters of Cover
@@ -151,7 +151,7 @@ Proportion_per_cluster = .75
 
 # ## Dependencies and Auxiliary Script(s)
 
-# In[8]:
+# In[86]:
 
 
 # %run Loader.ipynb
@@ -161,9 +161,18 @@ exec(open('Init_Dump.py').read())
 import time as time #<- Note sure why...but its always seems to need 'its own special loading...'
 
 
+# #### Ensure Minimum Width for Universality is Achieved
+
+# In[87]:
+
+
+exec(open('MISC_HELPER_FUNCTIONS.py').read())
+param_grid_Deep_Classifier['height'] = minimum_height_updater(param_grid_Deep_Classifier['height'])
+
+
 # # Simulate or Parse Data
 
-# In[9]:
+# In[88]:
 
 
 # %run Data_Simulator_and_Parser.ipynb
@@ -173,7 +182,7 @@ exec(open('Data_Simulator_and_Parser.py').read())
 # #### Scale Data
 # This is especially important to avoid exploding gradient problems when training the ML-models.
 
-# In[10]:
+# In[89]:
 
 
 scaler = StandardScaler()

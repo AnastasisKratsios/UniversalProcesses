@@ -26,9 +26,9 @@ if trial_run == True:
 
 
     param_grid_Deep_Classifier = {'batch_size': [16],
-                        'epochs': [50],
-                        'learning_rate': [0.00001],
-                        'height': [50],
+                        'epochs': [150],
+                        'learning_rate': [0.01],
+                        'height': [500],
                         'depth': [2],
                         'input_dim':[15],
                         'output_dim':[1]}
@@ -64,8 +64,8 @@ else:
     # Number of Jobs (Cores to use)
     n_jobs = 40
     # Number of Random CV Draws
-    n_iter = 5
-    n_iter_trees = 5
+    n_iter = 10
+    n_iter_trees = 10
     # Number of CV Folds
     CV_folds = 4
     # Number of Boostrapped Confidence Intervals
@@ -73,9 +73,9 @@ else:
     
 
     param_grid_Deep_Classifier = {'batch_size': [8,16,32],
-                        'epochs': [150,200,250,400],
-                        'learning_rate': [0.00001,0.000001,0.000001],
-                        'height': [50,100,200],
+                        'epochs': [400,600,800],
+                        'learning_rate': [0.001,0.0001,0.00001,0.000001],
+                        'height': [300,400,500,600],
                         'depth': [2,3],
                         'input_dim':[15],
                         'output_dim':[1]}

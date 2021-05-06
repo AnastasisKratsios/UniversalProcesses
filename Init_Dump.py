@@ -294,6 +294,7 @@ Path('./outputs/models/ffNNs/').mkdir(parents=True, exist_ok=True)
 Path('./outputs/plots/').mkdir(parents=True, exist_ok=True)
 Path('./outputs/tables/').mkdir(parents=True, exist_ok=True)
 Path('./outputs/results/').mkdir(parents=True, exist_ok=True)
+Path('./outputs/results/Final_Results/').mkdir(parents=True, exist_ok=True)
 
 
 # ---

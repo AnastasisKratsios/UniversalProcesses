@@ -1,58 +1,10 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # Deep Universal Regular Conditional Expectations:
-# 
-# ---
-# This implements the universal deep neural model of $\mathcal{NN}_{1_{\mathbb{R}^n},\mathcal{D}}^{\sigma:\star}$ [Anastasis Kratsios](https://people.math.ethz.ch/~kratsioa/) - 2021.
-# 
-# ---
-# 
-# ## What does this code do?
-# 1. Learn Heteroskedastic Non-Linear Regression Problem
-#      - $Y\sim f_{\text{unkown}}(x) + \epsilon$ where $f$ is an known function and $\epsilon\sim Laplace(0,\|x\|)$
-# 2. Learn Random Bayesian Network's Law:
-#     - $Y = W_J Y^{J-1}, \qquad Y^{j}\triangleq \sigma\bullet A^{j}Y^{j-1} + b^{j}, \qquad Y^0\triangleq x$
-# 
-# 3. In the above example if $A_j = M_j\odot \tilde{A_j}$ where $\tilde{A}_j$ is a deterministic matrix and $M_j$ is a "mask", that is, a random matrix with binary entries and $\odot$ is the Hadamard product then we recover the dropout framework.
-# 4. Learn the probability distribution that the unique strong solution to the rough SDE with uniformly Lipschitz drivers driven by a factional Brownian motion with Hurst exponent $H \in [\frac1{2},1)$:
-# $$
-# X_t^x = x + \int_0^t \alpha(s,X_s^x)ds + \int_0^t \beta(s,X_s^x)dB_s^H
-# $$
-# belongs, at time $t=1$, to a ball about the initial point $x$ of random radius given by an independant exponential random-variable with shape parameter $\lambda=2$
-# 5. Train a DNN to predict the returns of bitcoin with GD.  Since this has random initialization then each prediction of a given $x$ is stochastic...We learn the distribution of this conditional RV (conditioned on x in the input space).
-# $$
-# Y_x \triangleq \hat{f}_{\theta_{T}}(x), \qquad \theta_{(t+1)}\triangleq \theta_{(t)} + \lambda \sum_{x \in \mathbb{X}} \nabla_{\theta}\|\hat{f}_{\theta_t}(x) - f(x)\|, \qquad \theta_0 \sim N_d(0,1);
-# $$
-# $T\in \mathbb{N}$ is a fixed number of "SGD" iterations (typically identified by cross-validation on a single SGD trajectory for a single initialization) and where $\theta \in \mathbb{R}^{(d_{J}+1)+\sum_{j=0}^{J-1} (d_{j+1}d_j + 1)}$ and $d_j$ is the dimension of the "bias" vector $b_j$ defining each layer of the DNN with layer dimensions:
-# $$
-# \hat{f}_{\theta}(x)\triangleq A^{(J)}x^{(J)} + b^{(J)},\qquad x^{(j+1)}\triangleq \sigma\bullet A^{j}x^{(j)} + b^{j},\qquad x^{(0)}\triangleq x
-# .
-# $$
-# 
-# 6. Extreme Learning Machines: 
-#     Just like the Bayesian network but then last layer is trained on the training set using KRidge!
-
-# #### Mode:
-# Software/Hardware Testing or Real-Deal?
-
-# In[21]:
-
-
-trial_run = True
-
-
-# ### Simulation Method:
-
-# In[82]:
-
-
+trial_run = False
 # Random DNN
 # f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
 
 # Random DNN internal noise
 ## Real-world data version
-f_unknown_mode = "Extreme_Learning_Machine"
+# f_unknown_mode = "Extreme_Learning_Machine"
 ### Dataset Option 1
 dataset_option = 'SnP'
 ### Dataset Option 2
@@ -72,17 +24,17 @@ Dropout_rate = 0.1
 # GD_epochs = 50
 
 # SDE with fractional Driver
-# f_unknown_mode = "Rough_SDE"
+f_unknown_mode = "Rough_SDE"
 N_Euler_Steps = 10**1
 Hurst_Exponent = 0.5
 
-f_unknown_mode = "Rough_SDE_Vanilla"
+# f_unknown_mode = "Rough_SDE_Vanilla"
 ## Define Process' dynamics in (2) cell(s) below.
 
 
 # ## Problem Dimension
 
-# In[23]:
+# In[3]:
 
 
 problem_dim = 1
@@ -93,7 +45,7 @@ if f_unknown_mode != 'Extreme_Learning_Machine':
 # #### Vanilla fractional SDE:
 # If f_unknown_mode == "Rough_SDE_Vanilla" is selected, then we can specify the process's dynamics.  
 
-# In[24]:
+# In[4]:
 
 
 #--------------------------#
@@ -123,16 +75,16 @@ def f_unknown_vol_vanilla(x):
 # - Ratio $\frac{\text{Testing Datasize}}{\text{Training Datasize}}$.
 # - Number of Training Points to Generate
 
-# In[83]:
+# In[5]:
 
 
 train_test_ratio = .2
-N_train_size = 10*2
+N_train_size = 10**2
 
 
 # Monte-Carlo Paramters
 
-# In[84]:
+# In[6]:
 
 
 ## Monte-Carlo
@@ -141,7 +93,7 @@ N_Monte_Carlo_Samples = 10**3
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!
 
-# In[85]:
+# In[7]:
 
 
 # Hyper-parameters of Cover
@@ -151,7 +103,7 @@ Proportion_per_cluster = .75
 
 # ## Dependencies and Auxiliary Script(s)
 
-# In[86]:
+# In[8]:
 
 
 # %run Loader.ipynb
@@ -163,7 +115,17 @@ import time as time #<- Note sure why...but its always seems to need 'its own sp
 
 # #### Ensure Minimum Width for Universality is Achieved
 
-# In[87]:
+# In[25]:
+
+
+if (('output_dim' in locals()) == False):
+    if (f_unknown_mode == 'Rough_SDE') or (f_unknown_mode == 'Rough_SDE_Vanilla'):
+        output_dim = problem_dim
+    else:
+        output_dim = 1
+
+
+# In[26]:
 
 
 exec(open('MISC_HELPER_FUNCTIONS.py').read())
@@ -172,7 +134,7 @@ param_grid_Deep_Classifier['height'] = minimum_height_updater(param_grid_Deep_Cl
 
 # # Simulate or Parse Data
 
-# In[88]:
+# In[ ]:
 
 
 # %run Data_Simulator_and_Parser.ipynb
@@ -182,7 +144,7 @@ exec(open('Data_Simulator_and_Parser.py').read())
 # #### Scale Data
 # This is especially important to avoid exploding gradient problems when training the ML-models.
 
-# In[89]:
+# In[ ]:
 
 
 scaler = StandardScaler()

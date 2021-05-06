@@ -36,7 +36,7 @@
 # #### Mode:
 # Software/Hardware Testing or Real-Deal?
 
-# In[25]:
+# In[1]:
 
 
 trial_run = True
@@ -44,7 +44,7 @@ trial_run = True
 
 # ### Simulation Method:
 
-# In[26]:
+# In[2]:
 
 
 # Random DNN
@@ -72,7 +72,7 @@ Dropout_rate = 0.1
 # GD_epochs = 50
 
 # SDE with fractional Driver
-# f_unknown_mode = "Rough_SDE"
+f_unknown_mode = "Rough_SDE"
 N_Euler_Steps = 10**2
 Hurst_Exponent = 0.75
 
@@ -82,7 +82,7 @@ Hurst_Exponent = 0.75
 
 # ## Problem Dimension
 
-# In[27]:
+# In[3]:
 
 
 problem_dim = 1
@@ -93,7 +93,7 @@ if f_unknown_mode != 'Extreme_Learning_Machine':
 # #### Vanilla fractional SDE:
 # If f_unknown_mode == "Rough_SDE_Vanilla" is selected, then we can specify the process's dynamics.  
 
-# In[28]:
+# In[4]:
 
 
 #--------------------------#
@@ -123,7 +123,7 @@ def f_unknown_vol_vanilla(x):
 # - Ratio $\frac{\text{Testing Datasize}}{\text{Training Datasize}}$.
 # - Number of Training Points to Generate
 
-# In[29]:
+# In[5]:
 
 
 train_test_ratio = .2
@@ -132,7 +132,7 @@ N_train_size = 10
 
 # Monte-Carlo Paramters
 
-# In[30]:
+# In[6]:
 
 
 ## Monte-Carlo
@@ -141,7 +141,7 @@ N_Monte_Carlo_Samples = 10**2
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!
 
-# In[31]:
+# In[7]:
 
 
 # Hyper-parameters of Cover
@@ -151,7 +151,7 @@ Proportion_per_cluster = .75
 
 # ## Dependencies and Auxiliary Script(s)
 
-# In[32]:
+# In[8]:
 
 
 # %run Loader.ipynb
@@ -163,7 +163,7 @@ import time as time #<- Note sure why...but its always seems to need 'its own sp
 
 # # Simulate or Parse Data
 
-# In[33]:
+# In[9]:
 
 
 # %run Data_Simulator_and_Parser.ipynb
@@ -173,7 +173,7 @@ exec(open('Data_Simulator_and_Parser.py').read())
 # #### Scale Data
 # This is especially important to avoid exploding gradient problems when training the ML-models.
 
-# In[34]:
+# In[10]:
 
 
 scaler = StandardScaler()
@@ -185,7 +185,7 @@ X_test = scaler.transform(X_test)
 
 # # Run Main:
 
-# In[35]:
+# In[ ]:
 
 
 print("------------------------------")
@@ -208,7 +208,7 @@ print("------------------------------------")
 # \mathbb{R}^d \ni x \to f(x) \to \delta_{f(x)}\in \cap_{1\leq q<\infty}\mathcal{P}_{q}(\mathbb{R}).
 # $$
 
-# In[36]:
+# In[ ]:
 
 
 exec(open('CV_Grid.py').read())
@@ -224,7 +224,7 @@ exec(open('Benchmarks_Model_Builder_Pointmass_Based.py').read())
 
 # #### Training Model Facts
 
-# In[37]:
+# In[ ]:
 
 
 print(Summary_pred_Qual_models)
@@ -233,7 +233,7 @@ Summary_pred_Qual_models
 
 # #### Testing Model Facts
 
-# In[38]:
+# In[ ]:
 
 
 print(Summary_pred_Qual_models_test)
@@ -253,14 +253,14 @@ Summary_pred_Qual_models_test
 # 
 # Examples of this type of architecture are especially prevalent in uncertainty quantification; see ([Deep Ensembles](https://arxiv.org/abs/1612.01474)] or [NOMU: Neural Optimization-based Model Uncertainty](https://arxiv.org/abs/2102.13640).  Moreover, their universality in $C(\mathbb{R}^d,\mathcal{G}_2)$ is known, and has been shown in [Corollary 4.7](https://arxiv.org/abs/2101.05390).
 
-# In[39]:
+# In[ ]:
 
 
 # %run Benchmarks_Model_Builder_Mean_Var.ipynb
 exec(open('Benchmarks_Model_Builder_Mean_Var.py').read())
 
 
-# In[40]:
+# In[ ]:
 
 
 print("Prediction Quality (Updated): Test")
@@ -268,7 +268,7 @@ print(Summary_pred_Qual_models_test)
 Summary_pred_Qual_models_test
 
 
-# In[41]:
+# In[ ]:
 
 
 print("Prediction Quality (Updated): Train")
@@ -282,7 +282,7 @@ Summary_pred_Qual_models
 # - For every $x$ in the trainingdata-set we fit a GMM $\hat{\nu}_x$, using the [Expectation-Maximization (EM) algorithm](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm), with the same number of centers as the deep neural model in $\mathcal{NN}_{1_{\mathbb{R}^d},\mathcal{D}}^{\sigma:\star}$ which we are evaluating.  
 # - A Mixture density network is then trained to predict the infered parameters; given any $x \in \mathbb{R}^d$.
 
-# In[42]:
+# In[ ]:
 
 
 if output_dim == 1:
@@ -302,7 +302,7 @@ if output_dim == 1:
 # #### Finalizing Saving
 # **Note:** *We do it in two steps since the grid sometimes does not want to write nicely...*
 
-# In[43]:
+# In[ ]:
 
 
 ## Write Performance Metrics
@@ -322,7 +322,7 @@ Summary_pred_Qual_models.to_latex((results_tables_path+"/Final_Results/"+"Perfor
 
 # # For Terminal Runner(s):
 
-# In[44]:
+# In[ ]:
 
 
 # For Terminal Running

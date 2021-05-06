@@ -16,7 +16,7 @@ print("---------------------------------------")
 
 # #### For Debugging
 
-# In[24]:
+# In[22]:
 
 
 # trial_run = True
@@ -44,7 +44,7 @@ print("---------------------------------------")
 
 # # Random DNN internal noise
 # # Real-world data version
-# f_unknown_mode = "Extreme_Learning_Machine"
+# # f_unknown_mode = "Extreme_Learning_Machine"
 # dataset_option = 'crypto'
 # N_Random_Features = 10**2
 # # Simulated Data version
@@ -57,7 +57,7 @@ print("---------------------------------------")
 # Dropout_rate = 0.1
 
 # # Rough SDE (time 1)
-# # f_unknown_mode = "Rough_SDE"
+# f_unknown_mode = "Rough_SDE"
 
 # # GD with Randomized Input
 # # f_unknown_mode = "GD_with_randomized_input"
@@ -95,7 +95,7 @@ print("---------------------------------------")
 # N_test_size = int(np.round(N_train_size*train_test_ratio,0))
 
 
-# In[3]:
+# In[23]:
 
 
 Train_Set_PredictionTime_MC = time.time()
@@ -103,7 +103,7 @@ Train_Set_PredictionTime_MC = time.time()
 
 # # Decide on Which Simulator/Parser To Load:
 
-# In[4]:
+# In[24]:
 
 
 print("Deciding on Which Simulator/Parser To Load")
@@ -114,7 +114,7 @@ print("Deciding on Which Simulator/Parser To Load")
 # Y_x \sim f(x) + \text{Laplace}\left(\tilde{f}(x),\|x\|\right).
 # $$
 
-# In[5]:
+# In[25]:
 
 
 if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
@@ -156,7 +156,7 @@ if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
 
 # ## Bayesian DNN
 
-# In[6]:
+# In[26]:
 
 
 if f_unknown_mode == "DNN_with_Random_Weights":
@@ -188,7 +188,7 @@ if f_unknown_mode == "DNN_with_Random_Weights":
 
 # ## Vanilla DNN with MC-Droupout
 
-# In[7]:
+# In[27]:
 
 
 if f_unknown_mode == "DNN_with_Bayesian_Dropout":
@@ -245,7 +245,7 @@ if f_unknown_mode == "DNN_with_Bayesian_Dropout":
 # .
 # $$
 
-# In[8]:
+# In[28]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -376,7 +376,7 @@ if f_unknown_mode == "Rough_SDE":
 # .
 # $$
 
-# In[9]:
+# In[29]:
 
 
 if f_unknown_mode == "Rough_SDE_Vanilla": 
@@ -450,7 +450,7 @@ if f_unknown_mode == "Rough_SDE_Vanilla":
 
 # # Set/Define: Internal Parameters
 
-# In[10]:
+# In[30]:
 
 
 print("Setting/Defining: Internal Parameters")
@@ -460,7 +460,7 @@ print("Setting/Defining: Internal Parameters")
 # 
 # **Note:** *This is only relevant for (fractional) SDE Example which is multi-dimensional in the output space.*
 
-# In[11]:
+# In[31]:
 
 
 if f_unknown_mode != "Rough_SDE":
@@ -471,7 +471,7 @@ else:
 
 # ## Decide on Testing Set's Size
 
-# In[12]:
+# In[32]:
 
 
 N_test_size = int(np.round(N_train_size*train_test_ratio,0))
@@ -481,7 +481,7 @@ N_test_size = int(np.round(N_train_size*train_test_ratio,0))
 # # Decide on Which Type of Data to Get/Simulate
 # ---
 
-# In[13]:
+# In[33]:
 
 
 print("Deciding on Which Type of Data to Get/Simulate")
@@ -490,7 +490,7 @@ print("Deciding on Which Type of Data to Get/Simulate")
 # ## Initialize Inputs (Training & Testing) for: 
 # *Non-SDE and non GD with random inputs examples*.
 
-# In[14]:
+# In[34]:
 
 
 if f_unknown_mode != "GD_with_randomized_input":
@@ -508,7 +508,7 @@ if f_unknown_mode != "GD_with_randomized_input":
 # #### Relabel if fSDE is used instead
 # **Explanation:** *The "lowercase x" is used to highlight that the X is made of time-space pairs: (t,x).*
 
-# In[15]:
+# In[35]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -522,7 +522,7 @@ if f_unknown_mode == "Rough_SDE":
 # Y_x\triangleq \hat{f}_{\theta_T}(x),\qquad \theta_{t+1} \triangleq \theta_t - \nabla \sum_{x\in \mathbb{X}} \|\hat{f}_{\theta_t}(x)-f(x)\|, \qquad \theta_0 \sim N_d(0,1).
 # $$
 
-# In[16]:
+# In[36]:
 
 
 if f_unknown_mode == "GD_with_randomized_input":
@@ -692,14 +692,21 @@ if f_unknown_mode == "GD_with_randomized_input":
 
 # ### Extreme Learning-Machine Version
 
-# In[17]:
+# In[37]:
 
 
 if f_unknown_mode == "Extreme_Learning_Machine":
     # Auxiliary Initialization(s)
     Train_step_proportion = 1-train_test_ratio
-
     
+    # Vectorized Sigmoid
+    
+    # custom function
+    def sigmoid_univariate(x):
+        return 1 / (1 + math.exp(-x))
+    sigmoid = np.vectorize(sigmoid_univariate)
+    
+    # Get Data
     if dataset_option == "crypto":
         #--------------#
         # Prepare Data #
@@ -864,7 +871,7 @@ if f_unknown_mode == "Extreme_Learning_Machine":
 
 # # Get Output Data
 
-# In[18]:
+# In[38]:
 
 
 print("Simulating Output Data for given input data")
@@ -873,7 +880,7 @@ print("Simulating Output Data for given input data")
 # ## Get outputs for all cases besides Gradient-Descent or fractional SDEs:
 # ### Training:
 
-# In[19]:
+# In[39]:
 
 
 if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != 'Extreme_Learning_Machine'):
@@ -898,7 +905,7 @@ if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_in
 
 # ### Testing:
 
-# In[20]:
+# In[40]:
 
 
 if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != 'Extreme_Learning_Machine'):
@@ -927,7 +934,7 @@ if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_in
 # ### For: "GD_with_randomized_input":
 # This variant is more efficient in the case of the gradient-descent with randomized initializations
 
-# In[21]:
+# In[41]:
 
 
 # This implemention of the GD algorithm is more efficient (but this only holds for the GD Monte-Carlo method):
@@ -975,7 +982,7 @@ if f_unknown_mode == "GD_with_randomized_input":
     Test_Set_PredictionTime_MC = (time.time() - Test_Set_PredictionTime_MC2) + Test_Set_PredictionTime_MC
 
 
-# In[31]:
+# In[42]:
 
 
 if f_unknown_mode == 'Extreme_Learning_Machine':
@@ -1008,8 +1015,11 @@ if f_unknown_mode == 'Extreme_Learning_Machine':
             #### Apply Random (hidden) Biases
             X_train_rand_features = X_train_rand_features + biases_rand
             #### Apply Discontinuous (Step) Activation function
-            X_train_rand_features[X_train_rand_features>0] = 1
-            X_train_rand_features[X_train_rand_features<=0] = 0
+            if activation_function == 'thresholding':
+                X_train_rand_features[X_train_rand_features>0] = 1
+                X_train_rand_features[X_train_rand_features<=0] = 0
+            else:
+                X_train_rand_features = sigmoid(X_train_rand_features)
             #### Compress
             X_train_rand_features = sparse.csr_matrix(X_train_rand_features)
             # TIMER
@@ -1026,8 +1036,11 @@ if f_unknown_mode == 'Extreme_Learning_Machine':
             #### Apply Random (hidden) Biases
             X_test_rand_features = X_test_rand_features + biases_rand
             #### Apply Discontinuous (Step) Activation function
-            X_test_rand_features[X_test_rand_features>0] = 1
-            X_test_rand_features[X_test_rand_features<=0] = 0
+            if activation_function == 'thresholding':
+                X_test_rand_features[X_test_rand_features>0] = 1
+                X_test_rand_features[X_test_rand_features<=0] = 0
+            else:
+                X_test_rand_features = sigmoid(X_test_rand_features)
             #### Compress
             X_train_rand_features = sparse.csr_matrix(X_train_rand_features)
 
@@ -1081,7 +1094,7 @@ if f_unknown_mode == 'Extreme_Learning_Machine':
 
 # #### Build Training Set
 
-# In[ ]:
+# In[48]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -1102,11 +1115,13 @@ if f_unknown_mode == "Rough_SDE":
             X_train = np.append(X_train,X_inputs_to_return_loop,axis=0)
             # Update Output(s)
             Y_train = np.append(Y_train,x_sample_path_loop,axis=0)
+    # Get Mean Training Data
+    Y_train_mean_emp = np.mean(Y_train,axis=1)
 
 
 # #### Build Testing Set
 
-# In[ ]:
+# In[49]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -1129,6 +1144,8 @@ if f_unknown_mode == "Rough_SDE":
             X_test = np.append(X_test,X_inputs_to_return_loop,axis=0)
             # Update Output(s)
             Y_test = np.append(Y_test,x_sample_path_loop,axis=0)
+    # Get Testing Mean Data
+    Y_test_mean_emp = np.mean(Y_test,axis=1)
     # End Timer
     Test_Set_PredictionTime_MC = time.time() - Test_Set_PredictionTime_MC
     

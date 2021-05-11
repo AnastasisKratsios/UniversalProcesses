@@ -1,0 +1,19 @@
+\begin{table}
+\centering
+\caption{Quality Metrics; d:3, D:3, Depth:2, Width:20, Dropout rate:0.1.}
+\begin{tabular}{lrrllllrr}
+\toprule
+{} &    DNM &  MC-Oracle &     ENET &  KRidge &    GBRF &    DNN &     GPR &   DGN \\
+\midrule
+W1-95L                        &  0.326 &          0 &        - &       - &       - &      - &     106 &  1.08 \\
+W1                            &  0.335 &          0 &        - &       - &       - &      - &     107 &  1.09 \\
+W1-95R                        &  0.344 &          0 &        - &       - &       - &      - &     108 &  1.09 \\
+M-95L                         &  0.636 &          0 &      307 &     306 &     306 &   3.03 &     303 &  9.27 \\
+M                             &  0.664 &          0 &      309 &     308 &     306 &   3.06 &     305 &  9.32 \\
+M-95R                         &  0.698 &          0 &      311 &     311 &     306 &   3.08 &     308 &  9.38 \\
+N\_Par                         &    391 &          0 & 1.01e+03 &       0 & 9.4e+03 &     25 &       0 &    52 \\
+Train\_Time                    &   43.5 &       2.66 & 1.62e+09 &    2.03 &    2.22 &   6.46 &    2.91 &  4.71 \\
+Test\_Time/MC-Oracle\_Test\_Time & 0.0925 &          1 & 0.000531 & 0.00235 & 0.00174 & 0.0987 & 0.00494 & 0.193 \\
+\bottomrule
+\end{tabular}
+\end{table}

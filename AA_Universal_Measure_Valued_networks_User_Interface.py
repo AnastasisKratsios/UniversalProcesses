@@ -36,7 +36,7 @@
 # #### Mode:
 # Software/Hardware Testing or Real-Deal?
 
-# In[1]:
+# In[15]:
 
 
 trial_run = True
@@ -44,7 +44,7 @@ trial_run = True
 
 # ### Simulation Method:
 
-# In[2]:
+# In[16]:
 
 
 # Random DNN
@@ -52,7 +52,7 @@ trial_run = True
 
 # Random DNN internal noise
 ## Real-world data version
-f_unknown_mode = "Extreme_Learning_Machine"
+#f_unknown_mode = "Extreme_Learning_Machine"
 ### General Parameters
 # activation_function == 'thresholding'
 activation_function = 'sigmoid'
@@ -60,11 +60,11 @@ activation_function = 'sigmoid'
 dataset_option = 'SnP'
 ### Dataset Option 2
 # dataset_option = 'crypto'
-Depth_Bayesian_DNN = 100
-N_Random_Features = 10**2
+Depth_Bayesian_DNN = 1
+N_Random_Features = 10
 ## Simulated Data version
 # f_unknown_mode = "DNN_with_Random_Weights"
-width = 10**3
+width = 10
 
 # Random Dropout applied to trained DNN
 # f_unknown_mode = "DNN_with_Bayesian_Dropout"
@@ -75,9 +75,9 @@ Dropout_rate = 0.75
 # GD_epochs = 50
 
 # SDE with fractional Driver
-#f_unknown_mode = "Rough_SDE"
-N_Euler_Steps = 10**2
-Hurst_Exponent = 0.75
+# f_unknown_mode = "Rough_SDE"
+N_Euler_Steps = 10**4
+Hurst_Exponent = 0.5
 
 f_unknown_mode = "Rough_SDE_Vanilla"
 ## Define Process' dynamics in (2) cell(s) below.
@@ -85,7 +85,7 @@ f_unknown_mode = "Rough_SDE_Vanilla"
 
 # ## Problem Dimension
 
-# In[3]:
+# In[17]:
 
 
 problem_dim = 1
@@ -96,7 +96,7 @@ if f_unknown_mode != 'Extreme_Learning_Machine':
 # #### Vanilla fractional SDE:
 # If f_unknown_mode == "Rough_SDE_Vanilla" is selected, then we can specify the process's dynamics.  
 
-# In[4]:
+# In[18]:
 
 
 #--------------------------#
@@ -108,7 +108,7 @@ volatility_constant = 0.01
 # Define DNN Applier
 def f_unknown_drift_vanilla(x):
     x_internal = x
-    x_internal = drift_constant*x_internal
+    x_internal = drift_constant*np.ones(problem_dim)
     return x_internal
 def f_unknown_vol_vanilla(x):
     x_internal = volatility_constant*np.diag(np.ones(problem_dim))
@@ -126,16 +126,16 @@ def f_unknown_vol_vanilla(x):
 # - Ratio $\frac{\text{Testing Datasize}}{\text{Training Datasize}}$.
 # - Number of Training Points to Generate
 
-# In[5]:
+# In[19]:
 
 
-train_test_ratio = .2
-N_train_size = 10**4
+train_test_ratio = .1
+N_train_size = 5*(10**2)
 
 
 # Monte-Carlo Paramters
 
-# In[6]:
+# In[20]:
 
 
 ## Monte-Carlo
@@ -144,17 +144,17 @@ N_Monte_Carlo_Samples = 10**2
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!
 
-# In[7]:
+# In[21]:
 
 
 # Hyper-parameters of Cover
 delta = 0.1
-Proportion_per_cluster = .95
+Proportion_per_cluster = .5
 
 
 # ## Dependencies and Auxiliary Script(s)
 
-# In[8]:
+# In[22]:
 
 
 # %run Loader.ipynb
@@ -166,7 +166,7 @@ import time as time #<- Note sure why...but its always seems to need 'its own sp
 
 # # Simulate or Parse Data
 
-# In[ ]:
+# In[23]:
 
 
 # %run Data_Simulator_and_Parser.ipynb
@@ -176,7 +176,7 @@ exec(open('Data_Simulator_and_Parser.py').read())
 # #### Scale Data
 # This is especially important to avoid exploding gradient problems when training the ML-models.
 
-# In[ ]:
+# In[24]:
 
 
 scaler = StandardScaler()
@@ -188,14 +188,14 @@ X_test = scaler.transform(X_test)
 
 # # Run Main:
 
-# In[ ]:
+# In[59]:
 
 
 print("------------------------------")
 print("Running script for main model!")
 print("------------------------------")
-# %run Universal_Measure_Valued_Networks_Backend.ipynb
-exec(open('Universal_Measure_Valued_Networks_Backend.py').read())
+get_ipython().run_line_magic('run', 'Universal_Measure_Valued_Networks_Backend.ipynb')
+# exec(open('Universal_Measure_Valued_Networks_Backend.py').read())
 
 print("------------------------------------")
 print("Done: Running script for main model!")
@@ -227,7 +227,7 @@ exec(open('Benchmarks_Model_Builder_Pointmass_Based.py').read())
 
 # #### Training Model Facts
 
-# In[ ]:
+# In[14]:
 
 
 print(Summary_pred_Qual_models)

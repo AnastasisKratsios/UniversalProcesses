@@ -15,12 +15,15 @@
 
 # ### Meta-Parameter Dump (easy access for debugging):
 
-# In[ ]:
+# In[12]:
 
 
-# Trial_run = True
+# trial_run = True
 # exec(open('Init_Dump.py').read())
+# exec(open('Loader.py').read())
+# exec(open('Debug_Menu.py').read())
 # %run Debug_Menu.ipynb
+# Proportion_per_cluster = 0.1
 
 
 # ---
@@ -37,7 +40,7 @@
 
 # #### Index and identify: $\{f^{-1}[\hat{\mu}_{n=1}^N]\}_{n=1}^N\subset \mathbb{X}!$
 
-# In[45]:
+# In[13]:
 
 
 # Initialize k_means

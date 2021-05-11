@@ -16,86 +16,105 @@ print("---------------------------------------")
 
 # #### For Debugging
 
-# In[22]:
+# In[2]:
 
 
-# trial_run = True
+trial_run = True
 
-# problem_dim = 3
-
-
-# train_test_ratio = .2
-# N_train_size = 5
+problem_dim = 3
 
 
-# ## Monte-Carlo
-# N_Monte_Carlo_Samples = 10**2
-# N_Euler_Steps = 50
-# Hurst_Exponent = .5
+train_test_ratio = .2
+N_train_size = 5
 
 
-# # Hyper-parameters of Cover
-# delta = 0.01
-# Proportion_per_cluster = .5
+## Monte-Carlo
+N_Monte_Carlo_Samples = 10**2
+N_Euler_Steps = 50
+Hurst_Exponent = .6
 
 
-# # Random DNN
-# # f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
+# Hyper-parameters of Cover
+delta = 0.01
+Proportion_per_cluster = .5
 
-# # Random DNN internal noise
-# # Real-world data version
-# # f_unknown_mode = "Extreme_Learning_Machine"
-# dataset_option = 'crypto'
-# N_Random_Features = 10**2
-# # Simulated Data version
-# # f_unknown_mode = "DNN_with_Random_Weights"
-# Depth_Bayesian_DNN = 2
-# width = 20
 
-# # Random Dropout applied to trained DNN
-# # f_unknown_mode = "DNN_with_Bayesian_Dropout"
-# Dropout_rate = 0.1
+# Random DNN
+# f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
 
-# # Rough SDE (time 1)
+# Random DNN internal noise
+# Real-world data version
+# f_unknown_mode = "Extreme_Learning_Machine"
+dataset_option = 'crypto'
+N_Random_Features = 10**2
+# Simulated Data version
+# f_unknown_mode = "DNN_with_Random_Weights"
+Depth_Bayesian_DNN = 2
+width = 20
+
+# Random Dropout applied to trained DNN
+# f_unknown_mode = "DNN_with_Bayesian_Dropout"
+Dropout_rate = 0.1
+
+# Rough SDE (time 1)
 # f_unknown_mode = "Rough_SDE"
+f_unknown_mode = "Rough_SDE_Vanilla"
 
-# # GD with Randomized Input
-# # f_unknown_mode = "GD_with_randomized_input"
-# GD_epochs = 2
-
-
-
-# exec(open('Loader.py').read())
-# # Load Packages/Modules
-# exec(open('Init_Dump.py').read())
-# trial_run = True
-# # Load Hyper-parameter Grid
-# exec(open('CV_Grid.py').read())
-# # Load Helper Function(s)
-# exec(open('Helper_Functions.py').read())
-# # Architecture Builder
-# exec(open('Benchmarks_Model_Builder.py').read())
-# # Import time separately
-# import time
-# #os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+# GD with Randomized Input
+# f_unknown_mode = "GD_with_randomized_input"
+GD_epochs = 2
 
 
-# # load dataset
-# results_path = "./outputs/models/"
-# results_tables_path = "./outputs/results/"
-# raw_data_path_folder = "./inputs/raw/"
-# data_path_folder = "./inputs/data/"
+
+exec(open('Loader.py').read())
+# Load Packages/Modules
+exec(open('Init_Dump.py').read())
+trial_run = True
+# Load Hyper-parameter Grid
+exec(open('CV_Grid.py').read())
+# Load Helper Function(s)
+exec(open('Helper_Functions.py').read())
+# Architecture Builder
+exec(open('Benchmarks_Model_Builder.py').read())
+# Import time separately
+import time
+#os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
 
-# ### Set Seed
-# random.seed(2021)
-# np.random.seed(2021)
-# tf.random.set_seed(2021)
+# load dataset
+results_path = "./outputs/models/"
+results_tables_path = "./outputs/results/"
+raw_data_path_folder = "./inputs/raw/"
+data_path_folder = "./inputs/data/"
 
-# N_test_size = int(np.round(N_train_size*train_test_ratio,0))
+
+### Set Seed
+random.seed(2021)
+np.random.seed(2021)
+tf.random.set_seed(2021)
+
+N_test_size = int(np.round(N_train_size*train_test_ratio,0))
 
 
-# In[23]:
+
+
+#--------------------------#
+# Define Process' Dynamics #
+#--------------------------#
+drift_constant = 0.1
+volatility_constant = 0.01
+
+# Define DNN Applier
+def f_unknown_drift_vanilla(x):
+    x_internal = x
+    x_internal = drift_constant*np.ones(problem_dim)
+    return x_internal
+def f_unknown_vol_vanilla(x):
+    x_internal = volatility_constant*np.diag(np.ones(problem_dim))
+    return x_internal
+
+
+# In[3]:
 
 
 Train_Set_PredictionTime_MC = time.time()
@@ -103,7 +122,7 @@ Train_Set_PredictionTime_MC = time.time()
 
 # # Decide on Which Simulator/Parser To Load:
 
-# In[24]:
+# In[4]:
 
 
 print("Deciding on Which Simulator/Parser To Load")
@@ -114,7 +133,7 @@ print("Deciding on Which Simulator/Parser To Load")
 # Y_x \sim f(x) + \text{Laplace}\left(\tilde{f}(x),\|x\|\right).
 # $$
 
-# In[25]:
+# In[5]:
 
 
 if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
@@ -156,7 +175,7 @@ if f_unknown_mode == "Heteroskedastic_NonLinear_Regression":
 
 # ## Bayesian DNN
 
-# In[26]:
+# In[6]:
 
 
 if f_unknown_mode == "DNN_with_Random_Weights":
@@ -188,7 +207,7 @@ if f_unknown_mode == "DNN_with_Random_Weights":
 
 # ## Vanilla DNN with MC-Droupout
 
-# In[27]:
+# In[7]:
 
 
 if f_unknown_mode == "DNN_with_Bayesian_Dropout":
@@ -245,7 +264,7 @@ if f_unknown_mode == "DNN_with_Bayesian_Dropout":
 # .
 # $$
 
-# In[28]:
+# In[8]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -376,13 +395,13 @@ if f_unknown_mode == "Rough_SDE":
 # .
 # $$
 
-# In[29]:
+# In[9]:
 
 
 if f_unknown_mode == "Rough_SDE_Vanilla": 
-#------------------------------------------------------------------------------#   
-#------------------------------------------------------------------------------#   
-# Note: The simulator is a bit more complicated in this case that the others.
+    #------------------------------------------------------------------------------#   
+    #------------------------------------------------------------------------------#   
+    # Note: The simulator is a bit more complicated in this case that the others.
     def Simulator(x):
         #-------------------#
         # Initialization(s) #
@@ -396,12 +415,14 @@ if f_unknown_mode == "Rough_SDE_Vanilla":
             # (re) Coerce input_data fBM Path
             x_internal = x_init
             # Get fBM path
-            for d in range(problem_dim):
-                fBM_gen_loop = (((FBM(n=N_Euler_Steps, hurst=Hurst_Exponent, length=1, method='daviesharte')).fbm())[1:]).reshape(-1,1)
-                if d == 0:
-                    fBM_gen = fBM_gen_loop
-                else:
-                    fBM_gen = np.append(fBM_gen,fBM_gen_loop,axis=-1)
+            if Hurst_Exponent != 0.5:
+                for d in range(problem_dim):
+                    fBM_gen_loop = (((FBM(n=N_Euler_Steps, hurst=Hurst_Exponent, length=1, method='daviesharte')).fbm())[1:]).reshape(-1,1)
+                    
+                    if d == 0:
+                        fBM_gen = fBM_gen_loop
+                    else:
+                        fBM_gen = np.append(fBM_gen,fBM_gen_loop,axis=-1)
 
 
             #---------------#
@@ -413,7 +434,11 @@ if f_unknown_mode == "Rough_SDE_Vanilla":
                 # Evolve Path
                 drift_update = f_unknown_drift_vanilla(x_internal)/N_Euler_Steps
                 vol_update = f_unknown_vol_vanilla(x_internal)
-                x_internal = (x_internal + drift_update + np.matmul(vol_update,fBM_gen[t,])).reshape(1,-1,problem_dim)
+                if Hurst_Exponent != 0.5:
+                    current_noise = fBM_gen[t,]
+                else:
+                    current_noise = (np.random.normal(1,np.sqrt(1/N_Euler_Steps),problem_dim)).reshape(1,-1)
+                x_internal = (x_internal + drift_update + np.matmul(vol_update,current_noise)).reshape(1,-1,problem_dim)
                 # Coerce
                 x_internal = x_internal.reshape(1,-1,problem_dim)
                 # Update Sample path
@@ -442,7 +467,7 @@ if f_unknown_mode == "Rough_SDE_Vanilla":
         # Return Monte-Carlo Sample and Dataset update to User #
         #------------------------------------------------------#
         return X_inputs_to_return, x_sample_path
-    
+
     # Set Model to rough_SDE since the rest of the code is identical in that case:
     f_unknown_mode = "Rough_SDE"
     #Done
@@ -450,7 +475,7 @@ if f_unknown_mode == "Rough_SDE_Vanilla":
 
 # # Set/Define: Internal Parameters
 
-# In[30]:
+# In[10]:
 
 
 print("Setting/Defining: Internal Parameters")
@@ -460,7 +485,7 @@ print("Setting/Defining: Internal Parameters")
 # 
 # **Note:** *This is only relevant for (fractional) SDE Example which is multi-dimensional in the output space.*
 
-# In[31]:
+# In[11]:
 
 
 if f_unknown_mode != "Rough_SDE":
@@ -471,7 +496,7 @@ else:
 
 # ## Decide on Testing Set's Size
 
-# In[32]:
+# In[12]:
 
 
 N_test_size = int(np.round(N_train_size*train_test_ratio,0))
@@ -481,7 +506,7 @@ N_test_size = int(np.round(N_train_size*train_test_ratio,0))
 # # Decide on Which Type of Data to Get/Simulate
 # ---
 
-# In[33]:
+# In[13]:
 
 
 print("Deciding on Which Type of Data to Get/Simulate")
@@ -490,7 +515,7 @@ print("Deciding on Which Type of Data to Get/Simulate")
 # ## Initialize Inputs (Training & Testing) for: 
 # *Non-SDE and non GD with random inputs examples*.
 
-# In[34]:
+# In[14]:
 
 
 if f_unknown_mode != "GD_with_randomized_input":
@@ -508,7 +533,7 @@ if f_unknown_mode != "GD_with_randomized_input":
 # #### Relabel if fSDE is used instead
 # **Explanation:** *The "lowercase x" is used to highlight that the X is made of time-space pairs: (t,x).*
 
-# In[35]:
+# In[15]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -522,7 +547,7 @@ if f_unknown_mode == "Rough_SDE":
 # Y_x\triangleq \hat{f}_{\theta_T}(x),\qquad \theta_{t+1} \triangleq \theta_t - \nabla \sum_{x\in \mathbb{X}} \|\hat{f}_{\theta_t}(x)-f(x)\|, \qquad \theta_0 \sim N_d(0,1).
 # $$
 
-# In[36]:
+# In[16]:
 
 
 if f_unknown_mode == "GD_with_randomized_input":
@@ -692,7 +717,7 @@ if f_unknown_mode == "GD_with_randomized_input":
 
 # ### Extreme Learning-Machine Version
 
-# In[37]:
+# In[17]:
 
 
 if f_unknown_mode == "Extreme_Learning_Machine":
@@ -871,7 +896,7 @@ if f_unknown_mode == "Extreme_Learning_Machine":
 
 # # Get Output Data
 
-# In[38]:
+# In[18]:
 
 
 print("Simulating Output Data for given input data")
@@ -880,7 +905,7 @@ print("Simulating Output Data for given input data")
 # ## Get outputs for all cases besides Gradient-Descent or fractional SDEs:
 # ### Training:
 
-# In[39]:
+# In[19]:
 
 
 if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != 'Extreme_Learning_Machine'):
@@ -900,12 +925,12 @@ if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_in
             Y_train_mean_emp = np.append(Y_train_mean_emp,np.mean(y_loop))
     #         Y_train_var_emp = np.append(Y_train_var_emp,np.mean((y_loop - np.mean(y_loop))**2))
     # Join mean and Variance Training Data
-    # Y_train_var_emp = np.append(Y_train_mean_emp.reshape(-1,1),Y_train_var_emp.reshape(-1,1),axis=1)
+    Y_train_var_emp = np.append(Y_train_mean_emp.reshape(-1,1),Y_train_var_emp.reshape(-1,1),axis=1)
 
 
 # ### Testing:
 
-# In[40]:
+# In[20]:
 
 
 if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != 'Extreme_Learning_Machine'):
@@ -934,7 +959,7 @@ if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_in
 # ### For: "GD_with_randomized_input":
 # This variant is more efficient in the case of the gradient-descent with randomized initializations
 
-# In[41]:
+# In[21]:
 
 
 # This implemention of the GD algorithm is more efficient (but this only holds for the GD Monte-Carlo method):
@@ -982,7 +1007,7 @@ if f_unknown_mode == "GD_with_randomized_input":
     Test_Set_PredictionTime_MC = (time.time() - Test_Set_PredictionTime_MC2) + Test_Set_PredictionTime_MC
 
 
-# In[42]:
+# In[22]:
 
 
 if f_unknown_mode == 'Extreme_Learning_Machine':
@@ -1094,7 +1119,7 @@ if f_unknown_mode == 'Extreme_Learning_Machine':
 
 # #### Build Training Set
 
-# In[48]:
+# In[23]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -1103,7 +1128,7 @@ if f_unknown_mode == "Rough_SDE":
         x_init_loop = x_train[x_i,]
         # Monte-Carlo Simulate
         X_inputs_to_return_loop, x_sample_path_loop = Simulator(x_init_loop)
-        
+
         # Update Training dataset (both input(s) and output(s))
         if x_i == 0:
             # Update Input(s)
@@ -1121,7 +1146,7 @@ if f_unknown_mode == "Rough_SDE":
 
 # #### Build Testing Set
 
-# In[49]:
+# In[24]:
 
 
 if f_unknown_mode == "Rough_SDE":
@@ -1154,14 +1179,14 @@ if f_unknown_mode == "Rough_SDE":
 
 # ## Extra Parsing:
 
-# In[ ]:
+# In[25]:
 
 
 if f_unknown_mode == "Rough_SDE":
     Y_train_mean_emp = np.sum(Y_train,axis=1)
 
 
-# In[ ]:
+# In[26]:
 
 
 print("----------------------------------")
@@ -1169,7 +1194,7 @@ print("Done Data-Parsing/Simulation Phase")
 print("----------------------------------")
 
 
-# In[ ]:
+# In[27]:
 
 
 Train_Set_PredictionTime_MC = time.time() - Train_Set_PredictionTime_MC

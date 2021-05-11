@@ -53,19 +53,22 @@ trial_run = True
 # Random DNN internal noise
 ## Real-world data version
 f_unknown_mode = "Extreme_Learning_Machine"
+### General Parameters
+# activation_function == 'thresholding'
+activation_function = 'sigmoid'
 ### Dataset Option 1
 dataset_option = 'SnP'
 ### Dataset Option 2
 # dataset_option = 'crypto'
-Depth_Bayesian_DNN = 2
-N_Random_Features = 10**3
+Depth_Bayesian_DNN = 100
+N_Random_Features = 10**2
 ## Simulated Data version
 # f_unknown_mode = "DNN_with_Random_Weights"
-width = 10
+width = 10**3
 
 # Random Dropout applied to trained DNN
 # f_unknown_mode = "DNN_with_Bayesian_Dropout"
-Dropout_rate = 0.1
+Dropout_rate = 0.75
 
 # GD with Randomized Input
 # f_unknown_mode = "GD_with_randomized_input"
@@ -73,10 +76,10 @@ Dropout_rate = 0.1
 
 # SDE with fractional Driver
 #f_unknown_mode = "Rough_SDE"
-N_Euler_Steps = 10**1
-Hurst_Exponent = 0.5
+N_Euler_Steps = 10**2
+Hurst_Exponent = 0.75
 
-# f_unknown_mode = "Rough_SDE_Vanilla"
+f_unknown_mode = "Rough_SDE_Vanilla"
 ## Define Process' dynamics in (2) cell(s) below.
 
 
@@ -87,7 +90,7 @@ Hurst_Exponent = 0.5
 
 problem_dim = 1
 if f_unknown_mode != 'Extreme_Learning_Machine':
-    width = int(max(width,2*(problem_dim+1)))
+    width = int(2*(problem_dim+1))
 
 
 # #### Vanilla fractional SDE:
@@ -127,7 +130,7 @@ def f_unknown_vol_vanilla(x):
 
 
 train_test_ratio = .2
-N_train_size = 10**2
+N_train_size = 10**4
 
 
 # Monte-Carlo Paramters
@@ -136,7 +139,7 @@ N_train_size = 10**2
 
 
 ## Monte-Carlo
-N_Monte_Carlo_Samples = 10**3
+N_Monte_Carlo_Samples = 10**2
 
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!
@@ -146,12 +149,12 @@ N_Monte_Carlo_Samples = 10**3
 
 # Hyper-parameters of Cover
 delta = 0.1
-Proportion_per_cluster = .75
+Proportion_per_cluster = .95
 
 
 # ## Dependencies and Auxiliary Script(s)
 
-# In[ ]:
+# In[8]:
 
 
 # %run Loader.ipynb
@@ -159,25 +162,6 @@ exec(open('Loader.py').read())
 # Load Packages/Modules
 exec(open('Init_Dump.py').read())
 import time as time #<- Note sure why...but its always seems to need 'its own special loading...'
-
-
-# #### Ensure Minimum Width for Universality is Achieved
-
-# In[ ]:
-
-
-if (('output_dim' in locals()) == False):
-    if (f_unknown_mode == 'Rough_SDE') or (f_unknown_mode == 'Rough_SDE_Vanilla'):
-        output_dim = problem_dim
-    else:
-        output_dim = 1
-
-
-# In[ ]:
-
-
-exec(open('MISC_HELPER_FUNCTIONS.py').read())
-param_grid_Deep_Classifier['height'] = minimum_height_updater(param_grid_Deep_Classifier['height'])
 
 
 # # Simulate or Parse Data
@@ -306,7 +290,6 @@ Summary_pred_Qual_models
 
 if output_dim == 1:
     # %run Mixture_Density_Network.ipynb
-    exec(open('CV_Grid.py').read())
     exec(open('Mixture_Density_Network.py').read())
 
 
@@ -357,16 +340,6 @@ print(" ")
 print("Kernel_Used_in_GPR: "+str(GPR_trash.kernel))
 print("🙃🙃 Have a wonderful day! 🙃🙃")
 Summary_pred_Qual_models
-
-
-# ### More Facts
-
-# In[ ]:
-
-
-print("Problem:"+str(f_unknown_mode))
-print("Training Dataset Size: "+str(X_train.shape[0]))
-print("Testing Dataset Size: "+str(X_test.shape[0]))
 
 
 # ---

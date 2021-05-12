@@ -45,6 +45,7 @@ measure_weights_test = np.ones(N_Monte_Carlo_Samples_Test)/N_Monte_Carlo_Samples
 
 # Get number of centers
 N_Centers_per_box = max(1,int(round(np.sqrt(N_Quantizers_to_parameterize))))
+N_points_per_barycenter = 10
 
 
 # ## Get Barycenters
@@ -66,6 +67,8 @@ print("Building Training + Testing Set - rough-SDE Ground-Truth")
 
 # Initialize position Counter
 position_counter = 0
+# Barycenter Counter
+barycenter_counter = 0
 # Iniitalize uniform weights vector
 measures_weights_list_loop = np.ones(N_Monte_Carlo_Samples)/N_Monte_Carlo_Samples
 
@@ -74,7 +77,7 @@ N_Monte_Carlo_Samples_Test = N_Monte_Carlo_Samples
 
 # Overrine Number of Centers
 N_x = x_Grid_barycenters.shape[0]
-N_t = len(t_Grid_barycenters)
+N_t = N_Euler_Maruyama_Steps
 N_Quantizers_to_parameterize = N_x*N_t
 Q_How_many_time_steps_to_sample_per_x = int(round(N_Euler_Maruyama_Steps*Proportion_per_cluster))
 
@@ -91,7 +94,7 @@ for x_bary_i in tqdm(range(N_x)):
 
     for x_i in tqdm(range(N_points_per_barycenter),leave=True):
         # timer
-        if x_i == (N_points_per_barycenter - 1):
+        if x_i == 1:
             Test_Set_PredictionTime_MC_loop = time.time()
         else:
             Train_Set_PredictionTime_MC_loop = time.time()
@@ -122,12 +125,26 @@ for x_bary_i in tqdm(range(N_x)):
         #-----------#
         # Identify Which Elements to Add to Barycenters Array
         ## Identify Which Rows Belong to this Barycenter
-        t_indices_barycenters_loop = np.sort(np.random.choice(range(N_Euler_Maruyama_Steps),size = Q_How_many_time_steps_to_sample_per_x))
+        t_indices_barycenters_loop = np.sort(np.random.choice(range(N_Euler_Maruyama_Steps),size = Q_How_many_time_steps_to_sample_per_x, replace=False))
         X_grid_barycenters_loop = X_grid_loop[t_indices_barycenters_loop,:]
         # Get Barycenters for this loop
         Barycenter_update_loop = current_cover[t_indices_barycenters_loop,:,:]
-        # Get Current Barycenter Index
-        current_barycenter_index = np.repeat(x_bary_i,N_Euler_Maruyama_Steps)
+
+        # Get Current Barycenter Index      
+        ## Initializations(Loop)
+        barycenter_loop_index = 0
+        current_associated_centers_index = t_indices_barycenters_loop[barycenter_loop_index]
+        max_possible_loop = max(t_indices_barycenters_loop)
+        current_barycenter_index = np.array(range(N_Euler_Maruyama_Steps)) 
+        ## Get Clusters
+        for loop_index in range(N_Euler_Maruyama_Steps):
+            if (current_barycenter_index[loop_index] >= current_associated_centers_index) and (dummy[loop_index] < max_possible_loop):
+                # Update Active Barycenter
+                current_associated_centers_index = t_indices_barycenters_loop[barycenter_loop_index]
+                barycenter_loop_index = barycenter_loop_index + 1
+                barycenter_counter = barycenter_counter + 1
+            # Update Dummy
+            current_barycenter_index[loop_index] = barycenter_counter
         
         # Append
         ## Decide if we should initialize or append?...
@@ -141,7 +158,7 @@ for x_bary_i in tqdm(range(N_x)):
                 # Initialize Training Timer
                 Train_Set_PredictionTime_MC = time.time() - Train_Set_PredictionTime_MC_loop
                 # Update Barycenters Array (For training the deep classifier)
-                param_grid_Deep_Classifier = current_barycenter_index
+                Train_classes = current_barycenter_index
             # Initialize Test Set
             if x_i == 1:
                 X_test = X_grid_loop
@@ -150,7 +167,7 @@ for x_bary_i in tqdm(range(N_x)):
                 Test_Set_PredictionTime_MC = time.time() - Test_Set_PredictionTime_MC_loop
         # Update arrays (Now that they're all nice and initialized)
         else:
-            if x_i == 1:
+            if x_i != 1:
                 # Update Barycenters
                 Barycenters_Array = np.append(Barycenters_Array,Barycenter_update_loop,axis=0)
                 # Update Training Data
@@ -159,7 +176,7 @@ for x_bary_i in tqdm(range(N_x)):
                 # Update Training Timer
                 Train_Set_PredictionTime_MC = (time.time() - Train_Set_PredictionTime_MC) + Train_Set_PredictionTime_MC
                 # Update Barycenters Array (For training the deep classifier)
-                param_grid_Deep_Classifier = np.append(param_grid_Deep_Classifier,current_barycenter_index)
+                Train_classes = np.append(Train_classes,current_barycenter_index)
             else:
                 # Update Testing Data
                 X_test = np.append(X_test,X_grid_loop,axis = 0)
@@ -168,7 +185,10 @@ for x_bary_i in tqdm(range(N_x)):
                 Test_Set_PredictionTime_MC = (time.time() - Test_Set_PredictionTime_MC_loop) + Test_Set_PredictionTime_MC
                 
 # Get Numpy Classes
-param_grid_Deep_Classifier = (pd.get_dummies(test)).to_numpy()
+Train_classes = (pd.get_dummies(Train_classes)).to_numpy()
+
+# Update Number of Centers
+N_Quantizers_to_parameterize = Train_classes.shape[1]
 
 
 # ## Get Mean Data for Benchmark Models

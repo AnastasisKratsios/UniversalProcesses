@@ -176,8 +176,8 @@ print("======================================================")
 # In[ ]:
 
 
-param_grid_Deep_Classifier['input_dim'] = [problem_dim]
-param_grid_Deep_Classifier['output_dim'] = [N_GMM_clusters]
+param_grid_Deep_ffNN['input_dim'] = [problem_dim]
+param_grid_Deep_ffNN['output_dim'] = [N_GMM_clusters]
 
 
 # ### Means Network
@@ -326,7 +326,7 @@ timer_MDN_Means = time.time()
 MDN_Means_train, MDN_Means_test, N_params_MDN_MeansNet, timer_output_MDN_MeansNet = build_ffNN(n_folds = CV_folds,
                                                                                                n_jobs = n_jobs,
                                                                                                n_iter = n_iter,
-                                                                                               param_grid_in=param_grid_Deep_Classifier,
+                                                                                               param_grid_in=param_grid_Deep_ffNN,
                                                                                                X_train = X_train,
                                                                                                y_train = Y_MDN_targets_train_mean,
                                                                                                X_test = X_test)
@@ -355,7 +355,7 @@ timer_MDN_SDs = time.time()
 MDN_SDs_train, MDN_SDs_test, N_params_MDN_SDsNet, timer_output_MDN_SDsNet = build_MDN_SDs_SubNetwork(n_folds = CV_folds,
                                                                                                              n_jobs = n_jobs,
                                                                                                              n_iter = n_iter,
-                                                                                                             param_grid_in=param_grid_Deep_Classifier,
+                                                                                                             param_grid_in=param_grid_Deep_ffNN,
                                                                                                              X_train = X_train,
                                                                                                              y_train = Y_MDN_targets_train_sd,
                                                                                                              X_test = X_test)
@@ -382,7 +382,7 @@ timer_MDN_Mix = time.time()
 MDN_Mix_train, MDN_Mix_test, N_params_MDN_MixNet, timer_output_MDN_MixNet = build_simple_deep_classifier(n_folds = CV_folds,
                                                                                                          n_jobs = n_jobs,
                                                                                                          n_iter = n_iter,
-                                                                                                         param_grid_in=param_grid_Deep_Classifier,
+                                                                                                         param_grid_in=param_grid_Deep_ffNN,
                                                                                                          X_train = X_train,
                                                                                                          y_train = Y_MDN_targets_train_mixture_weights,
                                                                                                          X_test = X_test)

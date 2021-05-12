@@ -43,14 +43,19 @@
 # In[17]:
 
 
-# if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):
-# Initialize k_means
-N_Quantizers_to_parameterize = int(np.maximum(2,round(Proportion_per_cluster*X_train.shape[0])))
-kmeans = KMeans(n_clusters=N_Quantizers_to_parameterize, random_state=0).fit(X_train)
-# Get Classes
-Train_classes = np.array(pd.get_dummies(kmeans.labels_))
-# Get Center Measures
-Barycenters_Array_x = kmeans.cluster_centers_
+if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):
+    # Initialize k_means
+    N_Quantizers_to_parameterize = int(np.maximum(2,round(Proportion_per_cluster*X_train.shape[0])))
+    kmeans = KMeans(n_clusters=N_Quantizers_to_parameterize, random_state=0).fit(X_train)
+    # Get Classes
+    Train_classes = np.array(pd.get_dummies(kmeans.labels_))
+    # Get Center Measures
+    Barycenters_Array_x = kmeans.cluster_centers_
+else:
+    # Mod-2 Partitioning
+    Barycenters_index = np.array(range(X_train.shape[0]))[np.array(range(X_train.shape[0]))%2 == 0]
+    Train_classes = np.array([i for i in range(int(X_train.shape[0]/N_Clusters)) for _ in range(N_Clusters)])
+    Train_classes = np.array(pd.get_dummies(Train_classes))
 
 
 # ### Get $\{\hat{\mu}_{n=1}^{N}\}$!
@@ -81,7 +86,36 @@ else:
     # Update Problem Dimension (include time)
     problem_dim = problem_dim + 1
     # Save number of cluster produced
-    N_Quantizers_to_parameterize = Train_classes.shape[1]
+    N_Quantizers_to_parameterize = Barycenters_Array.shape[0]
+
+
+# In[35]:
+
+
+if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Rough_SDE_Vanilla"):
+    for i in range(Barycenters_Array.shape[0]):
+        if i == 0:
+            points_of_mass = Barycenters_Array[i,]
+        else:
+
+            points_of_mass = np.append(points_of_mass,Barycenters_Array[i,])
+# Janky way but works
+if (f_unknown_mode == "Rough_SDE") or (f_unknown_mode == "Rough_SDE_Vanilla"):
+    for i in range(Barycenters_Array.shape[0]):
+        if i == 0:
+            points_of_mass = Barycenters_Array[i,:,:]
+        else:
+
+            points_of_mass = np.append(points_of_mass,Barycenters_Array[i,:,:],axis=0)
+
+
+# In[36]:
+
+
+if (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Extreme_Learning_Machine") and (f_unknown_mode != "Rough_SDE_Vanilla"):
+    # Get Noisless Mean
+    direct_facts = np.apply_along_axis(f_unknown, 1, X_train)
+    direct_facts_test = np.apply_along_axis(f_unknown, 1, X_test)
 
 
 # # Train Model
@@ -146,35 +180,6 @@ print("===============================================")
 # #### Get Predicted Quantized Distributions
 # - Each *row* of "Predicted_Weights" is the $\beta\in \Delta_N$.
 # - Each *Column* of "Barycenters_Array" denotes the $x_1,\dots,x_N$ making up the points of the corresponding empirical measures.
-
-# In[35]:
-
-
-if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Rough_SDE_Vanilla"):
-    for i in range(Barycenters_Array.shape[0]):
-        if i == 0:
-            points_of_mass = Barycenters_Array[i,]
-        else:
-
-            points_of_mass = np.append(points_of_mass,Barycenters_Array[i,])
-# Janky way but works
-if (f_unknown_mode == "Rough_SDE") or (f_unknown_mode == "Rough_SDE_Vanilla"):
-    for i in range(Barycenters_Array.shape[0]):
-        if i == 0:
-            points_of_mass = Barycenters_Array[i,:,:]
-        else:
-
-            points_of_mass = np.append(points_of_mass,Barycenters_Array[i,:,:],axis=0)
-
-
-# In[36]:
-
-
-if (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Extreme_Learning_Machine") and (f_unknown_mode != "Rough_SDE_Vanilla"):
-    # Get Noisless Mean
-    direct_facts = np.apply_along_axis(f_unknown, 1, X_train)
-    direct_facts_test = np.apply_along_axis(f_unknown, 1, X_test)
-
 
 # ### Get Error(s)
 

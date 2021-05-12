@@ -26,12 +26,21 @@ if trial_run == True:
 
 
     param_grid_Deep_Classifier = {'batch_size': [16],
-                        'epochs': [2],
-                        'learning_rate': [0.00001],
-                        'height': [2],
-                        'depth': [1],
+                        'epochs': [800],
+                        'learning_rate': [0.5],
+                        'height': [300],
+                        'depth': [4],
                         'input_dim':[15],
                         'output_dim':[1]}
+    
+    param_grid_Deep_ffNN = {'batch_size': [16],
+                        'epochs': [400],
+                        'learning_rate': [0.5],
+                        'height': [200],
+                        'depth': [2],
+                        'input_dim':[15],
+                        'output_dim':[1]}
+    
     
     # Random Forest Grid
     #--------------------#
@@ -74,9 +83,17 @@ else:
 
     param_grid_Deep_Classifier = {'batch_size': [8,16,32],
                         'epochs': [400,600,800],
-                        'learning_rate': [0.001,0.0001,0.00001,0.000001],
-                        'height': [300,400,500,600],
+                        'learning_rate': [0.01,0.1,0.5],
+                        'height': [150,200,300],
                         'depth': [2,3],
+                        'input_dim':[15],
+                        'output_dim':[1]}
+    
+    param_grid_Deep_ffNN = {'batch_size': [8,16,32],
+                        'epochs': [200,400,600,800],
+                        'learning_rate': [0.1,0.01,0.001,0.5],
+                        'height': [300,400,500,600],
+                        'depth': [3,4],
                         'input_dim':[15],
                         'output_dim':[1]}
     

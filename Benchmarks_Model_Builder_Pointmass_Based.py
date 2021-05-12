@@ -516,13 +516,13 @@ print("Training: DNN")
 print("-------------")
 
 # Redefine (Dimension-related) Elements of Grid
-param_grid_Deep_Classifier['input_dim'] = [problem_dim]
-param_grid_Deep_Classifier['output_dim'] = [output_dim]
+param_grid_Deep_ffNN['input_dim'] = [problem_dim]
+param_grid_Deep_ffNN['output_dim'] = [output_dim]
 
 YHat_ffNN, YHat_ffNN_test, ffNN_N_Params, ffNN_eval_time = build_ffNN(n_folds = CV_folds,
                                                                       n_jobs = n_jobs, 
                                                                       n_iter = n_iter,
-                                                                      param_grid_in = param_grid_Deep_Classifier,  
+                                                                      param_grid_in = param_grid_Deep_ffNN,  
                                                                       X_train = X_train,
                                                                       y_train = Y_train_mean_emp,
                                                                       X_test = X_test)

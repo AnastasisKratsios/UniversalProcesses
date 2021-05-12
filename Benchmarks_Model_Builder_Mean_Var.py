@@ -383,12 +383,12 @@ print("===============================")
 timer_DGN = time.time()
 if output_dim == 1:
     # Redefine (Dimension-related) Elements of Grid
-    param_grid_Deep_Classifier['input_dim'] = [problem_dim]
-    param_grid_Deep_Classifier['output_dim'] = [output_dim]
+    param_grid_Deep_ffNN['input_dim'] = [problem_dim]
+    param_grid_Deep_ffNN['output_dim'] = [output_dim]
     Deep_Gaussian_train_parameters, Deep_Gaussian_test_parameters, N_params_deep_Gaussian, timer_output_Deep_Gaussian = build_ffNN_Gaussian(n_folds = CV_folds, 
                                                                                                                                             n_jobs = n_jobs, 
                                                                                                                                             n_iter = n_iter, 
-                                                                                                                                            param_grid_in=param_grid_Deep_Classifier, 
+                                                                                                                                            param_grid_in=param_grid_Deep_ffNN, 
                                                                                                                                             X_train = X_train, 
                                                                                                                                             y_train = Y_train_var_emp,
                                                                                                                                             X_test = X_test)
@@ -399,7 +399,7 @@ else:
     Deep_Gaussian_train_parameters, Deep_Gaussian_test_parameters, N_params_deep_Gaussian, timer_output_Deep_Gaussian = build_ffNN(n_folds = CV_folds, 
                                                                                                                                    n_jobs = n_jobs, 
                                                                                                                                    n_iter = n_iter, 
-                                                                                                                                   param_grid_in=param_grid_Deep_Classifier, 
+                                                                                                                                   param_grid_in=param_grid_Deep_ffNN, 
                                                                                                                                    X_train = X_train, 
                                                                                                                                    y_train = Y_train_var_emp,
                                                                                                                                    X_test = X_test)
@@ -471,14 +471,14 @@ for i in tqdm(range((X_train.shape[0]))):
                                                    N_Monte_Carlo_Samples)
         ## Get Multivariate Gaussian Process Regressor's Prediction
         sample_GRP = np.random.multivariate_normal(GPR_means[i,],
-                                                   np.diag(np.repeat(GPR_vars[i],problem_dim)),
+                                                   np.diag(np.repeat(GPR_vars[i],output_dim)),
                                                    N_Monte_Carlo_Samples)
         ## Get Multivariate deep Gaussian Network's prediction
         # Extract Prediction(s)
         ## Get Mean
-        mean_loop = Deep_Gaussian_train_parameters[0,:problem_dim]
+        mean_loop = Deep_Gaussian_train_parameters[0,:output_dim]
         ## Get Covariance for Predicted Cholesky Root
-        cov_sqrt_chol_loop = Deep_Gaussian_train_parameters[0,problem_dim:]
+        cov_sqrt_chol_loop = Deep_Gaussian_train_parameters[0,output_dim:]
         cov_sqrt_chol_loop = cov_sqrt_chol_loop.reshape(output_dim,output_dim)
         cov_sqrt_chol_loop = (np.matmul(cov_sqrt_chol_loop,cov_sqrt_chol_loop.T))
         ## Get Empirical Samples
@@ -585,14 +585,14 @@ for i in tqdm(range((X_test.shape[0]))):
         hat_mu_GRP_test = GPR_means_test[i,]
         hat_sd_GPR_test = np.sqrt(GPR_vars_test[i])
         sample_GRP_test = np.random.multivariate_normal(GPR_means_test[i,],
-                                                   np.diag(np.repeat(GPR_vars_test[i],problem_dim)),
+                                                   np.diag(np.repeat(GPR_vars_test[i],output_dim)),
                                                    N_Monte_Carlo_Samples)
         ## Get Multivariate deep Gaussian Network's prediction
         # Extract Prediction(s)
         ## Get Mean
-        mean_loop = Deep_Gaussian_test_parameters[0,:problem_dim]
+        mean_loop = Deep_Gaussian_test_parameters[0,:output_dim]
         ## Get Covariance for Predicted Cholesky Root
-        cov_sqrt_chol_loop = Deep_Gaussian_test_parameters[0,problem_dim:]
+        cov_sqrt_chol_loop = Deep_Gaussian_test_parameters[0,output_dim:]
         cov_sqrt_chol_loop = cov_sqrt_chol_loop.reshape(output_dim,output_dim)
         cov_sqrt_chol_loop = (np.matmul(cov_sqrt_chol_loop,cov_sqrt_chol_loop.T))
         ## Get Empirical Samples
@@ -645,7 +645,7 @@ M1_Errors_GPR_test = np.array(bootstrap(np.abs(Mean_Errors_GPR_test),n=N_Bootstr
 M1_Errors_DGN_test = np.array(bootstrap(np.abs(Mean_Errors_DGN_test),n=N_Bootstraps)(.95))
 
 print("#-------------------------#")
-print(" Get Training Error(s): END")
+print(" Get Testing Error(s): END")
 print("#-------------------------#")
 
 

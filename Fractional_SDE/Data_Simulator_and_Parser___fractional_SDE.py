@@ -138,7 +138,7 @@ for x_bary_i in tqdm(range(N_x)):
         current_barycenter_index = np.array(range(N_Euler_Maruyama_Steps)) 
         ## Get Clusters
         for loop_index in range(N_Euler_Maruyama_Steps):
-            if (current_barycenter_index[loop_index] >= current_associated_centers_index) and (dummy[loop_index] < max_possible_loop):
+            if (current_barycenter_index[loop_index] >= current_associated_centers_index) and (current_barycenter_index[loop_index] < max_possible_loop):
                 # Update Active Barycenter
                 current_associated_centers_index = t_indices_barycenters_loop[barycenter_loop_index]
                 barycenter_loop_index = barycenter_loop_index + 1

@@ -12,29 +12,32 @@
 # In[ ]:
 
 
-if f_unknown_mode != "Rough_SDE":
-    for i in range(Barycenters_Array.shape[0]):
-        if i == 0:
-            points_of_mass = Barycenters_Array[i,]
-        else:
+# if f_unknown_mode != "Rough_SDE":
+#     for i in range(Barycenters_Array.shape[0]):
+#         if i == 0:
+#             points_of_mass = Barycenters_Array[i,]
+#         else:
 
-            points_of_mass = np.append(points_of_mass,Barycenters_Array[i,])
-else:
-    for i in range(Barycenters_Array.shape[0]):
-        if i == 0:
-            points_of_mass = Barycenters_Array[i,]
-        else:
+#             points_of_mass = np.append(points_of_mass,Barycenters_Array[i,])
+# else:
+#     for i in range(Barycenters_Array.shape[0]):
+#         if i == 0:
+#             points_of_mass = Barycenters_Array[i,]
+#         else:
 
-            points_of_mass = np.append(points_of_mass,Barycenters_Array[i,],axis=0)
+#             points_of_mass = np.append(points_of_mass,Barycenters_Array[i,],axis=0)
 
+
+# #### Get Perfect Oracle (i.e.: closed-form mean)
+# Note, this is only available in certain settings; and not the ones considered in the paper.
 
 # In[ ]:
 
 
-if (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Extreme_Learning_Machine"):
-    # Get Noisless Mean
-    direct_facts = np.apply_along_axis(f_unknown, 1, X_train)
-    direct_facts_test = np.apply_along_axis(f_unknown, 1, X_test)
+# if (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Extreme_Learning_Machine") and (f_unknown_mode != "Rough_SDE_Vanilla"):
+#     # Get Noisless Mean
+#     direct_facts = np.apply_along_axis(f_unknown, 1, X_train)
+#     direct_facts_test = np.apply_along_axis(f_unknown, 1, X_test)
 
 
 # ## Get Error(s)
@@ -70,7 +73,7 @@ else:
 #-------------------------#
 # Define Transport Solver #
 #-------------------------#
-def transport_dist(x_source,w_source,x_sink,w_sink,output_dim,OT_method="Sliced"):
+def transport_dist(x_source,w_source,x_sink,w_sink,output_dim,OT_method="Sliced",n_projections = 10):
     # Decide which problem to solve (1D or multi-D)?
     if output_dim == 1:
         OT_out = ot.emd2_1d(x_source,
@@ -96,10 +99,11 @@ def transport_dist(x_source,w_source,x_sink,w_sink,output_dim,OT_method="Sliced"
             OT_out = float(OT_out[0])
         else:
             OT_out = ot.sliced.sliced_wasserstein_distance(X_s = x_source, 
-                                                    X_t = x_sink,
-                                                    a = w_source, 
-                                                    b = w_sink, 
-                                                    seed = 2020)
+                                                           X_t = x_sink,
+                                                           a = w_source, 
+                                                           b = w_sink, 
+                                                           seed = 2020,
+                                                           n_projections = n_projections)
             # COERSION
             OT_out = float(OT_out)
     # Return (regularized?) Transport Distance

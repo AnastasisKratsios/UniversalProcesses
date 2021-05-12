@@ -40,17 +40,17 @@
 
 # #### Index and identify: $\{f^{-1}[\hat{\mu}_{n=1}^N]\}_{n=1}^N\subset \mathbb{X}!$
 
-# In[15]:
+# In[17]:
 
 
-if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):
-    # Initialize k_means
-    N_Quantizers_to_parameterize = int(np.maximum(2,round(Proportion_per_cluster*X_train.shape[0])))
-    kmeans = KMeans(n_clusters=N_Quantizers_to_parameterize, random_state=0).fit(X_train)
-    # Get Classes
-    Train_classes = np.array(pd.get_dummies(kmeans.labels_))
-    # Get Center Measures
-    Barycenters_Array_x = kmeans.cluster_centers_
+# if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):
+# Initialize k_means
+N_Quantizers_to_parameterize = int(np.maximum(2,round(Proportion_per_cluster*X_train.shape[0])))
+kmeans = KMeans(n_clusters=N_Quantizers_to_parameterize, random_state=0).fit(X_train)
+# Get Classes
+Train_classes = np.array(pd.get_dummies(kmeans.labels_))
+# Get Center Measures
+Barycenters_Array_x = kmeans.cluster_centers_
 
 
 # ### Get $\{\hat{\mu}_{n=1}^{N}\}$!
@@ -58,26 +58,30 @@ if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):
 # In[46]:
 
 
-if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):
-    for i in tqdm(range(Barycenters_Array_x.shape[0])):
-        # Identify Nearest Datapoint to a ith Barycenter
-        #------------------------------------------------------------------------------------------------------#
-        ## Get Barycenter "out of sample" in X (NB there is no data-leakage since we know nothing about Y!)
-        Bar_x_loop = Barycenters_Array_x[i,]
-        ## Project Barycenter onto testset
-        distances = np.sum(np.abs(X_train-Bar_x_loop.reshape(-1,)),axis=1)
+# if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):
+for i in tqdm(range(Barycenters_Array_x.shape[0])):
+    # Identify Nearest Datapoint to a ith Barycenter
+    #------------------------------------------------------------------------------------------------------#
+    ## Get Barycenter "out of sample" in X (NB there is no data-leakage since we know nothing about Y!)
+    Bar_x_loop = Barycenters_Array_x[i,]
+    ## Project Barycenter onto testset
+    distances = np.sum(np.abs(X_train-Bar_x_loop.reshape(-1,)),axis=1)
 
-        # Update Subsetting Index
-        if i == 0:
-            Barycenters_index = np.array(np.argmin(distances))
-        else:
-            Barycenters_index = np.append(Barycenters_index,np.array(np.argmin(distances)))
-
-    # Subset Training Set-Outputs
-    if f_unknown_mode != "Rough_SDE":
-        Barycenters_Array = Y_train[Barycenters_index,]
+    # Update Subsetting Index
+    if i == 0:
+        Barycenters_index = np.array(np.argmin(distances))
     else:
-        Barycenters_Array = Y_train[Barycenters_index,:,:]
+        Barycenters_index = np.append(Barycenters_index,np.array(np.argmin(distances)))
+
+# Subset Training Set-Outputs
+if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):
+    Barycenters_Array = Y_train[Barycenters_index,]
+else:
+    Barycenters_Array = Y_train[Barycenters_index,:,:]
+    # Update Problem Dimension (include time)
+    problem_dim = problem_dim + 1
+    # Save number of cluster produced
+    N_Quantizers_to_parameterize = Train_classes.shape[1]
 
 
 # # Train Model
@@ -153,13 +157,14 @@ if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Rough_SDE_Vanilla"):
         else:
 
             points_of_mass = np.append(points_of_mass,Barycenters_Array[i,])
-else:
+# Janky way but works
+if (f_unknown_mode == "Rough_SDE") or (f_unknown_mode == "Rough_SDE_Vanilla"):
     for i in range(Barycenters_Array.shape[0]):
         if i == 0:
-            points_of_mass = Barycenters_Array[i,]
+            points_of_mass = Barycenters_Array[i,:,:]
         else:
 
-            points_of_mass = np.append(points_of_mass,Barycenters_Array[i,],axis=0)
+            points_of_mass = np.append(points_of_mass,Barycenters_Array[i,:,:],axis=0)
 
 
 # In[36]:
@@ -188,56 +193,57 @@ exec(open('Evaluation.py').read())
 # In[38]:
 
 
-# # Transport-problem initializations #
-# #-----------------------------------#
-# if output_dim != 1:
-#     ## Multi-dimensional
-#     # Externally Update Empirical Weights for multi-dimensional case
-#     empirical_weights = np.full((N_Monte_Carlo_Samples,),1/N_Monte_Carlo_Samples)
-#     # Also Initialize
-#     Sinkhorn_regularization = 0.1
-# else:
-#     ## Single-Dimensional
-#     # Initialize Empirical Weights
-#     empirical_weights = (np.ones(N_Monte_Carlo_Samples)/N_Monte_Carlo_Samples).reshape(-1,)
+# Transport-problem initializations #
+#-----------------------------------#
+if output_dim != 1:
+    ## Multi-dimensional
+    # Externally Update Empirical Weights for multi-dimensional case
+    empirical_weights = np.full((N_Monte_Carlo_Samples,),1/N_Monte_Carlo_Samples)
+    # Also Initialize
+    Sinkhorn_regularization = 0.1
+else:
+    ## Single-Dimensional
+    # Initialize Empirical Weights
+    empirical_weights = (np.ones(N_Monte_Carlo_Samples)/N_Monte_Carlo_Samples).reshape(-1,)
 
-# #-------------------------#
-# # Define Transport Solver #
-# #-------------------------#
-# def transport_dist(x_source,w_source,x_sink,w_sink,output_dim,OT_method="Sliced"):
-#     # Decide which problem to solve (1D or multi-D)?
-#     if output_dim == 1:
-#         OT_out = ot.emd2_1d(x_source,
-#                             x_sink,
-#                             w_source,
-#                             w_sink)
-#     else:
-#         # COERCSION
-#         ## Update Source Distribution
-#         x_source = points_of_mass.reshape(-1,output_dim)
-#         ## Update Sink Distribution
-#         x_sink = np.array(Y_train[i,]).reshape(-1,output_dim)
+#-------------------------#
+# Define Transport Solver #
+#-------------------------#
+def transport_dist(x_source,w_source,x_sink,w_sink,output_dim,OT_method="Sliced",n_projections = 10):
+    # Decide which problem to solve (1D or multi-D)?
+    if output_dim == 1:
+        OT_out = ot.emd2_1d(x_source,
+                            x_sink,
+                            w_source,
+                            w_sink)
+    else:
+        # COERCSION
+        ## Update Source Distribution
+        x_source = points_of_mass.reshape(-1,output_dim)
+        ## Update Sink Distribution
+        x_sink = np.array(Y_train[i,]).reshape(-1,output_dim)
         
-#         if OT_method == "Sinkhorn":
-#             OT_out = ot.bregman.empirical_sinkhorn2(X_s = x_source, 
-#                                                     X_t = x_sink,
-#                                                     a = w_source, 
-#                                                     b = w_sink, 
-#                                                     reg=0.01, 
-#                                                     verbose=False,
-#                                                     method = "sinkhorn_stabilized")
-#             # COERSION
-#             OT_out = float(OT_out[0])
-#         else:
-#             OT_out = ot.sliced.sliced_wasserstein_distance(X_s = x_source, 
-#                                                     X_t = x_sink,
-#                                                     a = w_source, 
-#                                                     b = w_sink, 
-#                                                     seed = 2020)
-#             # COERSION
-#             OT_out = float(OT_out)
-#     # Return (regularized?) Transport Distance
-#     return OT_out
+        if OT_method == "Sinkhorn":
+            OT_out = ot.bregman.empirical_sinkhorn2(X_s = x_source, 
+                                                    X_t = x_sink,
+                                                    a = w_source, 
+                                                    b = w_sink, 
+                                                    reg=0.01, 
+                                                    verbose=False,
+                                                    method = "sinkhorn_stabilized")
+            # COERSION
+            OT_out = float(OT_out[0])
+        else:
+            OT_out = ot.sliced.sliced_wasserstein_distance(X_s = x_source, 
+                                                           X_t = x_sink,
+                                                           a = w_source, 
+                                                           b = w_sink, 
+                                                           seed = 2020,
+                                                           n_projections = n_projections)
+            # COERSION
+            OT_out = float(OT_out)
+    # Return (regularized?) Transport Distance
+    return OT_out
 
 
 # #### Compute *Training* Error(s)

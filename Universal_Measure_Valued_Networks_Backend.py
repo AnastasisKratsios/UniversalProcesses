@@ -40,16 +40,17 @@
 
 # #### Index and identify: $\{f^{-1}[\hat{\mu}_{n=1}^N]\}_{n=1}^N\subset \mathbb{X}!$
 
-# In[13]:
+# In[15]:
 
 
-# Initialize k_means
-N_Quantizers_to_parameterize = int(np.maximum(2,round(Proportion_per_cluster*X_train.shape[0])))
-kmeans = KMeans(n_clusters=N_Quantizers_to_parameterize, random_state=0).fit(X_train)
-# Get Classes
-Train_classes = np.array(pd.get_dummies(kmeans.labels_))
-# Get Center Measures
-Barycenters_Array_x = kmeans.cluster_centers_
+if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):
+    # Initialize k_means
+    N_Quantizers_to_parameterize = int(np.maximum(2,round(Proportion_per_cluster*X_train.shape[0])))
+    kmeans = KMeans(n_clusters=N_Quantizers_to_parameterize, random_state=0).fit(X_train)
+    # Get Classes
+    Train_classes = np.array(pd.get_dummies(kmeans.labels_))
+    # Get Center Measures
+    Barycenters_Array_x = kmeans.cluster_centers_
 
 
 # ### Get $\{\hat{\mu}_{n=1}^{N}\}$!
@@ -57,25 +58,26 @@ Barycenters_Array_x = kmeans.cluster_centers_
 # In[46]:
 
 
-for i in tqdm(range(Barycenters_Array_x.shape[0])):
-    # Identify Nearest Datapoint to a ith Barycenter
-    #------------------------------------------------------------------------------------------------------#
-    ## Get Barycenter "out of sample" in X (NB there is no data-leakage since we know nothing about Y!)
-    Bar_x_loop = Barycenters_Array_x[i,]
-    ## Project Barycenter onto testset
-    distances = np.sum(np.abs(X_train-Bar_x_loop.reshape(-1,)),axis=1)
+if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):
+    for i in tqdm(range(Barycenters_Array_x.shape[0])):
+        # Identify Nearest Datapoint to a ith Barycenter
+        #------------------------------------------------------------------------------------------------------#
+        ## Get Barycenter "out of sample" in X (NB there is no data-leakage since we know nothing about Y!)
+        Bar_x_loop = Barycenters_Array_x[i,]
+        ## Project Barycenter onto testset
+        distances = np.sum(np.abs(X_train-Bar_x_loop.reshape(-1,)),axis=1)
 
-    # Update Subsetting Index
-    if i == 0:
-        Barycenters_index = np.array(np.argmin(distances))
+        # Update Subsetting Index
+        if i == 0:
+            Barycenters_index = np.array(np.argmin(distances))
+        else:
+            Barycenters_index = np.append(Barycenters_index,np.array(np.argmin(distances)))
+
+    # Subset Training Set-Outputs
+    if f_unknown_mode != "Rough_SDE":
+        Barycenters_Array = Y_train[Barycenters_index,]
     else:
-        Barycenters_index = np.append(Barycenters_index,np.array(np.argmin(distances)))
-
-# Subset Training Set-Outputs
-if f_unknown_mode != "Rough_SDE":
-    Barycenters_Array = Y_train[Barycenters_index,]
-else:
-    Barycenters_Array = Y_train[Barycenters_index,:,:]
+        Barycenters_Array = Y_train[Barycenters_index,:,:]
 
 
 # # Train Model
@@ -144,29 +146,29 @@ print("===============================================")
 # In[35]:
 
 
-# if f_unknown_mode != "Rough_SDE":
-#     for i in range(Barycenters_Array.shape[0]):
-#         if i == 0:
-#             points_of_mass = Barycenters_Array[i,]
-#         else:
+if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Rough_SDE_Vanilla"):
+    for i in range(Barycenters_Array.shape[0]):
+        if i == 0:
+            points_of_mass = Barycenters_Array[i,]
+        else:
 
-#             points_of_mass = np.append(points_of_mass,Barycenters_Array[i,])
-# else:
-#     for i in range(Barycenters_Array.shape[0]):
-#         if i == 0:
-#             points_of_mass = Barycenters_Array[i,]
-#         else:
+            points_of_mass = np.append(points_of_mass,Barycenters_Array[i,])
+else:
+    for i in range(Barycenters_Array.shape[0]):
+        if i == 0:
+            points_of_mass = Barycenters_Array[i,]
+        else:
 
-#             points_of_mass = np.append(points_of_mass,Barycenters_Array[i,],axis=0)
+            points_of_mass = np.append(points_of_mass,Barycenters_Array[i,],axis=0)
 
 
 # In[36]:
 
 
-# if (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Extreme_Learning_Machine"):
-#     # Get Noisless Mean
-#     direct_facts = np.apply_along_axis(f_unknown, 1, X_train)
-#     direct_facts_test = np.apply_along_axis(f_unknown, 1, X_test)
+if (f_unknown_mode != "GD_with_randomized_input") and (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Extreme_Learning_Machine") and (f_unknown_mode != "Rough_SDE_Vanilla"):
+    # Get Noisless Mean
+    direct_facts = np.apply_along_axis(f_unknown, 1, X_train)
+    direct_facts_test = np.apply_along_axis(f_unknown, 1, X_test)
 
 
 # ### Get Error(s)

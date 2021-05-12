@@ -394,8 +394,8 @@ if output_dim == 1:
                                                                                                                                             X_test = X_test)
 else:
     # Redefine (Dimension-related) Elements of Grid
-    param_grid_Deep_Classifier['input_dim'] = [problem_dim]
-    param_grid_Deep_Classifier['output_dim'] = [Y_train_var_emp.shape[1]]
+    param_grid_Deep_ffNN['input_dim'] = [problem_dim]
+    param_grid_Deep_ffNN['output_dim'] = [Y_train_var_emp.shape[1]]
     Deep_Gaussian_train_parameters, Deep_Gaussian_test_parameters, N_params_deep_Gaussian, timer_output_Deep_Gaussian = build_ffNN(n_folds = CV_folds, 
                                                                                                                                    n_jobs = n_jobs, 
                                                                                                                                    n_iter = n_iter, 

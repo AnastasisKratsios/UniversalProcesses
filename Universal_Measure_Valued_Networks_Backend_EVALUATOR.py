@@ -128,7 +128,7 @@ for i in tqdm(range((X_train.shape[0]))):
         b = b.reshape(-1,1)
         b = b
     b = np.array(b,dtype=float).reshape(-1,)
-    b = b/N_Monte_Carlo_Samples
+    b = b/np.sum(b)
     
     # Compute Error(s)
     ## W1
@@ -136,7 +136,9 @@ for i in tqdm(range((X_train.shape[0]))):
                              w_source = b,
                              x_sink = np.array(Y_train[i,]).reshape(-1,),
                              w_sink = empirical_weights,
-                             output_dim = output_dim)
+                             output_dim = output_dim,
+                             OT_method="proj",
+                             n_projections = 100)
     
     ## M1
     Mu_hat = np.matmul(points_of_mass.T,b).reshape(-1,)
@@ -150,7 +152,7 @@ for i in tqdm(range((X_train.shape[0]))):
     Mean_loop = np.sum(np.abs((Mu_hat-Mu)))
     Mean_loop_MC = np.sum(np.abs((Mu-Mu_MC)))
     
-    if f_unknown_mode != "Rough_SDE":
+    if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Rough_SDE_Vanilla"):
         ## Variance
         Var_hat = np.sum(((points_of_mass-Mu_hat)**2)*b)
         Var_MC = np.mean(np.array(Y_train[i]-Mu_MC)**2)
@@ -194,7 +196,7 @@ for i in tqdm(range((X_train.shape[0]))):
         ## Monte-Carlo
         Mean_errors_MC =  Mean_loop_MC
         # Higher-Order Moments
-        if f_unknown_mode != "Rough_SDE":
+        if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != 'Rough_SDE_Vanilla'):
             ## DNM
             Var_errors = Var_loop
             Skewness_errors = Skewness_loop
@@ -214,7 +216,7 @@ for i in tqdm(range((X_train.shape[0]))):
         ## Monte-Carlo
         Mean_errors_MC =  np.append(Mean_errors_MC,Mean_loop_MC)
         ## Higher-Order Moments
-        if f_unknown_mode != "Rough_SDE":
+        if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != 'Rough_SDE_Vanilla'):
             ## DNM
             Var_errors = np.append(Var_errors,Var_loop)
             Skewness_errors = np.append(Skewness_errors,Skewness_loop)
@@ -273,7 +275,7 @@ for i in tqdm(range((X_test.shape[0]))):
     Mean_loop_test = np.sum(np.abs((Mu_hat_test-Mu_test)))
     Mean_loop_MC_test = np.sum(np.abs((Mu_test-Mu_MC_test)))
     
-    if f_unknown_mode != "Rough_SDE":
+    if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "Rough_SDE_Vanilla"):
         ## M2
         Var_hat_test = np.sum(((points_of_mass-Mu_hat_test)**2)*b)
         Var_MC_test = np.mean(np.array(Y_test[i]-Mu_MC)**2)
@@ -317,7 +319,7 @@ for i in tqdm(range((X_test.shape[0]))):
         ## Monte-Carlo
         Mean_errors_MC_test =  Mean_loop_MC_test
         ### Get Higher-Moments
-        if f_unknown_mode != "Rough_SDE":
+        if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != 'Rough_SDE_Vanilla'):
             ## DNM
             Var_errors_test = Var_loop_test
             Skewness_errors_test = Skewness_loop_test
@@ -335,7 +337,7 @@ for i in tqdm(range((X_test.shape[0]))):
         ## Monte-Carlo
         Mean_errors_MC_test =  np.append(Mean_errors_MC_test,Mean_loop_MC_test)
         ### Get Higher Moments
-        if f_unknown_mode != "Rough_SDE":
+        if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != 'Rough_SDE_Vanilla'):
             Var_errors_test = np.append(Var_errors_test,Var_loop_test)
             Skewness_errors_test = np.append(Skewness_errors_test,Skewness_loop_test)
             Ex_Kurtosis_errors_test = np.append(Ex_Kurtosis_errors_test,Ex_Kurtosis_loop_test)

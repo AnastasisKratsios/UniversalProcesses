@@ -63,20 +63,20 @@ else:
 # In[46]:
 
 
-# if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):
-for i in tqdm(range(Barycenters_Array_x.shape[0])):
-    # Identify Nearest Datapoint to a ith Barycenter
-    #------------------------------------------------------------------------------------------------------#
-    ## Get Barycenter "out of sample" in X (NB there is no data-leakage since we know nothing about Y!)
-    Bar_x_loop = Barycenters_Array_x[i,]
-    ## Project Barycenter onto testset
-    distances = np.sum(np.abs(X_train-Bar_x_loop.reshape(-1,)),axis=1)
+if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):
+    for i in tqdm(range(Barycenters_Array_x.shape[0])):
+        # Identify Nearest Datapoint to a ith Barycenter
+        #------------------------------------------------------------------------------------------------------#
+        ## Get Barycenter "out of sample" in X (NB there is no data-leakage since we know nothing about Y!)
+        Bar_x_loop = Barycenters_Array_x[i,]
+        ## Project Barycenter onto testset
+        distances = np.sum(np.abs(X_train-Bar_x_loop.reshape(-1,)),axis=1)
 
-    # Update Subsetting Index
-    if i == 0:
-        Barycenters_index = np.array(np.argmin(distances))
-    else:
-        Barycenters_index = np.append(Barycenters_index,np.array(np.argmin(distances)))
+        # Update Subsetting Index
+        if i == 0:
+            Barycenters_index = np.array(np.argmin(distances))
+        else:
+            Barycenters_index = np.append(Barycenters_index,np.array(np.argmin(distances)))
 
 # Subset Training Set-Outputs
 if (f_unknown_mode != 'Rough_SDE') and (f_unknown_mode != 'Rough_SDE_Vanilla'):

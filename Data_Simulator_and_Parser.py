@@ -19,99 +19,99 @@ print("---------------------------------------")
 # In[2]:
 
 
-trial_run = True
+# trial_run = True
 
-problem_dim = 3
-
-
-train_test_ratio = .2
-N_train_size = 5
+# problem_dim = 3
 
 
-## Monte-Carlo
-N_Monte_Carlo_Samples = 10**2
-N_Euler_Steps = 50
-Hurst_Exponent = .6
+# train_test_ratio = .2
+# N_train_size = 5
 
 
-# Hyper-parameters of Cover
-delta = 0.01
-Proportion_per_cluster = .5
+# ## Monte-Carlo
+# N_Monte_Carlo_Samples = 10**2
+# N_Euler_Steps = 50
+# Hurst_Exponent = .6
 
 
-# Random DNN
-# f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
-
-# Random DNN internal noise
-# Real-world data version
-# f_unknown_mode = "Extreme_Learning_Machine"
-dataset_option = 'crypto'
-N_Random_Features = 10**2
-# Simulated Data version
-# f_unknown_mode = "DNN_with_Random_Weights"
-Depth_Bayesian_DNN = 2
-width = 20
-
-# Random Dropout applied to trained DNN
-# f_unknown_mode = "DNN_with_Bayesian_Dropout"
-Dropout_rate = 0.1
-
-# Rough SDE (time 1)
-# f_unknown_mode = "Rough_SDE"
-f_unknown_mode = "Rough_SDE_Vanilla"
-
-# GD with Randomized Input
-# f_unknown_mode = "GD_with_randomized_input"
-GD_epochs = 2
+# # Hyper-parameters of Cover
+# delta = 0.01
+# Proportion_per_cluster = .5
 
 
+# # Random DNN
+# # f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
 
-exec(open('Loader.py').read())
-# Load Packages/Modules
-exec(open('Init_Dump.py').read())
-trial_run = True
-# Load Hyper-parameter Grid
-exec(open('CV_Grid.py').read())
-# Load Helper Function(s)
-exec(open('Helper_Functions.py').read())
-# Architecture Builder
-exec(open('Benchmarks_Model_Builder.py').read())
-# Import time separately
-import time
-#os.environ['CUDA_VISIBLE_DEVICES'] = '0'
+# # Random DNN internal noise
+# # Real-world data version
+# # f_unknown_mode = "Extreme_Learning_Machine"
+# dataset_option = 'crypto'
+# N_Random_Features = 10**2
+# # Simulated Data version
+# # f_unknown_mode = "DNN_with_Random_Weights"
+# Depth_Bayesian_DNN = 2
+# width = 20
 
+# # Random Dropout applied to trained DNN
+# # f_unknown_mode = "DNN_with_Bayesian_Dropout"
+# Dropout_rate = 0.1
 
-# load dataset
-results_path = "./outputs/models/"
-results_tables_path = "./outputs/results/"
-raw_data_path_folder = "./inputs/raw/"
-data_path_folder = "./inputs/data/"
+# # Rough SDE (time 1)
+# # f_unknown_mode = "Rough_SDE"
+# f_unknown_mode = "Rough_SDE_Vanilla"
 
-
-### Set Seed
-random.seed(2021)
-np.random.seed(2021)
-tf.random.set_seed(2021)
-
-N_test_size = int(np.round(N_train_size*train_test_ratio,0))
+# # GD with Randomized Input
+# # f_unknown_mode = "GD_with_randomized_input"
+# GD_epochs = 2
 
 
 
+# exec(open('Loader.py').read())
+# # Load Packages/Modules
+# exec(open('Init_Dump.py').read())
+# trial_run = True
+# # Load Hyper-parameter Grid
+# exec(open('CV_Grid.py').read())
+# # Load Helper Function(s)
+# exec(open('Helper_Functions.py').read())
+# # Architecture Builder
+# exec(open('Benchmarks_Model_Builder.py').read())
+# # Import time separately
+# import time
+# #os.environ['CUDA_VISIBLE_DEVICES'] = '0'
 
-#--------------------------#
-# Define Process' Dynamics #
-#--------------------------#
-drift_constant = 0.1
-volatility_constant = 0.01
 
-# Define DNN Applier
-def f_unknown_drift_vanilla(x):
-    x_internal = x
-    x_internal = drift_constant*np.ones(problem_dim)
-    return x_internal
-def f_unknown_vol_vanilla(x):
-    x_internal = volatility_constant*np.diag(np.ones(problem_dim))
-    return x_internal
+# # load dataset
+# results_path = "./outputs/models/"
+# results_tables_path = "./outputs/results/"
+# raw_data_path_folder = "./inputs/raw/"
+# data_path_folder = "./inputs/data/"
+
+
+# ### Set Seed
+# random.seed(2021)
+# np.random.seed(2021)
+# tf.random.set_seed(2021)
+
+# N_test_size = int(np.round(N_train_size*train_test_ratio,0))
+
+
+
+
+# #--------------------------#
+# # Define Process' Dynamics #
+# #--------------------------#
+# drift_constant = 0.1
+# volatility_constant = 0.01
+
+# # Define DNN Applier
+# def f_unknown_drift_vanilla(x):
+#     x_internal = x
+#     x_internal = drift_constant*np.ones(problem_dim)
+#     return x_internal
+# def f_unknown_vol_vanilla(x):
+#     x_internal = volatility_constant*np.diag(np.ones(problem_dim))
+#     return x_internal
 
 
 # In[3]:

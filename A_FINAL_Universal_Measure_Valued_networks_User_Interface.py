@@ -1,100 +1,63 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # Deep Universal Regular Conditional Expectations:
-# 
-# ---
-# This implements the universal deep neural model of $\mathcal{NN}_{1_{\mathbb{R}^n},\mathcal{D}}^{\sigma:\star}$ [Anastasis Kratsios](https://people.math.ethz.ch/~kratsioa/) - 2021.
-# 
-# ---
-# 
-# ## What does this code do?
-# 1. Learn Heteroskedastic Non-Linear Regression Problem
-#      - $Y\sim f_{\text{unkown}}(x) + \epsilon$ where $f$ is an known function and $\epsilon\sim Laplace(0,\|x\|)$
-# 2. Learn Random Bayesian Network's Law:
-#     - $Y = W_J Y^{J-1}, \qquad Y^{j}\triangleq \sigma\bullet A^{j}Y^{j-1} + b^{j}, \qquad Y^0\triangleq x$
-# 
-# 3. In the above example if $A_j = M_j\odot \tilde{A_j}$ where $\tilde{A}_j$ is a deterministic matrix and $M_j$ is a "mask", that is, a random matrix with binary entries and $\odot$ is the Hadamard product then we recover the dropout framework.
-# 4. Learn the probability distribution that the unique strong solution to the rough SDE with uniformly Lipschitz drivers driven by a factional Brownian motion with Hurst exponent $H \in [\frac1{2},1)$:
-# $$
-# X_t^x = x + \int_0^t \alpha(s,X_s^x)ds + \int_0^t \beta(s,X_s^x)dB_s^H
-# $$
-# belongs, at time $t=1$, to a ball about the initial point $x$ of random radius given by an independant exponential random-variable with shape parameter $\lambda=2$
-# 5. Train a DNN to predict the returns of bitcoin with GD.  Since this has random initialization then each prediction of a given $x$ is stochastic...We learn the distribution of this conditional RV (conditioned on x in the input space).
-# $$
-# Y_x \triangleq \hat{f}_{\theta_{T}}(x), \qquad \theta_{(t+1)}\triangleq \theta_{(t)} + \lambda \sum_{x \in \mathbb{X}} \nabla_{\theta}\|\hat{f}_{\theta_t}(x) - f(x)\|, \qquad \theta_0 \sim N_d(0,1);
-# $$
-# $T\in \mathbb{N}$ is a fixed number of "SGD" iterations (typically identified by cross-validation on a single SGD trajectory for a single initialization) and where $\theta \in \mathbb{R}^{(d_{J}+1)+\sum_{j=0}^{J-1} (d_{j+1}d_j + 1)}$ and $d_j$ is the dimension of the "bias" vector $b_j$ defining each layer of the DNN with layer dimensions:
-# $$
-# \hat{f}_{\theta}(x)\triangleq A^{(J)}x^{(J)} + b^{(J)},\qquad x^{(j+1)}\triangleq \sigma\bullet A^{j}x^{(j)} + b^{j},\qquad x^{(0)}\triangleq x
-# .
-# $$
-# 
-# 6. Extreme Learning Machines: 
-#     Just like the Bayesian network but then last layer is trained on the training set using KRidge!
-
-# #### Mode:
-# Software/Hardware Testing or Real-Deal?
-
-# In[1]:
-
-
 trial_run = True
 
 
-# ### Simulation Method:
-
-# In[2]:
-
-
-# Random DNN
-# f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
-
-# Random DNN internal noise
-## Real-world data version
-# f_unknown_mode = "Extreme_Learning_Machine"
-### General Parameters
-# activation_function == 'thresholding'
-activation_function = 'sigmoid'
-### Dataset Option 1
-dataset_option = 'SnP'
-### Dataset Option 2
-# dataset_option = 'crypto'
-Depth_Bayesian_DNN = 1
-N_Random_Features = 10**2
-## Simulated Data version
-# f_unknown_mode = "DNN_with_Random_Weights"
-width = 10**2
-
-# Random Dropout applied to trained DNN
-# f_unknown_mode = "DNN_with_Bayesian_Dropout"
-Dropout_rate = 0.75
-
-# GD with Randomized Input
-# f_unknown_mode = "GD_with_randomized_input"
-# GD_epochs = 50
-
-# SDE with fractional Driver
-f_unknown_mode = "Rough_SDE"
-N_Euler_Steps = 50
-Hurst_Exponent = 0.9
-
-f_unknown_mode = "Rough_SDE_Vanilla"
-## Define Process' dynamics in (2) cell(s) below.
+# #### Load
+# %run Loader.ipynb
+exec(open('Helper_Scripts_and_Loading/Loader.py').read())
+# Load Packages/Modules
+exec(open('Helper_Scripts_and_Loading/Init_Dump.py').read())
+import time as time #<- Note sure why...but its always seems to need 'its own special loading...'
 
 
 # ---
-# #### More Meta-Parameters for "Vanilla" fractional SDE
+
+# ---
+
+# ---
+
+# ## Problem Dimension
 
 # In[3]:
 
 
-## Monte-Carlo
-N_Euler_Maruyama_Steps = 10**2
+problem_dim = 5
+
+
+# ---
+# ### More Meta-Parameters for "Vanilla" fractional SDE
+
+# #### Noise Parameters:
+# - Hust exponent: $B_t^{H\boldsymbol{\leftarrow}}$ determines the roughness of the driving fBM.
+# - Uniform noise level is: *depricated*
+
+# In[4]:
+
+
+Hurst_Exponent = 0.5
+uniform_noise_level = 0
+
+
+# #### Discritization/Grid:
+# - T_end: Is the place to stop the process
+# - N_Euler_Maruyama_Steps: Is the number of time discritization steps taken to generate $X_{\text{T_end}}$ starting at $X_{\text{T_begin}}$.
+# - Grid_Finess: Is the number of initial states $x\in \mathbb{R}^d$ to generate the process $X_t^x$ as starting from.
+# - Max_Grid: Is the size of the compact where the initial states (the $x$s can be generated on).
+
+# In[5]:
+
 
 # End times for Time-Grid
 T_end = 1
 T_end_test = 1.1
+
+
+# In[6]:
+
+
+N_Euler_Maruyama_Steps = 10**3
+
+
+# In[7]:
 
 
 ## Grid
@@ -102,29 +65,51 @@ N_Grid_Finess = 1
 Max_Grid = 0.5
 x_0 = 1
 
+
+# #### Centers
+
+# In[8]:
+
+
 # Number of Centers (\hat{\mu}_s)
 N_Quantizers_to_parameterize = 1
 N_Clusters = 2
-Hurst_Exponent = 0.5
-uniform_noise_level = 0
 
 # Hyper-parameters of Cover
 delta = 0.1
-N_measures_per_center = 10**2
+N_measures_per_center = 10**1
 
 
-# #### Vanilla Drift
+# #### Dynamics of fSDE:
 
-# In[4]:
+# -**Vanilla Drift**: Defines the dynamics of the "drift"; i.e.:
+# $
+# \alpha(t,x) \in C([0,\infty)\times \mathbb{R}^d, \mathbb{R}^d).
+# $
 
+# In[9]:
+
+
+W_1 = np.random.uniform(low=-.5,high=.5,size=[problem_dim,problem_dim])
+W_2 = np.random.uniform(low=-.5,high=.5,size=[problem_dim,problem_dim])
 
 def alpha(t,x):
-    return .1*np.ones(problem_dim)#(.1-.5*(.01**2))*t + np.cos(x)
+    # SDE Drift
+#     x_internal = np.matmul(W_1,x)
+#     x_internal = np.sin(x_internal)
+#     x_internal = np.matmul(W_2,x_internal)
+    # Vanilla
+    x_internal = .1*np.ones(problem_dim)#(.1-.5*(.01**2))*t + np.cos(x)
+    # Return Output
+    return x_internal
 
 
-# #### Vanilla Vol
+# -**Vanilla Volatility**: Defines the dynamics of the "drift"; i.e.:
+# $
+# \beta(t,x)\in C([0,\infty)\times \mathbb{R}^d, \operatorname{Mat}_{d\times d}(\mathbb{R})).
+# $
 
-# In[5]:
+# In[10]:
 
 
 def beta(t,x):
@@ -133,52 +118,99 @@ def beta(t,x):
 
 # ---
 
-# ## Problem Dimension
+# ## Simulation Meta-Parameter(s):
 
-# In[6]:
-
-
-problem_dim = 2
-if f_unknown_mode != 'Extreme_Learning_Machine':
-    width = int(2*(problem_dim+1))
-
-
-# #### Vanilla fractional SDE:
-# If f_unknown_mode == "Rough_SDE_Vanilla" is selected, then we can specify the process's dynamics.  
-
-# In[7]:
-
-
-# Depricated
-# #--------------------------#
-# # Define Process' Dynamics #
-# #--------------------------#
-# drift_constant = 0.1
-# volatility_constant = 0.01
-
-# # Define DNN Applier
-# def f_unknown_drift_vanilla(x):
-# #     x_internal = drift_constant*np.ones(problem_dim)
-#     x_internal = drift_constant*np.sin(x)
-#     return x_internal
-# def f_unknown_vol_vanilla(x):
-# #     x_internal = volatility_constant*np.diag(np.ones(problem_dim))
-#     x_internal = volatility_constant*np.diag(np.cos(x))
-#     return x_internal
-
-
-# ## Note: *Why the procedure is so computationally efficient*?
 # ---
-#  - The sample barycenters do not require us to solve for any new Wasserstein-1 Barycenters; which is much more computationally costly,
-#  - Our training procedure never back-propages through $\mathcal{W}_1$ since steps 2 and 3 are full-decoupled.  Therefore, training our deep classifier is (comparatively) cheap since it takes values in the standard $N$-simplex.
+
+# ### Simulation Method:
+
+# - **Learn Noise**:
+# This is not used in the paper; nevertheless it works nicely.  It is used to learn the noise in a regression task' instead of just learning the mean.
+
+# In[11]:
+
+
+# f_unknown_mode = "Heteroskedastic_NonLinear_Regression"
+
+
+# - **Random DNN**:This is used to learn predictions from a random DNN with internal noise.
 # 
+# *Here, the noise is generated by an extreme learning machine with Ridge-regression readout.*
+# 
+# There are two available datasets; the first is an repliation (returns regression) task using SnP500 data and the second is a cryptocurrency regression task.
+
+# In[12]:
+
+
+# Random DNN internal noise
+## Real-world data version
+
+# f_unknown_mode = "Extreme_Learning_Machine"
+### General Parameters
+# activation_function == 'thresholding'
+activation_function = 'sigmoid'
+
+### Dataset Option 1
+dataset_option = 'SnP'
+
+### Dataset Option 2
+# dataset_option = 'crypto'
+
+
+# - **Random Dropout applied to trained DNN**: This learns to predict DNNs with dropout's behaviour *(a.k.a.: this distribution; for any $x$ in the input space).*
+
+# In[13]:
+
+
+# f_unknown_mode = "DNN_with_Bayesian_Dropout"
+Dropout_rate = 0.75
+
+
+# - **GD with Randomized Input**: This learns to predict the "random behaviour" *(a.k.a. the distribution)* of SGD with randomized input.  
+
+# In[14]:
+
+
+# f_unknown_mode = "GD_with_randomized_input"
+# GD_epochs = 50
+
+
+# - **SDE with fractional Driver**:
+# This learns to predict $(t,x)\mapsto Law(X_t^x)$ where 
+# $$
+# X_t^x = x + \int_0^t \alpha(s,X_s^x)ds + \int_0^t \beta(s,X_s^x)dB_s^H;
+# $$
+# where $(B_t^H)_t$ is a [*frational Brownian motion*](https://arxiv.org/pdf/1406.1956.pdf) with [Hurst exponent](https://en.wikipedia.org/wiki/Hurst_exponent) in $[\frac1{2},1)$.
+
+# In[15]:
+
+
+# Depricated: f_unknown_mode = "Rough_SDE"
+f_unknown_mode = "Rough_SDE_Vanilla"
+## Define Process' dynamics in (2) cell(s) below.
+
+
+# - **Deep Bayesian DNN**: This next task predicts the predictions of a Bayesian DNN with random internal weights...everything is fully random. 
+# 
+# **Note:** *(This task is not as interesting as the rest but a good "sanity check" task..but it's great for debugging).
+
+# In[16]:
+
+
+Depth_Bayesian_DNN = 1
+N_Random_Features = 10**2
+## Simulated Data version
+# f_unknown_mode = "DNN_with_Random_Weights"
+width = 10**2
+
+
 # ---
 
 # #### Grid Hyperparameter(s)
 # - Ratio $\frac{\text{Testing Datasize}}{\text{Training Datasize}}$.
 # - Number of Training Points to Generate
 
-# In[8]:
+# In[17]:
 
 
 train_test_ratio = .1
@@ -187,17 +219,17 @@ N_train_size = 10**3
 
 # Monte-Carlo Paramters
 
-# In[9]:
+# In[18]:
 
 
 ## Monte-Carlo
-N_Monte_Carlo_Samples = 10**3
+N_Monte_Carlo_Samples = 10**2
 N_Monte_Carlo_Samples_Test = 10**2 # How many MC-samples to draw from test-set?
 
 
 # Initial radis of $\delta$-bounded random partition of $\mathcal{X}$!
 
-# In[10]:
+# In[19]:
 
 
 # Hyper-parameters of Cover
@@ -205,21 +237,36 @@ delta = 0.1
 Proportion_per_cluster = .75
 
 
-# ## Dependencies and Auxiliary Script(s)
+# ---
 
-# In[11]:
+# ---
+
+# ---
+
+# # Execute Code:
+
+# ---
+
+# ---
+
+# ---
+
+# #### Get Internal Parameter(s) and Failsafe(s)
+# These are mostly fail-safes and relabeled internal parameters used when merging code written on different days/moods.  
+
+# In[20]:
 
 
-# %run Loader.ipynb
-exec(open('Loader.py').read())
-# Load Packages/Modules
-exec(open('Init_Dump.py').read())
-import time as time #<- Note sure why...but its always seems to need 'its own special loading...'
+if f_unknown_mode != 'Extreme_Learning_Machine':
+    width = int(2*(problem_dim+1))
+    
+N_Euler_Steps = N_Euler_Maruyama_Steps
+Hurst_Exponent = Hurst_Exponent
 
 
 # # Simulate or Parse Data
 
-# In[12]:
+# In[21]:
 
 
 #-------------------------------------------------------#
@@ -237,10 +284,10 @@ else:
     T_begin = 0
     T_end = 1
     # Run da code
-    get_ipython().run_line_magic('run', 'Fractional_SDE/fractional_SDE_Simulator.ipynb')
-    get_ipython().run_line_magic('run', 'Fractional_SDE/Data_Simulator_and_Parser___fractional_SDE.ipynb')
-#     exec(open('Fractional_SDE/fractional_SDE_Simulator.py').read())
-#     exec(open('Fractional_SDE/Data_Simulator_and_Parser___fractional_SDE.py').read())
+#     %run Fractional_SDE/fractional_SDE_Simulator.ipynb
+#     %run Fractional_SDE/Data_Simulator_and_Parser___fractional_SDE.ipynb
+    exec(open('Fractional_SDE/fractional_SDE_Simulator.py').read())
+    exec(open('Fractional_SDE/Data_Simulator_and_Parser___fractional_SDE.py').read())
 
 # Verbosity is nice
 print("Generated Data:")
@@ -250,7 +297,7 @@ print("Number of Testing Datums:"+str(X_test.shape[0]))
 
 # ### Rescale
 
-# In[13]:
+# In[22]:
 
 
 # Rescale
@@ -263,14 +310,14 @@ X_test = scaler.transform(X_test)
 
 # ## Run: Main (DNM) and Oracle Models
 
-# In[14]:
+# In[ ]:
 
 
 print("------------------------------")
 print("Running script for main model!")
 print("------------------------------")
-get_ipython().run_line_magic('run', 'Universal_Measure_Valued_Networks_Backend.ipynb')
-# exec(open('Universal_Measure_Valued_Networks_Backend.py').read())
+# %run ./Models_Scripts/Universal_Measure_Valued_Networks_Backend.ipynb
+exec(open('./Models_Scripts/Universal_Measure_Valued_Networks_Backend.py').read())
 print("------------------------------------")
 print("Done: Running script for main model!")
 print("------------------------------------")
@@ -278,11 +325,11 @@ print("------------------------------------")
 
 # ### Evaluate Main and Oracle Model's Performance
 
-# In[15]:
+# In[ ]:
 
 
-get_ipython().run_line_magic('run', 'Universal_Measure_Valued_Networks_Backend_EVALUATOR.ipynb')
-# exec(open(Universal_Measure_Valued_Networks_Backend_EVALUATOR.py).read())
+# %run ./Helper_Scripts_and_Loading/Universal_Measure_Valued_Networks_Backend_EVALUATOR.ipynb
+exec(open('./Helper_Scripts_and_Loading/Universal_Measure_Valued_Networks_Backend_EVALUATOR.py').read())
 
 
 # ## 1) *Pointmass Benchmark(s)*
@@ -291,23 +338,23 @@ get_ipython().run_line_magic('run', 'Universal_Measure_Valued_Networks_Backend_E
 # \mathbb{R}^d \ni x \to f(x) \to \delta_{f(x)}\in \cap_{1\leq q<\infty}\mathcal{P}_{q}(\mathbb{R}).
 # $$
 
-# In[16]:
+# In[ ]:
 
 
-exec(open('CV_Grid.py').read())
+exec(open('./Helper_Scripts_and_Loading/CV_Grid.py').read())
 # Notebook Mode:
 # %run Evaluation.ipynb
-# %run Benchmarks_Model_Builder_Pointmass_Based.ipynb
+# %run ./Models_Scripts/Benchmarks_Model_Builder_Pointmass_Based.ipynb
 # Terminal Mode (Default):
-exec(open('Evaluation.py').read())
-exec(open('Benchmarks_Model_Builder_Pointmass_Based.py').read())
+exec(open('./Helper_Scripts_and_Loading/Evaluation.py').read())
+exec(open('./Models_Scripts/Benchmarks_Model_Builder_Pointmass_Based.py').read())
 
 
 # # Summary of Point-Mass Regression Models
 
 # #### Training Model Facts
 
-# In[17]:
+# In[ ]:
 
 
 print(Summary_pred_Qual_models)
@@ -316,7 +363,7 @@ Summary_pred_Qual_models
 
 # #### Testing Model Facts
 
-# In[18]:
+# In[ ]:
 
 
 print(Summary_pred_Qual_models_test)
@@ -340,7 +387,7 @@ Summary_pred_Qual_models_test
 
 
 # %run Jupyter_Notebooks/Jupyter_Notebooks_for_Final_Implementation/Benchmarks_Model_Builder_Mean_Var.ipynb
-exec(open('Benchmarks_Model_Builder_Mean_Var.py').read())
+exec(open('./Models_Scripts/Benchmarks_Model_Builder_Mean_Var.py').read())
 
 
 # In[ ]:
@@ -365,12 +412,12 @@ Summary_pred_Qual_models
 # - For every $x$ in the trainingdata-set we fit a GMM $\hat{\nu}_x$, using the [Expectation-Maximization (EM) algorithm](https://en.wikipedia.org/wiki/Expectation%E2%80%93maximization_algorithm), with the same number of centers as the deep neural model in $\mathcal{NN}_{1_{\mathbb{R}^d},\mathcal{D}}^{\sigma:\star}$ which we are evaluating.  
 # - A Mixture density network is then trained to predict the infered parameters; given any $x \in \mathbb{R}^d$.
 
-# In[21]:
+# In[ ]:
 
 
 if output_dim == 1:
     # %run Mixture_Density_Network.ipynb
-    exec(open('Mixture_Density_Network.py').read())
+    exec(open('./Models_Scripts/Mixture_Density_Network.py').read())
 
 
 # ## Get Final Outputs

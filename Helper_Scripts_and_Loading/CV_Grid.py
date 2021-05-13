@@ -15,7 +15,7 @@ if trial_run == True:
     # Training Parameters
     #----------------------#
     # Number of Jobs (Cores to use)
-    n_jobs = 4
+    n_jobs = 40
     # Number of Random CV Draws
     n_iter = 2
     n_iter_trees = 2
@@ -26,16 +26,16 @@ if trial_run == True:
 
 
     param_grid_Deep_Classifier = {'batch_size': [16],
-                        'epochs': [800],
-                        'learning_rate': [0.5],
-                        'height': [500],
+                        'epochs': [300],
+                        'learning_rate': [0.001],
+                        'height': [200],
                         'depth': [2],
                         'input_dim':[15],
                         'output_dim':[1]}
     
     param_grid_Deep_ffNN = {'batch_size': [16],
-                        'epochs': [400],
-                        'learning_rate': [0.5],
+                        'epochs': [300],
+                        'learning_rate': [0.001],
                         'height': [200],
                         'depth': [2],
                         'input_dim':[15],

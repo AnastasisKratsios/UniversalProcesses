@@ -267,122 +267,122 @@ if f_unknown_mode == "DNN_with_Bayesian_Dropout":
 # In[8]:
 
 
-if f_unknown_mode == "Rough_SDE":
-    #-------------------#
-    # Build DNN (Drift) #
-    #-------------------#
-    W_feature = np.random.uniform(size=np.array([width,problem_dim]),low=-.5,high=.5)
-    W_readout = np.random.uniform(size=np.array([problem_dim,width]),low=-.5,high=.5)
-    # Generate Matrices
-    for i_weights in range(Depth_Bayesian_DNN):
-        W_hidden_loop = np.random.uniform(size=np.array([width,width]),low=-.5,high=.5)
-        if i_weights == 0:
-            W_hidden_list = [W_hidden_loop]
-        else:
-            W_hidden_list.append(W_hidden_loop)
-    # Define DNN Applier
-    def f_unknown_drift(x):
-        x_internal = x.reshape(-1,)
-        x_internal = np.matmul(W_feature,x)
-        #Deep Layer(s)
-        for i in range(Depth_Bayesian_DNN):
-            W_internal = W_hidden_list[i]
-            x_internal = np.matmul(W_internal,x_internal)
-            x_internal = np.maximum(0,x_internal)    
-        # Readout Layer
-        x_internal = np.matmul(W_readout,x_internal)
-        return x_internal
+# if f_unknown_mode == "Rough_SDE":
+#     #-------------------#
+#     # Build DNN (Drift) #
+#     #-------------------#
+#     W_feature = np.random.uniform(size=np.array([width,problem_dim]),low=-.5,high=.5)
+#     W_readout = np.random.uniform(size=np.array([problem_dim,width]),low=-.5,high=.5)
+#     # Generate Matrices
+#     for i_weights in range(Depth_Bayesian_DNN):
+#         W_hidden_loop = np.random.uniform(size=np.array([width,width]),low=-.5,high=.5)
+#         if i_weights == 0:
+#             W_hidden_list = [W_hidden_loop]
+#         else:
+#             W_hidden_list.append(W_hidden_loop)
+#     # Define DNN Applier
+#     def f_unknown_drift(x):
+#         x_internal = x.reshape(-1,)
+#         x_internal = np.matmul(W_feature,x)
+#         #Deep Layer(s)
+#         for i in range(Depth_Bayesian_DNN):
+#             W_internal = W_hidden_list[i]
+#             x_internal = np.matmul(W_internal,x_internal)
+#             x_internal = np.maximum(0,x_internal)    
+#         # Readout Layer
+#         x_internal = np.matmul(W_readout,x_internal)
+#         return x_internal
     
-    #-----------------#
-    # Build DNN (Vol) #
-    #-----------------#
-    W_feature_vol = np.random.uniform(size=np.array([width,problem_dim]),low=-.5,high=.5)
-    W_readout_vol = np.random.uniform(size=np.array([problem_dim,width]),low=-.5,high=.5)
-    # Generate Matrices
-    for i_weights in range(Depth_Bayesian_DNN):
-        W_hidden_loop_vol = np.random.uniform(size=np.array([width,width]),low=-.5,high=.5)
-        if i_weights == 0:
-            W_hidden_list_vol = [W_hidden_loop_vol]
-        else:
-            W_hidden_list_vol.append(W_hidden_loop_vol)
-    def f_unknown_vol(x):
-        x_internal = x.reshape(-1,)
-        x_internal = np.matmul(W_feature,x)
-        #Deep Layer(s)
-        for i in range(Depth_Bayesian_DNN):
-            W_internal = W_hidden_list[i]
-            x_internal = np.matmul(W_internal,x_internal)
-            x_internal = np.maximum(0,x_internal)    
-        # Readout Layer
-        x_internal = np.matmul(W_readout,x_internal)
-        x_internal = np.outer(x_internal,x_internal)
-        x_internal = np.tanh(x_internal)
-        return x_internal
+#     #-----------------#
+#     # Build DNN (Vol) #
+#     #-----------------#
+#     W_feature_vol = np.random.uniform(size=np.array([width,problem_dim]),low=-.5,high=.5)
+#     W_readout_vol = np.random.uniform(size=np.array([problem_dim,width]),low=-.5,high=.5)
+#     # Generate Matrices
+#     for i_weights in range(Depth_Bayesian_DNN):
+#         W_hidden_loop_vol = np.random.uniform(size=np.array([width,width]),low=-.5,high=.5)
+#         if i_weights == 0:
+#             W_hidden_list_vol = [W_hidden_loop_vol]
+#         else:
+#             W_hidden_list_vol.append(W_hidden_loop_vol)
+#     def f_unknown_vol(x):
+#         x_internal = x.reshape(-1,)
+#         x_internal = np.matmul(W_feature,x)
+#         #Deep Layer(s)
+#         for i in range(Depth_Bayesian_DNN):
+#             W_internal = W_hidden_list[i]
+#             x_internal = np.matmul(W_internal,x_internal)
+#             x_internal = np.maximum(0,x_internal)    
+#         # Readout Layer
+#         x_internal = np.matmul(W_readout,x_internal)
+#         x_internal = np.outer(x_internal,x_internal)
+#         x_internal = np.tanh(x_internal)
+#         return x_internal
     
     
     
-#------------------------------------------------------------------------------#   
-#------------------------------------------------------------------------------#   
-# Note: The simulator is a bit more complicated in this case that the others.
-    def Simulator(x):
-        #-------------------#
-        # Initialization(s) #
-        #-------------------#
-        x_init = x.reshape(-1,)
+# #------------------------------------------------------------------------------#   
+# #------------------------------------------------------------------------------#   
+# # Note: The simulator is a bit more complicated in this case that the others.
+#     def Simulator(x):
+#         #-------------------#
+#         # Initialization(s) #
+#         #-------------------#
+#         x_init = x.reshape(-1,)
 
-        #--------------------------------#
-        # Perform Monte-Carlo Simulation #
-        #--------------------------------#
-        for i_MC in range(N_Monte_Carlo_Samples):
-            # (re) Coerce input_data fBM Path
-            x_internal = x_init
-            # Get fBM path
-            for d in range(problem_dim):
-                fBM_gen_loop = (((FBM(n=N_Euler_Steps, hurst=Hurst_Exponent, length=1, method='daviesharte')).fbm())[1:]).reshape(-1,1)
-                if d == 0:
-                    fBM_gen = fBM_gen_loop
-                else:
-                    fBM_gen = np.append(fBM_gen,fBM_gen_loop,axis=-1)
-
-
-            #---------------#
-            # Generate Path #
-            #---------------#
-            for t in range(N_Euler_Steps):
-                # Coerce
-                x_internal = x_internal.reshape(-1,)
-                # Evolve Path
-                drift_update = f_unknown_drift(x_internal)/N_Euler_Steps
-                vol_update = f_unknown_vol(x_internal)
-                x_internal = (x_internal + drift_update + np.matmul(vol_update,fBM_gen[t,])).reshape(1,-1,problem_dim)
-                # Coerce
-                x_internal = x_internal.reshape(1,-1,problem_dim)
-                # Update Sample path
-                if t == 0:
-                    x_sample_path_loop = x_internal
-                else:
-                    x_sample_path_loop = np.append(x_sample_path_loop,x_internal,axis=0)
-            # Update Sample Path
-            if i_MC == 0:
-                x_sample_path = x_sample_path_loop
-            else:
-                x_sample_path = np.append(x_sample_path,x_sample_path_loop,axis=1)
-
-        #------------------------------------------#
-        # Get Inputs for These Monte-Carlo Outputs #
-        #------------------------------------------#
-        ## Generate Path in time
-        t_steps = (np.linspace(start = 0, stop = 1, num = N_Euler_Steps)).reshape(-1,1)
-        ## Generate x paired with this t
-        x_position_initialization = (np.repeat(x.reshape(1,-1),N_Euler_Steps,axis=0)).reshape(-1,problem_dim)
-        ## Create (t,x) pairs
-        X_inputs_to_return = np.append(t_steps,x_position_initialization,axis=1)
+#         #--------------------------------#
+#         # Perform Monte-Carlo Simulation #
+#         #--------------------------------#
+#         for i_MC in range(N_Monte_Carlo_Samples):
+#             # (re) Coerce input_data fBM Path
+#             x_internal = x_init
+#             # Get fBM path
+#             for d in range(problem_dim):
+#                 fBM_gen_loop = (((FBM(n=N_Euler_Steps, hurst=Hurst_Exponent, length=1, method='daviesharte')).fbm())[1:]).reshape(-1,1)
+#                 if d == 0:
+#                     fBM_gen = fBM_gen_loop
+#                 else:
+#                     fBM_gen = np.append(fBM_gen,fBM_gen_loop,axis=-1)
 
 
-        #------------------------------------------------------#
-        # Return Monte-Carlo Sample and Dataset update to User #
-        #------------------------------------------------------#
-        return X_inputs_to_return, x_sample_path
+#             #---------------#
+#             # Generate Path #
+#             #---------------#
+#             for t in range(N_Euler_Steps):
+#                 # Coerce
+#                 x_internal = x_internal.reshape(-1,)
+#                 # Evolve Path
+#                 drift_update = f_unknown_drift(x_internal)/N_Euler_Steps
+#                 vol_update = f_unknown_vol(x_internal)
+#                 x_internal = (x_internal + drift_update + np.matmul(vol_update,fBM_gen[t,])).reshape(1,-1,problem_dim)
+#                 # Coerce
+#                 x_internal = x_internal.reshape(1,-1,problem_dim)
+#                 # Update Sample path
+#                 if t == 0:
+#                     x_sample_path_loop = x_internal
+#                 else:
+#                     x_sample_path_loop = np.append(x_sample_path_loop,x_internal,axis=0)
+#             # Update Sample Path
+#             if i_MC == 0:
+#                 x_sample_path = x_sample_path_loop
+#             else:
+#                 x_sample_path = np.append(x_sample_path,x_sample_path_loop,axis=1)
+
+#         #------------------------------------------#
+#         # Get Inputs for These Monte-Carlo Outputs #
+#         #------------------------------------------#
+#         ## Generate Path in time
+#         t_steps = (np.linspace(start = 0, stop = 1, num = N_Euler_Steps)).reshape(-1,1)
+#         ## Generate x paired with this t
+#         x_position_initialization = (np.repeat(x.reshape(1,-1),N_Euler_Steps,axis=0)).reshape(-1,problem_dim)
+#         ## Create (t,x) pairs
+#         X_inputs_to_return = np.append(t_steps,x_position_initialization,axis=1)
+
+
+#         #------------------------------------------------------#
+#         # Return Monte-Carlo Sample and Dataset update to User #
+#         #------------------------------------------------------#
+#         return X_inputs_to_return, x_sample_path
 
 
 # ## (fractional) SDE - Vanilla Version:
@@ -398,79 +398,79 @@ if f_unknown_mode == "Rough_SDE":
 # In[9]:
 
 
-if f_unknown_mode == "Rough_SDE_Vanilla": 
-    #------------------------------------------------------------------------------#   
-    #------------------------------------------------------------------------------#   
-    # Note: The simulator is a bit more complicated in this case that the others.
-    def Simulator(x):
-        #-------------------#
-        # Initialization(s) #
-        #-------------------#
-        x_init = x.reshape(-1,)
+# if f_unknown_mode == "Rough_SDE_Vanilla": 
+#     #------------------------------------------------------------------------------#   
+#     #------------------------------------------------------------------------------#   
+#     # Note: The simulator is a bit more complicated in this case that the others.
+#     def Simulator(x):
+#         #-------------------#
+#         # Initialization(s) #
+#         #-------------------#
+#         x_init = x.reshape(-1,)
 
-        #--------------------------------#
-        # Perform Monte-Carlo Simulation #
-        #--------------------------------#
-        for i_MC in range(N_Monte_Carlo_Samples):
-            # (re) Coerce input_data fBM Path
-            x_internal = x_init
-            # Get fBM path
-            if Hurst_Exponent != 0.5:
-                for d in range(problem_dim):
-                    fBM_gen_loop = (((FBM(n=N_Euler_Steps, hurst=Hurst_Exponent, length=1, method='daviesharte')).fbm())[1:]).reshape(-1,1)
+#         #--------------------------------#
+#         # Perform Monte-Carlo Simulation #
+#         #--------------------------------#
+#         for i_MC in range(N_Monte_Carlo_Samples):
+#             # (re) Coerce input_data fBM Path
+#             x_internal = x_init
+#             # Get fBM path
+#             if Hurst_Exponent != 0.5:
+#                 for d in range(problem_dim):
+#                     fBM_gen_loop = (((FBM(n=N_Euler_Steps, hurst=Hurst_Exponent, length=1, method='daviesharte')).fbm())[1:]).reshape(-1,1)
                     
-                    if d == 0:
-                        fBM_gen = fBM_gen_loop
-                    else:
-                        fBM_gen = np.append(fBM_gen,fBM_gen_loop,axis=-1)
+#                     if d == 0:
+#                         fBM_gen = fBM_gen_loop
+#                     else:
+#                         fBM_gen = np.append(fBM_gen,fBM_gen_loop,axis=-1)
 
 
-            #---------------#
-            # Generate Path #
-            #---------------#
-            for t in range(N_Euler_Steps):
-                # Coerce
-                x_internal = x_internal.reshape(-1,)
-                # Evolve Path
-                drift_update = f_unknown_drift_vanilla(x_internal)/N_Euler_Steps
-                vol_update = f_unknown_vol_vanilla(x_internal)
-                if Hurst_Exponent != 0.5:
-                    current_noise = fBM_gen[t,]
-                else:
-                    current_noise = (np.random.normal(1,np.sqrt(1/N_Euler_Steps),problem_dim)).reshape(1,-1)
-                x_internal = (x_internal + drift_update + np.matmul(vol_update,current_noise)).reshape(1,-1,problem_dim)
-                # Coerce
-                x_internal = x_internal.reshape(1,-1,problem_dim)
-                # Update Sample path
-                if t == 0:
-                    x_sample_path_loop = x_internal
-                else:
-                    x_sample_path_loop = np.append(x_sample_path_loop,x_internal,axis=0)
-            # Update Sample Path
-            if i_MC == 0:
-                x_sample_path = x_sample_path_loop
-            else:
-                x_sample_path = np.append(x_sample_path,x_sample_path_loop,axis=1)
+#             #---------------#
+#             # Generate Path #
+#             #---------------#
+#             for t in range(N_Euler_Steps):
+#                 # Coerce
+#                 x_internal = x_internal.reshape(-1,)
+#                 # Evolve Path
+#                 drift_update = f_unknown_drift_vanilla(x_internal)/N_Euler_Steps
+#                 vol_update = f_unknown_vol_vanilla(x_internal)
+#                 if Hurst_Exponent != 0.5:
+#                     current_noise = fBM_gen[t,]
+#                 else:
+#                     current_noise = (np.random.normal(1,np.sqrt(1/N_Euler_Steps),problem_dim)).reshape(1,-1)
+#                 x_internal = (x_internal + drift_update + np.matmul(vol_update,current_noise)).reshape(1,-1,problem_dim)
+#                 # Coerce
+#                 x_internal = x_internal.reshape(1,-1,problem_dim)
+#                 # Update Sample path
+#                 if t == 0:
+#                     x_sample_path_loop = x_internal
+#                 else:
+#                     x_sample_path_loop = np.append(x_sample_path_loop,x_internal,axis=0)
+#             # Update Sample Path
+#             if i_MC == 0:
+#                 x_sample_path = x_sample_path_loop
+#             else:
+#                 x_sample_path = np.append(x_sample_path,x_sample_path_loop,axis=1)
 
-        #------------------------------------------#
-        # Get Inputs for These Monte-Carlo Outputs #
-        #------------------------------------------#
-        ## Generate Path in time
-        t_steps = (np.linspace(start = 0, stop = 1, num = N_Euler_Steps)).reshape(-1,1)
-        ## Generate x paired with this t
-        x_position_initialization = (np.repeat(x.reshape(1,-1),N_Euler_Steps,axis=0)).reshape(-1,problem_dim)
-        ## Create (t,x) pairs
-        X_inputs_to_return = np.append(t_steps,x_position_initialization,axis=1)
+#         #------------------------------------------#
+#         # Get Inputs for These Monte-Carlo Outputs #
+#         #------------------------------------------#
+#         ## Generate Path in time
+#         t_steps = (np.linspace(start = 0, stop = 1, num = N_Euler_Steps)).reshape(-1,1)
+#         ## Generate x paired with this t
+#         x_position_initialization = (np.repeat(x.reshape(1,-1),N_Euler_Steps,axis=0)).reshape(-1,problem_dim)
+#         ## Create (t,x) pairs
+#         X_inputs_to_return = np.append(t_steps,x_position_initialization,axis=1)
 
 
-        #------------------------------------------------------#
-        # Return Monte-Carlo Sample and Dataset update to User #
-        #------------------------------------------------------#
-        return X_inputs_to_return, x_sample_path
+#         #------------------------------------------------------#
+#         # Return Monte-Carlo Sample and Dataset update to User #
+#         #------------------------------------------------------#
+#         return X_inputs_to_return, x_sample_path
 
-    # Set Model to rough_SDE since the rest of the code is identical in that case:
-    f_unknown_mode = "Rough_SDE"
-    #Done
+#     # Set Model to rough_SDE since the rest of the code is identical in that case:
+#     f_unknown_mode = "Rough_SDE"
+#     #Done
 
 
 # # Set/Define: Internal Parameters
@@ -925,7 +925,7 @@ if (f_unknown_mode != "Rough_SDE") and (f_unknown_mode != "GD_with_randomized_in
             Y_train_mean_emp = np.append(Y_train_mean_emp,np.mean(y_loop))
     #         Y_train_var_emp = np.append(Y_train_var_emp,np.mean((y_loop - np.mean(y_loop))**2))
     # Join mean and Variance Training Data
-    Y_train_var_emp = np.append(Y_train_mean_emp.reshape(-1,1),Y_train_var_emp.reshape(-1,1),axis=1)
+#     Y_train_var_emp = np.append(Y_train_mean_emp.reshape(-1,1),Y_train_var_emp.reshape(-1,1),axis=1)
 
 
 # ### Testing:

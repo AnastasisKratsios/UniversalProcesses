@@ -4,19 +4,19 @@
 # # Loader
 # Externally (Re)Load required packages and initialize path(s):
 
-# In[4]:
+# In[6]:
 
 
 # Load Packages/Modules
-exec(open('Init_Dump.py').read())
+exec(open('./Helper_Scripts_and_Loading/Init_Dump.py').read())
 # Load Hyper-parameter Grid
-exec(open('CV_Grid.py').read())
+exec(open('./Helper_Scripts_and_Loading/CV_Grid.py').read())
 # Load Helper Function(s)
-exec(open('Helper_Functions.py').read())
+exec(open('./Helper_Scripts_and_Loading/Helper_Functions.py').read())
 # Architecture Builder
-exec(open('Benchmarks_Model_Builder.py').read())
+exec(open('./Helper_Scripts_and_Loading/Benchmarks_Model_Builder.py').read())
 # Auxiliary Helper Function(s)
-exec(open('MISC_HELPER_FUNCTIONS.py').read())
+exec(open('./Helper_Scripts_and_Loading/MISC_HELPER_FUNCTIONS.py').read())
 # Import time separately
 import time
 #os.environ['CUDA_VISIBLE_DEVICES'] = '0'

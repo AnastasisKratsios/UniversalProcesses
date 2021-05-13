@@ -1,1 +1,0 @@
-Kernel_Used_in_GPR: RBF(length_scale=1)

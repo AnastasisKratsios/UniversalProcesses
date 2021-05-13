@@ -17,7 +17,7 @@
 
 
 # Redefine (Dimension-related) Elements of Grid
-exec(open('Init_Dump.py').read())
+exec(open('./Helper_Scripts_and_Loading/Init_Dump.py').read())
 import time
 
 
